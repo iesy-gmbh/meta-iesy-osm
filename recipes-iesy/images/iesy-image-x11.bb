@@ -5,9 +5,12 @@ IMAGE_FEATURES += "package-management x11"
 
 inherit core-image features_check
 
-REQUIRED_DISTRO_FEATURES = "x11"
+REQUIRED_DISTRO_FEATURES = "x11 sysvinit"
+
+CORE_IMAGE_BASE_INSTALL_remove = "packagegroup-core-boot"
 
 CORE_IMAGE_BASE_INSTALL += "\
+    packagegroup-core-boot-sysvinit \
     openbox \
     xterm \
     liberation-fonts \
