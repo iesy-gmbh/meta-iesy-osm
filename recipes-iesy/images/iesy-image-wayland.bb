@@ -5,9 +5,12 @@ IMAGE_FEATURES += "package-management"
 
 inherit core-image features_check
 
-REQUIRED_DISTRO_FEATURES = "wayland x11"
+REQUIRED_DISTRO_FEATURES = "wayland x11 systemd"
+
+CORE_IMAGE_BASE_INSTALL_remove = "packagegroup-core-boot"
 
 CORE_IMAGE_BASE_INSTALL += "\
+    packagegroup-core-boot-systemd \
     weston \
     weston-init \
     weston-xwayland \
