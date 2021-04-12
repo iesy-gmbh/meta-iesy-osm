@@ -5,7 +5,7 @@ Currently supported are:
 
 | OSM module | Evaluation Kit |
 | ------ | ------ |
-| iesy i.MX8M OSM-SF | [iesy iMX8M EVA-MI](#iesy-iMX8M-EVA-MI) Eval Kit |
+| iesy i.MX8M OSM-SF | [iesy i.MX8M EVA-MI](#iesy-iMX8M-EVA-MI) Eval Kit |
 
 ### Dependencies
 
@@ -35,11 +35,11 @@ For other distributions please refer to [this](https://www.yoctoproject.org/docs
 Build instructions are listed below. The build process varies depending on the hardware.  
 Select your hardware from the table at the top for which you want to build.
 
-## iesy iMX8M EVA-MI
+## iesy i.MX8M EVA-MI
 
 ### Prerequisites
 
-To build images for iesy iMX8M EVA-MI Evaluation Kit you need the following Yocto Layers:
+To build images for iesy i.MX8M EVA-MI Evaluation Kit you need the following Yocto Layers:
 * meta-freescale
 * meta-freescale-3rdparty
 * meta-freescale-distro
@@ -73,15 +73,15 @@ $ git clone https://github.com/iesy-gmbh/meta-iesy-osm -b dunfell sources/meta-i
 
 ### Build Process
 
-In this example we use the distro ***iesy-base***.  
-Available Images are:
+There are 3 different configurations available:
 
-| Image | Description |  Details |
-| ------ | ------ | ------ |
-| iesy-image-minimal | A minimal console-only image | SysVinit; BusyBox; mdev; ash |
-| iesy-image-wayland | An image supporting Wayland and XWayland | Systemd; Weston; udev; bash; weston-terminal |
-| iesy-image-x11 | An image with native X11 support | SysVinit; Openbox; udev; bash; xterm |
+| Distro | Image | Description |  Details |
+| ------ | ------ | ------ | ------ |
+| iesy-fb | iesy-base-image | Minimal console-only (Framebuffer) | SysVinit; BusyBox; mdev; ash |
+| iesy-wayland | iesy-base-image | Supporting Wayland and XWayland | Systemd; Weston; udev; bash; weston-terminal |
+| iesy-x11 | iesy-base-image | Native X11 support | SysVinit; Openbox; udev; bash; xterm |
 
+In this example we are building sample image ***iesy-base-image*** using distro ***iesy-wayland***.  
 Alternatively, you can use the distributions and images provided by Poky or refer to the resources provided in the FSL Community BSP.  
 
 To retrieve a list of all available distros and images run the following commands:
@@ -95,15 +95,15 @@ Of course you can also build you own distro or image.
 
 #### Start Building
 
-Setup your Build Environment running setup-environment script provided via FSL Community BSP:
+Setup your Build Environment running *setup-environment* script provided via FSL Community BSP:
 ```
-$ MACHINE=iesy-imx8m-eva-mi DISTRO=iesy-base source setup-environment build_iesy-base
+$ MACHINE=iesy-imx8m-eva-mi DISTRO=iesy-wayland source setup-environment build_iesy-wayland
 ```
 
 When running for the first time, you will be notified about the NXP EULA. To use i.MX Proprietary software it is necessary to agree to these conditions. For more information about this, please read [here](http://freescale.github.io/doc/release-notes/current/#license).  
 
-Running setup-environment for the first time will create a new build directory.  
-If setup-environment has already been run previously for that particular build directory, it only prepares the environment, but leaves configuration untouched. For more details on this see [here](https://github.com/Freescale/fsl-community-bsp-base/blob/5a551f453260bd19895e4d847877874eaa51fde3/setup-environment#L36).  
+Running *setup-environment* for the first time will create a new build directory.  
+If *setup-environment* has already been run previously for that particular build directory, it only prepares the environment, but leaves configuration untouched. For more details on this see [here](https://github.com/Freescale/fsl-community-bsp-base/blob/5a551f453260bd19895e4d847877874eaa51fde3/setup-environment#L36).  
 **You can manually change that build configuration later by editing local.conf in your build directory.**
 
 Also make sure to add meta-iesy-osm to your bblayers.conf.  
@@ -114,7 +114,7 @@ $ bitbake-layers add-layer ../sources/meta-iesy-osm
 
 Once you have set up the Environment, build your image:
 ```
-$ bitbake iesy-image-wayland
+$ bitbake iesy-base-image
 ```
 
 ### Build Results
