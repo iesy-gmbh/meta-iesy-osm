@@ -5,8 +5,8 @@ USE_WAYLAND = "${@bb.utils.contains("DISTRO", "iesy-wayland", "yes", "no", d)}"
 USE_X11 = "${@bb.utils.contains("DISTRO", "iesy-x11", "yes", "no", d)}"
 
 IMAGE_FEATURES += " \
-    package-management \
-    ${@bb.utils.contains('USE_X11', 'yes', 'x11', '', d)} \
+    ${@bb.utils.contains('USE_WAYLAND', 'yes', 'package-management', '', d)} \
+    ${@bb.utils.contains('USE_X11', 'yes', 'package-management x11', '', d)} \
     "
 
 inherit core-image features_check
