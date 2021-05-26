@@ -1,19 +1,21 @@
 # meta-iesy-osm
 
 Yocto BSP Layer providing support for iesy OSM hardware.  
-Currently supported are:
+Supported configurations are:
 
-| OSM module | Evaluation Kit |
-| ------ | ------ |
-| iesy i.MX8M OSM-SF | [iesy i.MX8M EVA-MI](#iesy-iMX8M-EVA-MI) Eval Kit |
+| Machine | OSM module | Evaluation Kit |
+| ------ | ------ | ------ |
+| iesy-imx8mm-eva-mi | iesy i.MX8M Mini OSM-SF | iesy i.MX8M EVA-MI |
+| iesy-rpx30-eva-mi | iesy RPX30 OSM-SF | iesy RPX30 EVA-MI |
 
 ### Dependencies
 
 This BSP Layer depends on:
 
-* [FSL Community BSP](https://github.com/Freescale/fsl-community-bsp-platform)  
+* [FSL Community BSP](https://github.com/Freescale/fsl-community-bsp-platform)
+* [Rockchip Yocto BSP](https://github.com/rockchip-linux/manifests/tree/yocto-next)  
 
-## Getting Started
+## Prerequisites
 
 ### Setup your Build Host
 
@@ -30,48 +32,37 @@ For other distributions please refer to [this](https://www.yoctoproject.org/docs
 
 **Make sure that at least 50 GB (better 100 GB) of free disk space is available.**
 
-### Building Yocto
-
-Build instructions are listed below. The build process varies depending on the hardware.  
-Select your hardware from the table at the top for which you want to build.
-
-## iesy i.MX8M EVA-MI
-
-### Prerequisites
-
-To build images for iesy i.MX8M EVA-MI Evaluation Kit you need the following Yocto Layers:
-* meta-freescale
-* meta-freescale-3rdparty
-* meta-freescale-distro
-* meta-iesy-osm
-* meta-openembedded
-* poky
+## Getting Started
 
 You can choose between different Releases of the Yocto Project.  
 Here you can get an overview, which Releases are currently supported: [https://github.com/iesy-gmbh/meta-iesy-osm/branches/all](https://github.com/iesy-gmbh/meta-iesy-osm/branches/all)
 
-In this example version `dunfell` is used. If you want to use another Release instead, you need to replace _dunfell_ with one of the other supported Releases in the commands below.
+In this example `dunfell` is used. If you want to use another Release instead, you need to replace _dunfell_ with one of the other supported Releases in the commands below.
 
-First install the repo utility to get the FSL Community BSP:
+Install the `repo` utility:
 ```
 $ mkdir ~/bin
 $ curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
 $ chmod a+x ~/bin/repo
 $ PATH=${PATH}:~/bin
 ```
-Create your project directory and download FSL Community BSP sources:
+Create your Build Directory and download the BSP:
+#### For iesy i.MX8M (all):
 ```
 $ mkdir imx-yocto-bsp
 $ cd imx-yocto-bsp
-$ repo init -u https://github.com/Freescale/fsl-community-bsp-platform -b dunfell
+$ repo init -u https://github.com/iesy-gmbh/yocto-bsp-manifest -b dunfell -m iesy-osm-imx8m.xml
+$ repo sync
+```  
+#### For iesy RPX30:
+```
+$ mkdir rk-yocto-bsp
+$ cd rk-yocto-bsp
+$ repo init -u https://github.com/iesy-gmbh/yocto-bsp-manifest -b dunfell -m iesy-osm-rpx30.xml
 $ repo sync
 ```
-Finally add meta-iesy-osm Layer:
-```
-$ git clone https://github.com/iesy-gmbh/meta-iesy-osm -b dunfell sources/meta-iesy-osm
-```
 
-### Build Process
+## Building Yocto
 
 There are 3 different configurations available:
 
@@ -81,10 +72,9 @@ There are 3 different configurations available:
 | iesy-wayland | iesy-base-image | Supporting Wayland and XWayland | Systemd; udev; bash; Weston |
 | iesy-x11 | iesy-base-image | Native X11 support | SysVinit; udev; bash; Openbox; xterm |
 
-In this example we are building the image `iesy-base-image` using distro `iesy-wayland`.  
-Alternatively, you can use the distributions and images provided by Poky or refer to the resources provided in the FSL Community BSP.  
+Alternatively, you can use the distributions and images provided by Poky or refer to the resources provided in the other BSP Layers.  
 
-To retrieve a list of all available distros and images run the following commands:
+To retrieve a full list of all available distros and images run the following commands:
 ```
 $ printf "%s\n" sources/meta-*/conf/distro/*.conf sources/poky/meta-*/conf/distro/*.conf | awk -F/ '{print $NF}' | sed -e 's/\.conf$//'
 ```
@@ -93,24 +83,56 @@ $ printf "%s\n" sources/meta*/recipes*/images/*.bb sources/poky/meta*/recipes*/i
 ```
 Of course you can also build you own distro or image.
 
-#### Start Building
+### Build Process
 
-Setup your Build Environment running `setup-environment` script provided via FSL Community BSP:
+In this example we are building the image `iesy-base-image` using distro `iesy-wayland`.  
+First we need to configure our Build Environment. This needs to be done whenever a new session is started.
+
+#### For iesy i.MX8M (all):
+
+Setup your Build Environment running `setup-environment` script.  
+Set MACHINE variable according to the values from the above [table](#meta-iesy-osm):
+
 ```
-$ MACHINE=iesy-imx8m-eva-mi DISTRO=iesy-wayland source setup-environment build_iesy-wayland
+$ MACHINE=iesy-imx8mm-eva-mi DISTRO=iesy-wayland source setup-environment build_iesy-wayland
 ```
 
-When running for the first time, you will be notified about the NXP EULA. To use i.MX Proprietary software it is necessary to agree to these conditions. For more information about this, please read [here](http://freescale.github.io/doc/release-notes/current/#license).  
+When running for the very first time, you might be notified about the NXP EULA. To use i.MX Proprietary software it is necessary to agree to these conditions. For more information about this, please read [here](http://freescale.github.io/doc/release-notes/current/#license).
 
-Running `setup-environment` for the first time will create a new build directory.  
-If that has already been run previously for that particular build directory, it only prepares the environment, but leaves configuration untouched. For more details on this, see [here](https://github.com/Freescale/fsl-community-bsp-base/blob/5a551f453260bd19895e4d847877874eaa51fde3/setup-environment#L27).  
-**You can manually change that build configuration later by editing `local.conf`.**
+Running `setup-environment` for the first time will create a new Build Directory. If that has already been run previously for that particular Build Directory, it only prepares the environment, but leaves configuration untouched.  
+You can manually change that build configuration later by editing `local.conf`.
 
-Also make sure to add meta-iesy-osm to your `bblayers.conf`.  
-<ins>Note</ins>: This only needs to be done for the first time when a new build directory is created.
+Make sure to add meta-iesy-osm to your `bblayers.conf`.  
+<ins>Note</ins>: This only needs to be done for the first time when a new Build Directory is created.
 ```
 $ bitbake-layers add-layer ../sources/meta-iesy-osm
-```  
+```
+
+#### For iesy RPX30:
+
+Setup your Build Environment running `oe-init-build-env` script. 
+
+```
+$ source oe-init-build-env build_iesy-wayland
+```
+
+When running for the first time (new Build Directory is created), make sure to add all necessary Layers to your `bblayers.conf`. The simplest way would be to just use the predefined template file:
+
+```
+$ cp ../sources/meta-iesy-osm/conf/bblayers.conf.rpx30 conf/bblayers.conf
+```
+
+Set MACHINE and DISTRO variables in your `local.conf`:
+
+```
+sed -i 's/\(MACHINE ??= \)\(.*\)/\1"iesy-rpx30-eva-mi"/' conf/local.conf
+sed -i 's/\(DISTRO ?= \)\(.*\)/\1"iesy-wayland"/' conf/local.conf
+```
+
+<ins>Note</ins>: This only needs to be done for the first time when a new Build Directory is created.  
+You can also manually change that configuration later by editing `local.conf`.
+
+### Start Building
 
 Once you have set up the Environment, build your image:
 ```
@@ -119,19 +141,21 @@ $ bitbake iesy-base-image
 
 ### Build Results
 
-Build output is located in `build_iesy-wayland/tmp/deploy/images/iesy-imx8m-eva-mi`.
+Build output is located in `build_iesy-wayland/tmp/deploy/images/...`
+
+`iesy-imx8mm-eva-mi`:
 
 | File | Description |
 | ------ | ------ |
-| iesy-base-image-iesy-imx8m-eva-mi.wic.gz | Full Image for flashing to SD card |
-| Image-iesy-imx8m-eva-mi.bin | Kernel Image |
-| u-boot-spl.bin-iesy-imx8m-eva-mi | U-Boot SPL |
-| u-boot-iesy-imx8m-eva-mi.bin | U-Boot |
+| iesy-base-image-iesy-imx8mm-eva-mi.wic.gz | Full Image for flashing to SD card |
+| Image-iesy-imx8mm-eva-mi.bin | Kernel Image |
+| u-boot-spl.bin-iesy-imx8mm-eva-mi | U-Boot SPL |
+| u-boot-iesy-imx8mm-eva-mi.bin | U-Boot |
 
 ### Install Image
 
 Flash the built image to SD card:
 ```
-$ cd tmp/deploy/images/iesy-imx8m-eva-mi
-$ gunzip -c iesy-base-image-iesy-imx8m-eva-mi.wic.gz | sudo dd of=/dev/sdf bs=1M status=progress conv=fsync
+$ cd tmp/deploy/images/iesy-imx8mm-eva-mi
+$ gunzip -c iesy-base-image-iesy-imx8mm-eva-mi.wic.gz | sudo dd of=/dev/sdf bs=1M status=progress conv=fsync
 ```
