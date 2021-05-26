@@ -11,7 +11,8 @@ BBLAYERS ?= " \
   ${TOPDIR}/../sources/meta-qt5 \
   ${TOPDIR}/../sources/meta-rust \
   ${TOPDIR}/../sources/meta-clang \
-  ${TOPDIR}/../sources/meta-browser \
+  ${TOPDIR}/../sources/meta-browser/meta-chromium \
+  ${TOPDIR}/../sources/meta-browser/meta-firefox \
   ${TOPDIR}/../sources/meta-python2 \
   ${TOPDIR}/../sources/meta-rockchip \
   ${TOPDIR}/../sources/poky/meta \
