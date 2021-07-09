@@ -64,7 +64,7 @@ $ repo sync
 
 ## Building Yocto
 
-There are 3 different configurations available:
+There are 3 predefined configurations available:
 
 | Distro | Image | Description |  Details |
 | ------ | ------ | ------ | ------ |
@@ -141,21 +141,54 @@ $ bitbake iesy-base-image
 
 ### Build Results
 
-Build output is located in `build_iesy-wayland/tmp/deploy/images/...`
+Build output is located in **`build_iesy-wayland/tmp/deploy/images/`**...
 
-`iesy-imx8mm-eva-mi`:
+##### `/iesy-imx8mm-eva-mi`:
 
 | File | Description |
 | ------ | ------ |
-| iesy-base-image-iesy-imx8mm-eva-mi.wic.gz | Full Image for flashing to SD card |
-| Image-iesy-imx8mm-eva-mi.bin | Kernel Image |
+| iesy-base-image-iesy-imx8mm-eva-mi.wic.gz | Full Image |
 | u-boot-spl.bin-iesy-imx8mm-eva-mi | U-Boot SPL |
 | u-boot-iesy-imx8mm-eva-mi.bin | U-Boot |
+| Image-iesy-imx8mm-eva-mi.bin | Kernel Image |
+
+##### `/iesy-rpx30-eva-mi`:
+
+| File | Description |
+| ------ | ------ |
+| iesy-base-image-iesy-rpx30-eva-mi.wic | Full Image |
+| idblock.img | Pre-Bootloader (IDBLoader) |
+| uboot.img | U-Boot |
+| trust.img | Trust |
+| boot.img | Kernel / DTB |
+| rootfs.img | rootfs |
+
+For a more detailed description of these resources and boot mechanism on Rockchip SoC take a look at http://opensource.rock-chips.com/wiki_Boot_option
 
 ### Install Image
 
-Flash the built image to SD card:
+#### For iesy i.MX8M Mini:
+
+##### Flash image to SD card:
 ```
 $ cd tmp/deploy/images/iesy-imx8mm-eva-mi
-$ gunzip -c iesy-base-image-iesy-imx8mm-eva-mi.wic.gz | sudo dd of=/dev/sdf bs=1M status=progress conv=fsync
+```
+```
+$ gunzip -c iesy-base-image-iesy-imx8mm-eva-mi.wic.gz | sudo dd of=/dev/sdX bs=1M status=progress conv=fsync
+```
+(Replace `/dev/sdX` with the actual device name of your SD card)
+
+#### For iesy RPX30:
+
+##### Flash image to eMMC:
+We are using [Linux Upgrade Tool](https://github.com/rockchip-linux/tools/tree/master/linux/Linux_Upgrade_Tool) provided by Rockchip. Alternatively you can use one of the other tools mentioned [here](http://opensource.rock-chips.com/wiki_Tools).
+
+Make sure to put the Board into [Maskrom Mode](http://opensource.rock-chips.com/wiki_Rockusb) first. Then run `upgrade_tool` to flash the image.
+```
+$ cd tmp/deploy/images/iesy-rpx30-eva-mi
+```
+```
+$ ./upgrade_tool ef loader.bin
+$ ./upgrade_tool db loader.bin
+$ ./upgrade_tool wl 0 iesy-base-image-iesy-rpx30-eva-mi.wic
 ```
