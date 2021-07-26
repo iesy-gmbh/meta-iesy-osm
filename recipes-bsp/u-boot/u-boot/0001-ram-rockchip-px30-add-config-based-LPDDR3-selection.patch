@@ -1,0 +1,45 @@
+From 77a65ea788d3d075a83172a91fb40ccba3f967b7 Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Thu, 15 Jul 2021 11:55:24 +0200
+Subject: [PATCH 1/1] ram: rockchip: px30: add config-based LPDDR3 selection
+
+Originally authored by Heiko Stuebner <heiko.stuebner@theobroma-systems.com>
+https://source.denx.de/u-boot/custodians/u-boot-rockchip/-/commit/2db36c64bd5a8910112708c1c6b68bd3594517d3
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ drivers/ram/rockchip/Kconfig      | 7 +++++++
+ drivers/ram/rockchip/sdram_px30.c | 2 +-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/ram/rockchip/Kconfig b/drivers/ram/rockchip/Kconfig
+index 7f24646dffe9..644561f0aeec 100644
+--- a/drivers/ram/rockchip/Kconfig
++++ b/drivers/ram/rockchip/Kconfig
+@@ -24,3 +24,10 @@ config ROCKCHIP_TPL_INIT_DRAM_TYPE
+ 	  This choose DRAM type for TPL INIT code, 0 for DDR4, 2 for DDR2,
+ 	  3 for DDR3, 5 for LPDDR2, 6 for LPDDR3, 7 for LPDDR4, all other
+ 	  value are reserved.
++
++config RAM_PX30_LPDDR3
++	bool "LPDDR3 support for Rockchip PX30"
++	depends on ROCKCHIP_PX30
++	help
++	  This enables LPDDR3 sdram support instead of the default DDR3 support
++	  on Rockchip PX30 SoCs.
+diff --git a/drivers/ram/rockchip/sdram_px30.c b/drivers/ram/rockchip/sdram_px30.c
+index 0a6723d0d8b9..976d771e670a 100644
+--- a/drivers/ram/rockchip/sdram_px30.c
++++ b/drivers/ram/rockchip/sdram_px30.c
+@@ -51,7 +51,7 @@ struct dram_info {
+ struct dram_info dram_info;
+ 
+ struct px30_sdram_params sdram_configs[] = {
+-#ifdef CONFIG_ROCKCHIP_RK3326
++#if defined CONFIG_ROCKCHIP_RK3326 || defined CONFIG_RAM_PX30_LPDDR3
+ #include	"sdram-px30-lpddr3-detect-333.inc"
+ #else
+ #include	"sdram-px30-ddr3-detect-333.inc"
+-- 
+2.32.0
+
