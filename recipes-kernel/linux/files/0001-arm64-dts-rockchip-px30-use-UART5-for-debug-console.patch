@@ -1,0 +1,40 @@
+From 9147bf37028c117b520e0d44d22c1adc22d871cb Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Mon, 26 Jul 2021 14:01:05 +0200
+Subject: [PATCH 1/1] arm64: dts: rockchip: px30: use UART5 for debug console
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm64/boot/dts/rockchip/px30-linux.dtsi | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/rockchip/px30-linux.dtsi b/arch/arm64/boot/dts/rockchip/px30-linux.dtsi
+index 15f887aaad72..9c112f19fdd7 100644
+--- a/arch/arm64/boot/dts/rockchip/px30-linux.dtsi
++++ b/arch/arm64/boot/dts/rockchip/px30-linux.dtsi
+@@ -44,19 +44,19 @@
+ 	compatible = "rockchip,linux", "rockchip,rk3326";
+ 
+ 	chosen {
+-		bootargs = "earlycon=uart8250,mmio32,0xff160000 swiotlb=1 console=ttyFIQ0 rw root=PARTUUID=614e0000-0000 rootwait";
++		bootargs = "earlycon=uart8250,mmio32,0xff178000 swiotlb=1 console=ttyFIQ0 rw root=PARTUUID=614e0000-0000 rootwait";
+ 	};
+ 
+ 	fiq-debugger {
+ 		compatible = "rockchip,fiq-debugger";
+-		rockchip,serial-id = <2>;
++		rockchip,serial-id = <5>;
+ 		rockchip,wake-irq = <0>;
+ 		/* If enable uart uses irq instead of fiq */
+ 		rockchip,irq-mode-enable = <0>;
+ 		rockchip,baudrate = <1500000>;  /* Only 115200 and 1500000 */
+ 		interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_LOW>;
+ 		pinctrl-names = "default";
+-		pinctrl-0 = <&uart2m0_xfer>;
++		pinctrl-0 = <&uart5_xfer>;
+ 		status = "okay";
+ 	};
+ 
+-- 
+2.32.0
+
