@@ -159,7 +159,7 @@ Build output is located in **`build_iesy-wayland/tmp/deploy/images/`**...
 | iesy-base-image-iesy-rpx30-eva-mi.wic | Full Image |
 | idblock.img | Pre-Bootloader (IDBLoader) |
 | uboot.img | U-Boot |
-| trust.img | Trust |
+| trust.img | Trusted Firmware |
 | boot.img | Kernel / DTB |
 | rootfs.img | rootfs |
 
@@ -192,3 +192,12 @@ $ ./upgrade_tool ef loader.bin
 $ ./upgrade_tool db loader.bin
 $ ./upgrade_tool wl 0 iesy-base-image-iesy-rpx30-eva-mi.wic
 ```
+
+##### Flash image to SD card:
+```
+$ cd tmp/deploy/images/iesy-rpx30-eva-mi
+```
+```
+$ sudo dd if=iesy-base-image-iesy-rpx30-eva-mi.wic of=/dev/sdX bs=1M status=progress conv=fsync
+```
+(Replace `/dev/sdX` with the actual device name of your SD card)
