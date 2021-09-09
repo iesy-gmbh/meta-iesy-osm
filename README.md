@@ -172,15 +172,13 @@ For a more detailed description of these resources and boot mechanism on Rockchi
 ##### Flash image to eMMC:
 We suggest using the [universal update utility (UUU)](https://github.com/NXPmicro/mfgtools). It might also be possible to flash on eMMC with other tools.
 
-Make sure to put the Board into [Serial Download Mode](https://static6.arrow.com/aropdfconversion/3eb66c6ff328259ad060ed3a1cb5b2e34dcaa693/imx8mmevkhug.pdf) first. For that change Boot Device settings to SW1101: 1010xxxxxx and SW1102: xxxxxxxxx0. Then follow the instructions bellow.
+Make sure to put the Board into Serial Download Mode first. Then follow the instructions below.
 ```
 $ cd tmp/deploy/images/iesy-imx8mm-eva-mi
 ```
-If you are using a virtual machine make sure that the USB device is properly connected the entire flashing process. (!The USB device name changes when the bootloader is uploaded!)
 ```
 $ sudo uuu -b emmc_all imx-boot-iesy-imx8mm-eva-mi-sd.bin-flash_evk iesy-base-image-iesy-imx8mm-eva-mi.wic.gz/*
 ```
-When the image is successfully  flashed change back the Boot Device settings to eMMC/uSDHC3 (SW1101:0110110001 and SW1102: 0001010100) and restart or reset the device.
 
 ##### Flash image to SD card:
 ```
