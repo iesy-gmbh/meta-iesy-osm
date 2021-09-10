@@ -169,6 +169,17 @@ For a more detailed description of these resources and boot mechanism on Rockchi
 
 #### For iesy i.MX8M Mini:
 
+##### Flash image to eMMC:
+We suggest using the [universal update utility (UUU)](https://github.com/NXPmicro/mfgtools). It might also be possible to flash on eMMC with other tools.
+
+Make sure to put the Board into Serial Download Mode first. Then follow the instructions below.
+```
+$ cd tmp/deploy/images/iesy-imx8mm-eva-mi
+```
+```
+$ sudo uuu -b emmc_all imx-boot-iesy-imx8mm-eva-mi-sd.bin-flash_evk iesy-base-image-iesy-imx8mm-eva-mi.wic.gz/*
+```
+
 ##### Flash image to SD card:
 ```
 $ cd tmp/deploy/images/iesy-imx8mm-eva-mi
