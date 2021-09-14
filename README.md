@@ -46,7 +46,7 @@ $ curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/bin/r
 $ chmod a+x ~/bin/repo
 $ PATH=${PATH}:~/bin
 ```
-Create your Build Directory and download the BSP:
+Create your Project Directory and download the BSP:
 #### For iesy i.MX8M (all):
 ```
 $ mkdir imx-yocto-bsp
@@ -72,8 +72,26 @@ There are 3 predefined configurations available:
 | iesy-wayland | iesy-base-image | Supporting Wayland and XWayland | Systemd; udev; bash; Weston |
 | iesy-x11 | iesy-base-image | Native X11 support | SysVinit; udev; bash; Openbox; xterm |
 
-Alternatively, you can use the distributions and images provided by Poky or refer to the resources provided in the other BSP Layers.  
+<details>
+  <summary>Click to show more detailed information</summary>
+  <br>
+  
+  > #### iesy-base-image
+  > This is the default image intended to be build with one of the following distributions.
+  >
+  > #### iesy-wayland
+  > This distribution supports both Wayland and XWayland. XWayland is enabled by default.  
+  > You can change that by modifying `/usr/share/weston-start/xwayland`.
+  >
+  > Alternatively you can delete the whole directory
+  > ```
+  > root@iesy-rpx30-eva-mi:~# rm /usr/share/weston-start/xwayland
+  > root@iesy-rpx30-eva-mi:~# rmdir /usr/share/weston-start
+  > ```
+  > and control XWayland via Weston configuration `/etc/xdg/weston/weston.ini` or Environment file `/etc/default/weston`.
+</details>
 
+Alternatively, you can use the distributions and images provided by Poky or refer to the resources provided in the other BSP Layers.  
 To retrieve a full list of all available distros and images run the following commands:
 ```
 $ printf "%s\n" sources/meta-*/conf/distro/*.conf sources/poky/meta-*/conf/distro/*.conf | awk -F/ '{print $NF}' | sed -e 's/\.conf$//'
