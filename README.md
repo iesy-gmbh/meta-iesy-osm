@@ -69,20 +69,15 @@ There are 3 predefined configurations available:
 | Distro | Image | Description |  Details |
 | ------ | ------ | ------ | ------ |
 | iesy-fb | iesy-base-image | Minimal console-only (Framebuffer) | BusyBox; mdev; ash |
-| iesy-wayland | iesy-base-image | Supporting Wayland and XWayland | Systemd; udev; bash; Weston |
+| iesy-wayland | iesy-base-image | Supporting [Wayland and XWayland](#how-to-switch-between-wayland-and-xwayland "How to switch between Wayland and XWayland") | Systemd; udev; bash; Weston |
 | iesy-x11 | iesy-base-image | Native X11 support | SysVinit; udev; bash; Openbox; xterm |
 
 <details>
-  <summary>Click to show more detailed information</summary>
+  <summary>Expand to show information about <code>iesy-wayland</code></summary>
   <br>
   
-  > #### iesy-base-image
-  > This is the default image intended to be build with one of the following distributions.
-  >
-  > #### iesy-wayland
-  > This distribution supports both Wayland and XWayland. XWayland is enabled by default.  
-  > You can change that by modifying `/usr/share/weston-start/xwayland`.
-  >
+  > #### How to switch between Wayland and XWayland
+  > XWayland is enabled by default. You can change that by modifying `/usr/share/weston-start/xwayland`.
   > Alternatively you can delete the whole directory
   > ```
   > root@iesy-rpx30-eva-mi:~# rm /usr/share/weston-start/xwayland
@@ -90,6 +85,8 @@ There are 3 predefined configurations available:
   > ```
   > and control XWayland via Weston configuration `/etc/xdg/weston/weston.ini` or Environment file `/etc/default/weston`.
 </details>
+
+<br>
 
 Alternatively, you can use the distributions and images provided by Poky or refer to the resources provided in the other BSP Layers.  
 To retrieve a full list of all available distros and images run the following commands:
@@ -143,8 +140,8 @@ $ cp ../sources/meta-iesy-osm/conf/bblayers.conf.rpx30 conf/bblayers.conf
 Set MACHINE and DISTRO variables in your `local.conf`:
 
 ```
-sed -i 's/\(MACHINE ??= \)\(.*\)/\1"iesy-rpx30-eva-mi"/' conf/local.conf
-sed -i 's/\(DISTRO ?= \)\(.*\)/\1"iesy-wayland"/' conf/local.conf
+$ sed -i 's/\(MACHINE ??= \)\(.*\)/\1"iesy-rpx30-eva-mi"/' conf/local.conf
+$ sed -i 's/\(DISTRO ?= \)\(.*\)/\1"iesy-wayland"/' conf/local.conf
 ```
 
 <ins>Note</ins>: This only needs to be done for the first time when a new Build Directory is created.  
