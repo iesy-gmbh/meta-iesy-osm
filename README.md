@@ -62,7 +62,7 @@ $ repo init -u https://github.com/iesy-gmbh/yocto-bsp-manifest -b dunfell -m ies
 $ repo sync
 ```
 
-## Building Yocto
+## Build Image
 
 There are 3 predefined configurations available:
 
@@ -180,13 +180,12 @@ Build output is located in **`build_iesy-wayland/tmp/deploy/images/`**...
 
 For a more detailed description of these resources and boot mechanism on Rockchip SoC take a look at http://opensource.rock-chips.com/wiki_Boot_option
 
-### Install Image
+## Install Image
 
 #### For iesy i.MX8M Mini:
 
 ##### Flash image to eMMC:
-We suggest using the [universal update utility (UUU)](https://github.com/NXPmicro/mfgtools). It might also be possible to flash on eMMC with other tools.
-
+We suggest using the [universal update utility (UUU)](https://github.com/NXPmicro/mfgtools). It might also be possible to flash on eMMC with other tools.  
 Make sure to put the Board into Serial Download Mode first. Then follow the instructions below.
 ```
 $ cd tmp/deploy/images/iesy-imx8mm-eva-mi
@@ -207,8 +206,7 @@ $ gunzip -c iesy-base-image-iesy-imx8mm-eva-mi.wic.gz | sudo dd of=/dev/sdX bs=1
 #### For iesy RPX30:
 
 ##### Flash image to eMMC:
-We are using [Linux Upgrade Tool](https://github.com/rockchip-linux/tools/tree/master/linux/Linux_Upgrade_Tool) provided by Rockchip. Alternatively you can use one of the other tools mentioned [here](http://opensource.rock-chips.com/wiki_Tools).
-
+We are using [Linux Upgrade Tool](https://github.com/rockchip-linux/tools/tree/master/linux/Linux_Upgrade_Tool) provided by Rockchip. Alternatively you can use one of the other tools mentioned [here](http://opensource.rock-chips.com/wiki_Tools).  
 Make sure to put the Board into [Maskrom Mode](http://opensource.rock-chips.com/wiki_Rockusb) first. Then run `upgrade_tool` to flash the image.
 ```
 $ cd tmp/deploy/images/iesy-rpx30-eva-mi
@@ -227,3 +225,26 @@ $ cd tmp/deploy/images/iesy-rpx30-eva-mi
 $ sudo dd if=iesy-base-image-iesy-rpx30-eva-mi.wic of=/dev/sdX bs=1M status=progress conv=fsync
 ```
 (Replace `/dev/sdX` with the actual device name of your SD card)
+
+
+## Build SDK
+
+The Yocto Project offers the possibility to generate an SDK for your built Image to ease independent developing and testing code that is intended to run on the target hardware.
+
+There are two different SDK variants that can be build: The Standard SDK and the Extensible SDK (eSDK).  
+The difference between those two, as well as all the instructions on how to use the SDK are explained in the [Yocto Project SDK Manual](https://www.yoctoproject.org/docs/latest/sdk-manual/sdk-manual.html).
+
+##### Build the Standard SDK:
+```
+$ bitbake iesy-base-image -c populate_sdk
+```
+
+##### Build the Extensible SDK (eSDK):
+```
+$ bitbake iesy-base-image -c populate_sdk_ext
+```
+
+### Build Results
+
+Build output is located in **`build_iesy-wayland/tmp/deploy/sdk`**.
+
