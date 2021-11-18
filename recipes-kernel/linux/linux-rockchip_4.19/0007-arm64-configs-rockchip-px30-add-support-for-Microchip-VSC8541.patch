@@ -1,0 +1,23 @@
+From 3cd7abf9f00194baf957972423e2b7d1f64897ba Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Thu, 18 Nov 2021 13:46:15 +0100
+Subject: [PATCH 1/1] arm64: configs: rockchip: px30: add support for Microchip
+ VSC8541
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm64/configs/px30_linux_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/px30_linux_defconfig b/arch/arm64/configs/px30_linux_defconfig
+index 537c6db800b6..4fbba73f27af 100644
+--- a/arch/arm64/configs/px30_linux_defconfig
++++ b/arch/arm64/configs/px30_linux_defconfig
+@@ -515,3 +515,4 @@ CONFIG_CRC7=y
+ # CONFIG_XZ_DEC_POWERPC is not set
+ # CONFIG_XZ_DEC_IA64 is not set
+ # CONFIG_XZ_DEC_SPARC is not set
++CONFIG_MICROSEMI_PHY=y
+-- 
+2.33.1
+
