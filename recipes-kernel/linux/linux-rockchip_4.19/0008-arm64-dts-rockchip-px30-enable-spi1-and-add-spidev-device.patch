@@ -1,0 +1,34 @@
+From 7ebb4937561b13bfbd1d51fb91be792f4d64ff42 Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Thu, 18 Nov 2021 14:16:48 +0100
+Subject: [PATCH 1/1] arm64: dts: rockchip: px30: enable spi1 and add spidev
+ device
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts b/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts
+index fa0a05685a3e..8f0df869fbae 100644
+--- a/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts
++++ b/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts
+@@ -894,6 +894,15 @@
+ 	status = "okay";
+ };
+ 
++&spi1 {
++	status = "okay";
++    spidev@0 {
++       compatible = "linux,spidev";
++       spi-max-frequency = <10000000>;
++	   reg = <0>;
++	};
++};
++
+ &pinctrl {
+ 	headphone {
+ 		hp_det: hp-det {
+-- 
+2.33.1
+
