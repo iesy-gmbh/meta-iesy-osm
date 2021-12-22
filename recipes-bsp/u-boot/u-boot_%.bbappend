@@ -1,7 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot:"
 
 SRC_URI += " \
-	file://0001-ram-rockchip-px30-add-config-based-LPDDR3-selection.patch \
+	file://0007-ram-rockchip-px30-add-config-based-LPDDR3-selection.patch \
 	file://defconfig.cfg \
 	file://ddrbin_param.txt \
 "
