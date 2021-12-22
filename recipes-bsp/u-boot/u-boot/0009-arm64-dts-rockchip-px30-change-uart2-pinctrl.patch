@@ -1,0 +1,28 @@
+From 03649eb798a592785e2f3d1542c7bdc6557477b4 Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Tue, 21 Dec 2021 13:40:13 +0100
+Subject: [PATCH 1/1] arm64: dts: rockchip: px30: change uart2 pinctrl
+
+Use UART2_M1 for serial console
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm/dts/px30.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/px30.dtsi b/arch/arm/dts/px30.dtsi
+index 1290cc32b36e..8dca6cad2ea4 100644
+--- a/arch/arm/dts/px30.dtsi
++++ b/arch/arm/dts/px30.dtsi
+@@ -417,7 +417,7 @@
+ 		dmas = <&dmac 4>, <&dmac 5>;
+ 		#dma-cells = <2>;
+ 		pinctrl-names = "default";
+-		pinctrl-0 = <&uart2m0_xfer>;
++		pinctrl-0 = <&uart2m1_xfer>;
+ 		status = "disabled";
+ 	};
+ 
+-- 
+2.33.1
+

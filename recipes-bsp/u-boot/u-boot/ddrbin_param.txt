@@ -7,9 +7,9 @@ ddr4_freq=
 lp4_freq=
 lp4x_freq=
 
-uart id=5
-uart iomux=
-uart baudrate=1500000
+uart id=2
+uart iomux=1
+uart baudrate=115200
 
 ssmod_downspread=
 ssmod_div=
