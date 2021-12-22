@@ -1,0 +1,251 @@
+From a8a2310d184e51e1e01b455515f62fb4b6e1c60d Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Tue, 21 Dec 2021 12:39:53 +0100
+Subject: [PATCH 1/1] arm64: dts: rockchip: px30: adapt pmic config for
+ iesy-rpx30-eva-mi
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm/dts/px30-evb.dts | 113 +++++++++++++++++---------------------
+ 1 file changed, 51 insertions(+), 62 deletions(-)
+
+diff --git a/arch/arm/dts/px30-evb.dts b/arch/arm/dts/px30-evb.dts
+index bf1c857d62f3..6c7f8016f63d 100644
+--- a/arch/arm/dts/px30-evb.dts
++++ b/arch/arm/dts/px30-evb.dts
+@@ -111,8 +111,8 @@
+ &i2c0 {
+ 	status = "okay";
+ 
+-	rk817: pmic@20 {
+-		compatible = "rockchip,rk817";
++	rk809: pmic@20 {
++		compatible = "rockchip,rk809";
+ 		reg = <0x20>;
+ 		interrupt-parent = <&gpio0>;
+ 		interrupts = <7 IRQ_TYPE_LEVEL_LOW>;
+@@ -123,23 +123,23 @@
+ 		#clock-cells = <1>;
+ 		clock-output-names = "xin32k", "rk808-clkout2";
+ 
+-		vcc1-supply = <&vccsys>;
+-		vcc2-supply = <&vccsys>;
+-		vcc3-supply = <&vccsys>;
+-		vcc4-supply = <&vccsys>;
+-		vcc5-supply = <&vccsys>;
+-		vcc6-supply = <&vccsys>;
+-		vcc7-supply = <&vcc_3v0>;
+-		vcc8-supply = <&vccsys>;
+-		vcc9-supply = <&dcdc_boost>;
+-
+-		vccsys: vccsys{
++		vcc1-supply = <&vcc5v0_sys>;
++		vcc2-supply = <&vcc5v0_sys>;
++		vcc3-supply = <&vcc5v0_sys>;
++		vcc4-supply = <&vcc5v0_sys>;
++		vcc5-supply = <&vcc3v3_sys>;
++		vcc6-supply = <&vcc5v0_sys>;
++		vcc7-supply = <&vcc3v3_sys>;
++		vcc8-supply = <&vcc5v0_sys>;
++		vcc9-supply = <&vcc5v0_sys>;
++
++		vcc5v0_sys: vccsys {
+ 			compatible = "regulator-fixed";
+-			regulator-name = "vcc3v8_sys";
++			regulator-name = "vcc5v0_sys";
+ 			regulator-always-on;
+ 			regulator-boot-on;
+-			regulator-min-microvolt = <3800000>;
+-			regulator-max-microvolt = <3800000>;
++			regulator-min-microvolt = <5000000>;
++			regulator-max-microvolt = <5000000>;
+ 		};
+ 
+ 		rk817_pin0_ts: rk817_pin0_ts {
+@@ -167,38 +167,38 @@
+ 		};
+ 
+ 		regulators {
+-			vdd_arm: DCDC_REG1 {
++			vdd_logic: DCDC_REG1 {
+ 				regulator-always-on;
+ 				regulator-boot-on;
+-				regulator-min-microvolt = <950000>;
+-				regulator-max-microvolt = <1350000>;
++				regulator-min-microvolt = <900000>;
++				regulator-max-microvolt = <1100000>;
+ 				regulator-ramp-delay = <6001>;
+-				regulator-initial-mode = <0x1>;
+-				regulator-name = "vdd_arm";
++				regulator-initial-mode = <0x2>;
++				regulator-name = "vdd_logic";
+ 				regulator-state-mem {
+ 					regulator-on-in-suspend;
+-					regulator-suspend-microvolt = <700000>;
++					regulator-suspend-microvolt = <900000>;
+ 				};
+ 			};
+ 
+-			vdd_logic: DCDC_REG2 {
++			vdd_arm: DCDC_REG2 {
+ 				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-min-microvolt = <950000>;
+ 				regulator-max-microvolt = <1350000>;
+ 				regulator-ramp-delay = <6001>;
+-				regulator-initial-mode = <0x1>;
+-				regulator-name = "vdd_logic";
++				regulator-initial-mode = <0x2>;
++				regulator-name = "vdd_arm";
+ 				regulator-state-mem {
+ 					regulator-off-in-suspend;
+-					regulator-suspend-microvolt = <800000>;
++					regulator-suspend-microvolt = <950000>;
+ 				};
+ 			};
+ 
+ 			vcc_ddr: DCDC_REG3 {
+ 				regulator-always-on;
+ 				regulator-boot-on;
+-				regulator-initial-mode = <0x1>;
++				regulator-initial-mode = <0x2>;
+ 				regulator-name = "vcc_ddr";
+ 					regulator-state-mem {
+ 					regulator-on-in-suspend;
+@@ -206,11 +206,9 @@
+ 			};
+ 
+ 			vcc_3v0: DCDC_REG4 {
+-				regulator-always-on;
+-				regulator-boot-on;
+ 				regulator-min-microvolt = <3000000>;
+ 				regulator-max-microvolt = <3000000>;
+-				regulator-initial-mode = <0x1>;
++				regulator-initial-mode = <0x2>;
+ 				regulator-name = "vcc_3v0";
+ 				regulator-state-mem {
+ 					regulator-off-in-suspend;
+@@ -218,15 +216,27 @@
+ 				};
+ 			};
+ 
+-			vcc2v5_ddr: LDO_REG1 {
++			vcc3v3_sys: DCDC_REG5 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-name = "vcc3v3_sys";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3300000>;
++				};
++			};
++
++			vcc_1v0: LDO_REG1 {
+ 				regulator-always-on;
+ 				regulator-boot-on;
+-				regulator-min-microvolt = <2500000>;
+-				regulator-max-microvolt = <2500000>;
+-				regulator-name = "vcc2v5_ddr";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-name = "vcc_1v0";
+ 				regulator-state-mem {
+ 					regulator-on-in-suspend;
+-					regulator-suspend-microvolt = <2500000>;
++					regulator-suspend-microvolt = <1000000>;
+ 				};
+ 			};
+ 
+@@ -251,7 +261,7 @@
+ 
+ 				regulator-name = "vcc1v0_soc";
+ 				regulator-state-mem {
+-					regulator-off-in-suspend;
++					regulator-on-in-suspend;
+ 					regulator-suspend-microvolt = <1000000>;
+ 				};
+ 			};
+@@ -259,13 +269,13 @@
+ 			vcc3v0_pmu: LDO_REG4 {
+ 				regulator-always-on;
+ 				regulator-boot-on;
+-				regulator-min-microvolt = <3000000>;
+-				regulator-max-microvolt = <3000000>;
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
+ 
+ 				regulator-name = "vcc3v0_pmu";
+ 				regulator-state-mem {
+-					regulator-off-in-suspend;
+-					regulator-suspend-microvolt = <3000000>;
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3300000>;
+ 				};
+ 			};
+ 
+@@ -283,21 +293,17 @@
+ 			};
+ 
+ 			vcc_sd: LDO_REG6 {
+-				regulator-always-on;
+-				regulator-boot-on;
+ 				regulator-min-microvolt = <3300000>;
+ 				regulator-max-microvolt = <3300000>;
+ 
+ 				regulator-name = "vcc_sd";
+ 				regulator-state-mem {
+-					regulator-on-in-suspend;
++					regulator-off-in-suspend;
+ 					regulator-suspend-microvolt = <3300000>;
+ 				};
+ 			};
+ 
+ 			vcc2v8_dvp: LDO_REG7 {
+-			regulator-always-on;
+-				regulator-boot-on;
+ 				regulator-min-microvolt = <2800000>;
+ 				regulator-max-microvolt = <2800000>;
+ 
+@@ -309,7 +315,6 @@
+ 			};
+ 
+ 			vcc1v8_dvp: LDO_REG8 {
+-				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+@@ -322,8 +327,6 @@
+ 			};
+ 
+ 			vdd1v5_dvp: LDO_REG9 {
+-				regulator-always-on;
+-				regulator-boot-on;
+ 				regulator-min-microvolt = <1500000>;
+ 				regulator-max-microvolt = <1500000>;
+ 
+@@ -333,20 +336,6 @@
+ 					regulator-suspend-microvolt = <1500000>;
+ 				};
+ 			};
+-
+-			dcdc_boost: BOOST {
+-				regulator-always-on;
+-				regulator-boot-on;
+-				regulator-min-microvolt = <4700000>;
+-				regulator-max-microvolt = <5400000>;
+-				regulator-name = "boost";
+-			};
+-
+-			otg_switch: OTG_SWITCH {
+-				regulator-always-on;
+-				regulator-boot-on;
+-				regulator-name = "otg_switch";
+-			};
+ 		};
+ 
+ 		battery {
+-- 
+2.33.1
+

@@ -2,6 +2,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot:"
 
 SRC_URI += " \
 	file://0007-ram-rockchip-px30-add-config-based-LPDDR3-selection.patch \
+	file://0008-arm64-dts-rockchip-px30-adapt-pmic-config-for-iesy-rpx30-eva-mi.patch \
 	file://defconfig.cfg \
 	file://ddrbin_param.txt \
 "
