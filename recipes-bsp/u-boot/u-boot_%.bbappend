@@ -8,7 +8,7 @@ SRC_URI += " \
 	file://ddrbin_param.txt \
 "
 
-DDR_BIN_FILE = "px30_ddr_333MHz_v1.15.bin"
+DDR_BIN_FILE = "px30_ddr_333MHz_v*.bin"
 
 do_configure_append() {
 	# use parameters from given ddrbin_param.txt
