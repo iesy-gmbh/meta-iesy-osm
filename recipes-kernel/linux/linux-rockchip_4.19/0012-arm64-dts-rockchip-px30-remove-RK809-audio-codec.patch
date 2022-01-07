@@ -1,0 +1,64 @@
+From 2ba9558e7ba41648962b05e303c6b204f7649348 Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Thu, 6 Jan 2022 14:02:05 +0100
+Subject: [PATCH 1/1] arm64: dts: rockchip: px30: remove RK809 audio codec
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ .../dts/rockchip/px30-evb-ddr3-v10-linux.dts  | 33 -------------------
+ 1 file changed, 33 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts b/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts
+index 4014fa730d4e..0f22993dcd69 100644
+--- a/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts
++++ b/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts
+@@ -102,27 +102,6 @@
+ 		status = "okay";
+ 	};
+ 
+-	rk809-sound {
+-		compatible = "simple-audio-card";
+-		simple-audio-card,format = "i2s";
+-		simple-audio-card,name = "rockchip,rk809-codec";
+-		simple-audio-card,mclk-fs = <256>;
+-		simple-audio-card,widgets =
+-			"Microphone", "Mic Jack",
+-			"Headphone", "Headphone Jack";
+-		simple-audio-card,routing =
+-			"Mic Jack", "MICBIAS1",
+-			"IN1P", "Mic Jack",
+-			"Headphone Jack", "HPOL",
+-			"Headphone Jack", "HPOR";
+-		simple-audio-card,cpu {
+-			sound-dai = <&i2s1_2ch>;
+-		};
+-		simple-audio-card,codec {
+-			sound-dai = <&rk809_codec>;
+-		};
+-	};
+-
+ 	rk_headset: rk-headset {
+ 		compatible = "rockchip_headset";
+ 		headset_gpio = <&gpio2 RK_PB0 GPIO_ACTIVE_LOW>;
+@@ -604,18 +583,6 @@
+ 				regulator-name = "vcc3v3_lcd";
+ 			};
+ 		};
+-
+-		rk809_codec: codec {
+-			#sound-dai-cells = <0>;
+-			compatible = "rockchip,rk809-codec", "rockchip,rk817-codec";
+-			clocks = <&cru SCLK_I2S1_OUT>;
+-			clock-names = "mclk";
+-			pinctrl-names = "default";
+-			pinctrl-0 = <&i2s1_2ch_mclk>;
+-			hp-volume = <20>;
+-			spk-volume = <3>;
+-			status = "okay";
+-		};
+ 	};
+ };
+ 
+-- 
+2.33.1
+
