@@ -1,0 +1,33 @@
+From ad5d552c35a76074079b085b1d09af057801cd9a Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Thu, 3 Feb 2022 17:50:15 +0100
+Subject: [PATCH 3/6] arm64: dts: iesy: px30: enable spi1 and add spidev device
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index e2c3d4b3a285..2880ec27cf33 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -1068,6 +1068,15 @@
+ 	status = "okay";
+ };
+ 
++&spi1 {
++	status = "okay";
++    spidev@0 {
++       compatible = "linux,spidev";
++       spi-max-frequency = <10000000>;
++	   reg = <0>;
++	};
++};
++
+ &pinctrl {
+ 	headphone {
+ 		hp_det: hp-det {
+-- 
+2.34.1
+

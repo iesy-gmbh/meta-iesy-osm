@@ -1,18 +1,18 @@
-From 2ba9558e7ba41648962b05e303c6b204f7649348 Mon Sep 17 00:00:00 2001
+From 1521f17d23bb7baa4cf6a29b3a153551c57fb8dd Mon Sep 17 00:00:00 2001
 From: Stefan Lellwitz <lel@iesy.com>
-Date: Thu, 6 Jan 2022 14:02:05 +0100
-Subject: [PATCH 1/1] arm64: dts: rockchip: px30: remove RK809 audio codec
+Date: Thu, 3 Feb 2022 17:52:57 +0100
+Subject: [PATCH 6/6] arm64: dts: iesy: remove rk809 audio codec
 
 Signed-off-by: Stefan Lellwitz <lel@iesy.com>
 ---
- .../dts/rockchip/px30-evb-ddr3-v10-linux.dts  | 33 -------------------
- 1 file changed, 33 deletions(-)
+ .../arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 38 -------------------
+ 1 file changed, 38 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts b/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts
-index 4014fa730d4e..0f22993dcd69 100644
---- a/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts
-+++ b/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-linux.dts
-@@ -102,27 +102,6 @@
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 7b04fd980c42..85afeaa4b51d 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -110,27 +110,6 @@
  		status = "okay";
  	};
  
@@ -40,7 +40,7 @@ index 4014fa730d4e..0f22993dcd69 100644
  	rk_headset: rk-headset {
  		compatible = "rockchip_headset";
  		headset_gpio = <&gpio2 RK_PB0 GPIO_ACTIVE_LOW>;
-@@ -604,18 +583,6 @@
+@@ -779,18 +758,6 @@
  				regulator-name = "vcc3v3_lcd";
  			};
  		};
@@ -59,6 +59,18 @@ index 4014fa730d4e..0f22993dcd69 100644
  	};
  };
  
+@@ -861,11 +828,6 @@
+ 	};
+ };
+ 
+-&i2s1_2ch {
+-	status = "okay";
+-	#sound-dai-cells = <0>;
+-};
+-
+ &io_domains {
+ 	status = "okay";
+ 
 -- 
-2.33.1
+2.34.1
 

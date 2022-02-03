@@ -1,0 +1,29 @@
+From b19a70f53a29d7c0b733c5d18a5973e4fa32fea9 Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Thu, 3 Feb 2022 17:49:21 +0100
+Subject: [PATCH 2/6] arm64: dts: iesy: px30: use uart2_m1 for debug console
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index bdf8a1fadd78..e2c3d4b3a285 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -18,6 +18,11 @@
+ 	model = "iesy RPX30 EVA-MI (Eval Kit)";
+ 	compatible = "rockchip,px30-evb-ddr3-v10-linux", "rockchip,px30";
+ 
++	fiq-debugger {
++		pinctrl-0 = <&uart2m1_xfer>;
++		status = "okay";
++	};
++
+ 	adc-keys {
+ 		compatible = "adc-keys";
+ 		io-channels = <&saradc 2>;
+-- 
+2.34.1
+
