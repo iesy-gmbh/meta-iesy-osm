@@ -1,6 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}_${LINUX_VERSION}:"
 
 SRC_URI += " \
+	file://config.cfg \
 	file://0006-arm64-configs-rockchip-px30-add-missing-px30-cpu-selection.patch \
 	file://0007-scripts-mkimg-consider-dtbs-apart-from-Rockchip.patch \
 	file://0008-arm64-Makefile-consider-dtbs-apart-from-Rockchip.patch \
@@ -39,4 +40,9 @@ python () {
     # Avoid replacing "rockchip/" as stated in linux-rockchip.inc. We need to be able to select
     # between Rockchip and iesy dtb in Makefiles
     d.setVar('KERNEL_IMAGETYPE_FOR_MAKE', ' ' + d.getVar('KERNEL_DEVICETREE').replace('.dtb', '.img'));
+}
+
+# Add .cfg to Kernelconfig
+do_configure_append() {
+    ${S}/scripts/kconfig/merge_config.sh -m -O ${B} ${B}/.config ${WORKDIR}/*.cfg
 }
