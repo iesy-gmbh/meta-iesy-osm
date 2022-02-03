@@ -3,7 +3,9 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}_${LINUX_VERSION}:"
 SRC_URI += " \
 	file://0006-arm64-dts-rockchip-px30-use-uart2_m1-for-debug-console.patch \
 	file://0007-arm64-configs-rockchip-px30-add-support-for-Microchip-VSC8541.patch \
+	file://0007-scripts-mkimg-consider-dtbs-apart-from-Rockchip.patch \
 	file://0008-arm64-dts-rockchip-px30-enable-spi1-and-add-spidev-device.patch \
+	file://0008-arm64-Makefile-consider-dtbs-apart-from-Rockchip.patch \
 	file://0009-arm64-configs-rockchip-px30-add-missing-px30-cpu-selection.patch \
 	file://0009-arm64-dts-iesy-add-iesy-rpx30-eva-mi.patch \
 	file://0010-arm64-dts-rockchip-px30-set-baudrate-to-115200.patch \
@@ -33,3 +35,9 @@ do_apply_defconfig_patches(){
 }
 
 addtask apply_defconfig_patches after do_patch before do_kernel_configme
+
+python () {
+    # Avoid replacing "rockchip/" as stated in linux-rockchip.inc. We need to be able to select
+    # between Rockchip and iesy dtb in Makefiles
+    d.setVar('KERNEL_IMAGETYPE_FOR_MAKE', ' ' + d.getVar('KERNEL_DEVICETREE').replace('.dtb', '.img'));
+}
