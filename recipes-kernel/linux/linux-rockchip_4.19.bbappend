@@ -5,6 +5,7 @@ SRC_URI += " \
 	file://0007-arm64-configs-rockchip-px30-add-support-for-Microchip-VSC8541.patch \
 	file://0008-arm64-dts-rockchip-px30-enable-spi1-and-add-spidev-device.patch \
 	file://0009-arm64-configs-rockchip-px30-add-missing-px30-cpu-selection.patch \
+	file://0009-arm64-dts-iesy-add-iesy-rpx30-eva-mi.patch \
 	file://0010-arm64-dts-rockchip-px30-set-baudrate-to-115200.patch \
 	file://0011-arm64-dts-rockchip-px30-adapt-pmic-config-for-iesy-rpx30-eva-mi.patch \
 	file://0012-arm64-dts-rockchip-px30-remove-RK809-audio-codec.patch \
