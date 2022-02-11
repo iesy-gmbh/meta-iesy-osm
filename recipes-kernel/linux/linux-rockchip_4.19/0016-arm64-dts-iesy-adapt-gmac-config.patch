@@ -1,0 +1,31 @@
+From 1a3a6dff8ded4dd8b97f772e0b8d28bedeae4ac4 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Fri, 11 Feb 2022 14:02:41 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: adapt gmac config
+
+remove reset gpio, use clock from PHY;
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 0f686af1de2d..293a1cb168b3 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -504,10 +504,9 @@
+ 
+ &gmac {
+ 	phy-supply = <&vcc_phy>;
+-	clock_in_out = "output";
+-	snps,reset-gpio = <&gpio2 13 GPIO_ACTIVE_LOW>;
+-	snps,reset-active-low;
+-	snps,reset-delays-us = <0 50000 50000>;
++	clock_in_out = "input";
++	assigned-clocks = <&cru SCLK_GMAC>;
++	assigned-clock-parents = <&cru SCLK_GMAC>;
+ 	status = "okay";
+ };
+ 
+-- 
+2.30.2
+

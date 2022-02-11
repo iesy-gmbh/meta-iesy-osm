@@ -12,6 +12,7 @@ SRC_URI += " \
 	file://0013-arm64-dts-iesy-adapt-pmic-config.patch \
 	file://0014-arm64-dts-iesy-remove-rk809-audio-codec.patch \
 	file://0015-arm64-dts-adapt-pmic-config-and-disable-devices-not-used.patch \
+	file://0016-arm64-dts-iesy-adapt-gmac-config.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:
