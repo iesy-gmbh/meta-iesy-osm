@@ -1,0 +1,145 @@
+From 3f89b88621b2c0341853c2a03a56b866b73c5050 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Thu, 10 Feb 2022 16:19:45 +0100
+Subject: [PATCH 1/1] arm64: dts: adapt pmic config, disable devices not used
+ yet
+
+Don't allow vcc1v8_dvp to be switched off;
+Disable WLAN, BT, DSI, MIPI, SPI, ADC, I2C1 and I2C2;
+---
+ .../arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 45 ++++++++++---------
+ 1 file changed, 23 insertions(+), 22 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 85afeaa4b51d..0f686af1de2d 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -154,7 +154,7 @@
+ 		compatible = "wlan-platdata";
+ 		wifi_chip_type = "AP6210";
+ 		WIFI,host_wake_irq = <&gpio0 RK_PB2 GPIO_ACTIVE_HIGH>;
+-		status = "okay";
++		/* status = "okay"; */
+ 	};
+ 
+ 	wireless-bluetooth {
+@@ -168,16 +168,16 @@
+ 		BT,reset_gpio = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
+ 		BT,wake_gpio = <&gpio2 RK_PB0 GPIO_ACTIVE_HIGH>;
+ 		BT,wake_host_irq = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
+-		status = "okay";
++		/* status = "okay"; */
+ 	};
+ };
+ 
+ &display_subsystem {
+-	status = "okay";
++	/* status = "okay"; */
+ };
+ 
+ &dsi {
+-	status = "okay";
++	/* status = "okay"; */
+ 
+ 	panel@0 {
+ 		compatible = "sitronix,st7703", "simple-panel-dsi";
+@@ -627,6 +627,18 @@
+ 				};
+ 			};
+ 
++			vcc3v3_sys: DCDC_REG5 {
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-name = "vcc3v3_sys";
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3300000>;
++				};
++			};
++
+ 			vcc_1v0: LDO_REG1 {
+ 				regulator-always-on;
+ 				regulator-boot-on;
+@@ -716,6 +728,7 @@
+ 			};
+ 
+ 			vcc1v8_dvp: LDO_REG8 {
++				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+@@ -738,18 +751,6 @@
+ 				};
+ 			};
+ 
+-			vcc3v3_sys: DCDC_REG5 {
+-				regulator-always-on;
+-				regulator-boot-on;
+-				regulator-min-microvolt = <3300000>;
+-				regulator-max-microvolt = <3300000>;
+-				regulator-name = "vcc3v3_sys";
+-				regulator-state-mem {
+-					regulator-on-in-suspend;
+-					regulator-suspend-microvolt = <3300000>;
+-				};
+-			};
+-
+ 			vcc5v0_host: SWITCH_REG1 {
+ 				regulator-name = "vcc5v0_host";
+ 			};
+@@ -762,7 +763,7 @@
+ };
+ 
+ &i2c1 {
+-	status = "okay";
++	/* status = "okay"; */
+ 
+ 	sensor@f {
+ 		status = "okay";
+@@ -797,7 +798,7 @@
+ };
+ 
+ &i2c2 {
+-	status = "okay";
++	/* status = "okay"; */
+ 
+ 	clock-frequency = <100000>;
+ 
+@@ -843,7 +844,7 @@
+ };
+ 
+ &mipi_dphy_rx0 {
+-	status = "okay";
++	/* status = "okay"; */
+ 
+ 	ports {
+ 		#address-cells = <1>;
+@@ -908,12 +909,12 @@
+ };
+ 
+ &rockchip_suspend {
+-	status = "okay";
++	/* status = "okay"; */
+ 	rockchip,sleep-debug-en = <1>;
+ };
+ 
+ &saradc {
+-	status = "okay";
++	/* status = "okay"; */
+ 	vref-supply = <&vcc1v8_soc>;
+ };
+ 
+@@ -1024,7 +1025,7 @@
+ };
+ 
+ &spi1 {
+-	status = "okay";
++	/* status = "okay"; */
+     spidev@0 {
+        compatible = "linux,spidev";
+        spi-max-frequency = <10000000>;
+-- 
+2.30.2
+
