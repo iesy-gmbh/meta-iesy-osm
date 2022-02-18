@@ -1,0 +1,36 @@
+From b560ccf69d47f77e1b6b2dfd4db696715a985899 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Fri, 18 Feb 2022 09:26:09 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: disable eMMC high speed mode
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 293a1cb168b3..d8a9ca0897a1 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -493,8 +493,8 @@
+ 
+ &emmc {
+ 	bus-width = <8>;
+-	cap-mmc-highspeed;
+-	mmc-hs200-1_8v;
++	/* cap-mmc-highspeed; */
++	/* mmc-hs200-1_8v; */
+ 	supports-emmc;
+ 	disable-wp;
+ 	non-removable;
+@@ -930,7 +930,7 @@
+ 	sd-uhs-sdr50;
+ 	sd-uhs-sdr104;
+ 	vqmmc-supply = <&vccio_sd>;
+-	vmmc-supply = <&vcc_sd>;
++	/* vmmc-supply = <&vcc_sd>; */
+ 	status = "okay";
+ };
+ 
+-- 
+2.30.2
+
