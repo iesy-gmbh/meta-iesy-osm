@@ -1,0 +1,27 @@
+From dd166cfed365122e692defcf39992bcb7bbe9d31 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Fri, 18 Feb 2022 10:39:03 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: reenable moderate emmc sdr high speed
+ mode
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index d8a9ca0897a1..30d86ea6c7ff 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -493,7 +493,8 @@
+ 
+ &emmc {
+ 	bus-width = <8>;
+-	/* cap-mmc-highspeed; */
++	cap-mmc-highspeed;
++	/* mmc-ddr-1_8v; */
+ 	/* mmc-hs200-1_8v; */
+ 	supports-emmc;
+ 	disable-wp;
+-- 
+2.30.2
+
