@@ -15,6 +15,7 @@ SRC_URI += " \
 	file://0016-arm64-dts-iesy-adapt-gmac-config.patch \
 	file://0017-arm64-dts-iesy-disable-emmc-high-speed-mode.patch \
 	file://0018-arm64-dts-iesy-reenable-moderate-emmc-sdr-high-speed-mode.patch \
+	file://0019-arm64-dts-iesy-reenable-emmc-hs200-mode-after-hw-fix.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:

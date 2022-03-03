@@ -1,0 +1,25 @@
+From ad42f99b86a7f86fc378e77ee75511104a7b1eb9 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Thu, 3 Mar 2022 14:05:47 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: reenable emmc hs200 mode after hw fix
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 30d86ea6c7ff..e687d07b6606 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -495,7 +495,7 @@
+ 	bus-width = <8>;
+ 	cap-mmc-highspeed;
+ 	/* mmc-ddr-1_8v; */
+-	/* mmc-hs200-1_8v; */
++	mmc-hs200-1_8v;
+ 	supports-emmc;
+ 	disable-wp;
+ 	non-removable;
+-- 
+2.30.2
+
