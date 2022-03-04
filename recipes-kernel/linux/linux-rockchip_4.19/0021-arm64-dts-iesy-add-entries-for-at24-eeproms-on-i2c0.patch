@@ -1,0 +1,37 @@
+From 7b99d388fa09f849460deb56b6bfb13e95defb4b Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Fri, 4 Mar 2022 13:22:55 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: add entries for at24 eeproms on i2c0
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index f1e1a41a9872..f67108765698 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -766,6 +766,20 @@
+ 		compatible = "lm75";
+ 		reg = <0x4e>;
+ 	};
++
++	eeprom@50 {
++		status = "okay";
++		compatible = "atmel,24c32";
++		reg = <0x50>;
++		pagesize = <32>;
++	};
++
++	eeprom@51 {
++		status = "okay";
++		compatible = "atmel,24c64";
++		reg = <0x51>;
++		pagesize = <32>;
++	};
+ };
+ 
+ &i2c1 {
+-- 
+2.30.2
+
