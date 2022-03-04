@@ -16,6 +16,7 @@ SRC_URI += " \
 	file://0017-arm64-dts-iesy-disable-emmc-high-speed-mode.patch \
 	file://0018-arm64-dts-iesy-reenable-moderate-emmc-sdr-high-speed-mode.patch \
 	file://0019-arm64-dts-iesy-reenable-emmc-hs200-mode-after-hw-fix.patch \
+	file://0020-arm64-dts-iesy-add-entry-for-lm75-sensor-on-i2c0-at-0x4e.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:

@@ -1,0 +1,30 @@
+From 93529f701d56aedb7a884a7095e7330a612d40ec Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Fri, 4 Mar 2022 09:30:23 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: add entry for lm75 sensor on i2c0 at
+ 0x4e
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index e687d07b6606..f1e1a41a9872 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -760,6 +760,12 @@
+ 			};
+ 		};
+ 	};
++
++	sensor@4e {
++		status = "okay";
++		compatible = "lm75";
++		reg = <0x4e>;
++	};
+ };
+ 
+ &i2c1 {
+-- 
+2.30.2
+
