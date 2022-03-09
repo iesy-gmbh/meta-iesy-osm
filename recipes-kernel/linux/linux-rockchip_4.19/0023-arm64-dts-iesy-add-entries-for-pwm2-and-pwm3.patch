@@ -1,0 +1,31 @@
+From abdd042d3e5c8958bf4759c21953454a2858e67f Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Wed, 9 Mar 2022 08:42:46 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: add entries for pwm2 and pwm3
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 38b872f304e0..79188037b0a7 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -910,6 +910,14 @@
+ 	status = "okay";
+ };
+ 
++&pwm2 {
++	status = "okay";
++};
++
++&pwm3 {
++	status = "okay";
++};
++
+ &rk_rga {
+ 	status = "okay";
+ };
+-- 
+2.30.2
+

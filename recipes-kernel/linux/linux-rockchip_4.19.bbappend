@@ -19,6 +19,7 @@ SRC_URI += " \
 	file://0020-arm64-dts-iesy-add-entry-for-lm75-sensor-on-i2c0-at-0x4e.patch \
 	file://0021-arm64-dts-iesy-add-entries-for-at24-eeproms-on-i2c0.patch \
 	file://0022-arm64-dts-iesy-add-entries-for-uart0-and-uart1.patch \
+	file://0023-arm64-dts-iesy-add-entries-for-pwm2-and-pwm3.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:
