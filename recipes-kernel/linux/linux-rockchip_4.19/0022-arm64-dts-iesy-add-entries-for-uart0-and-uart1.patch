@@ -1,0 +1,30 @@
+From f236a10b3f4342dad9fd4cf8a9319fffb6b948e7 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Fri, 4 Mar 2022 16:26:04 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: add entries for uart0 and uart1
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index f67108765698..38b872f304e0 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -974,9 +974,11 @@
+ 	status = "okay";
+ };
+ 
++&uart0 {
++	status = "okay";
++};
++
+ &uart1 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&uart1_xfer &uart1_cts>;
+ 	status = "okay";
+ };
+ 
+-- 
+2.30.2
+
