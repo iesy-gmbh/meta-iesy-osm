@@ -1,0 +1,65 @@
+From 0535ad7151b941612651a8619591927ad1666a88 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Fri, 18 Mar 2022 16:19:39 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: add definitions for user leds
+
+---
+ .../arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 28 +++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 5c264f9e1e16..965bd12053ee 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -13,6 +13,8 @@
+ #include <dt-bindings/sensor-dev.h>
+ #include "../rockchip/px30.dtsi"
+ #include "../rockchip/rk3326-linux.dtsi"
++#include <dt-bindings/leds/common.h>
++
+ 
+ / {
+ 	model = "iesy RPX30 EVA-MI (Eval Kit)";
+@@ -192,6 +194,25 @@
+ 		regulator-always-on;
+ 		regulator-boot-on;
+ 	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		pinctrl-names = "default";
++        pinctrl-0 = <&pinctrl_leds_bb138>; 
++
++		led@0 {
++			label = "USER_LED_00";
++			gpios = <&gpio3 RK_PA0 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++
++		led@1 {
++			label = "USER_LED_01";
++			gpios = <&gpio3 RK_PA1 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++	};
+ };
+ 
+ &display_subsystem {
+@@ -1130,6 +1151,13 @@
+ 			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
++
++	leds {
++		pinctrl_leds_bb138: pinctrl-leds-bb138 {
++			rockchip,pins = <3 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none
++							 3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
+ };
+ 
+ /* DON'T PUT ANYTHING BELOW HERE.  PUT IT ABOVE PINCTRL */
+-- 
+2.30.2
+

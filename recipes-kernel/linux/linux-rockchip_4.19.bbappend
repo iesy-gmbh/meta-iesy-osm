@@ -22,6 +22,7 @@ SRC_URI += " \
 	file://0023-arm64-dts-iesy-add-entries-for-pwm2-and-pwm3.patch \
 	file://0024-arm64-dts-iesy-correct-voltage-regulators-used-in-io-domains.patch \
 	file://0025-arm64-dts-iesy-assign-regulators-to-usb-ports.patch \
+	file://0026-arm64-dts-iesy-add-definitions-for-user-leds.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:
