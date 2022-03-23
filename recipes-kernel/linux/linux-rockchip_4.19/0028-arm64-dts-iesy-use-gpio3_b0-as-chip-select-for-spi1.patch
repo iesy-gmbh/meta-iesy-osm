@@ -1,0 +1,38 @@
+From 32bfcf571eb37218b184c23674ab8a1a4dcbd8b5 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Wed, 23 Mar 2022 14:39:55 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: use gpio3_b0 as chip select for spi1
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 965bd12053eeb..ba49c2b729c91 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -1109,12 +1109,20 @@
+ };
+ 
+ &spi1 {
+-	/* status = "okay"; */
++	status = "okay";
++	cs-gpios = <&gpio3 RK_PB0 GPIO_ACTIVE_LOW>;
++
+     spidev@0 {
+        compatible = "linux,spidev";
+        spi-max-frequency = <10000000>;
+ 	   reg = <0>;
+ 	};
++
++    spidev@1 {
++       compatible = "linux,spidev";
++       spi-max-frequency = <10000000>;
++	   reg = <1>;
++	};
+ };
+ 
+ &pinctrl {
+-- 
+2.30.2
+
