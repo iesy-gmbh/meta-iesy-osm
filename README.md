@@ -1,13 +1,17 @@
 # meta-iesy-osm
 
-Yocto BSP Layer providing support for [iesy Open Standard Module](https://www.iesy.com/en/open-standard-module) Hardware.  
+Yocto BSP Layer providing support for [iesy Open Standard Module](https://www.iesy.com/en/products/modules/open-standard-module) hardware.  
 
 
 #### Dependencies
 
-* [FSL Community BSP](https://github.com/Freescale/fsl-community-bsp-platform)
-* [Rockchip Yocto BSP](https://github.com/rockchip-linux/manifests/tree/yocto-next)  
+* FSL Community BSP
+* Rockchip Yocto BSP
 
 ## Documentation
 
-Documentation is available in the [Project Wiki](https://github.com/iesy-gmbh/meta-iesy-osm/wiki).
+Documentation is available in the [Project Wiki](https://github.com/iesy-gmbh/meta-iesy-osm/wiki) containing information on:
+
+* Working with the BSP
+* Starting up the hardware
+* Demo images
