@@ -1,0 +1,46 @@
+From 447d705968dd121b8973735be95f77c032829858 Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Mon, 21 Mar 2022 18:27:30 +0100
+Subject: [PATCH 1/1] drivers: gpu: drm: bridge: add missing support for
+ Lontium LT8912
+
+We are moving to SL-MIPI-LVDS-HDMI-CNV MIPI-DSI to HDMI display converter, which includes Lontium LT8912B Bridge
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ drivers/gpu/drm/bridge/Kconfig  | 8 ++++++++
+ drivers/gpu/drm/bridge/Makefile | 1 +
+ 2 files changed, 9 insertions(+)
+
+diff --git a/drivers/gpu/drm/bridge/Kconfig b/drivers/gpu/drm/bridge/Kconfig
+index 5f95969549a3..e263f9d49119 100644
+--- a/drivers/gpu/drm/bridge/Kconfig
++++ b/drivers/gpu/drm/bridge/Kconfig
+@@ -146,6 +146,14 @@ config DRM_TI_TFP410
+ 	---help---
+ 	  Texas Instruments TFP410 DVI/HDMI Transmitter driver
+ 
++config DRM_LONTIUM_LT8912
++	tristate "Lontium LT8912 MIPI-DSI to LVDS and HDMI/MHL bridge"
++	depends on OF
++	select DRM_KMS_HELPER
++	select REGMAP_I2C
++	help
++	  Lontium LT8912 MIPI-DSI to LVDS and HDMI/MHL bridge chip driver.
++
+ source "drivers/gpu/drm/bridge/analogix/Kconfig"
+ 
+ source "drivers/gpu/drm/bridge/adv7511/Kconfig"
+diff --git a/drivers/gpu/drm/bridge/Makefile b/drivers/gpu/drm/bridge/Makefile
+index e211289c4387..5f4b374bbcdc 100644
+--- a/drivers/gpu/drm/bridge/Makefile
++++ b/drivers/gpu/drm/bridge/Makefile
+@@ -16,4 +16,5 @@ obj-$(CONFIG_DRM_TOSHIBA_TC358767) += tc358767.o
+ obj-$(CONFIG_DRM_ANALOGIX_DP) += analogix/
+ obj-$(CONFIG_DRM_I2C_ADV7511) += adv7511/
+ obj-$(CONFIG_DRM_TI_TFP410) += ti-tfp410.o
++obj-$(CONFIG_DRM_LONTIUM_LT8912) += lt8912.o
+ obj-y += synopsys/
+-- 
+2.35.1
+
