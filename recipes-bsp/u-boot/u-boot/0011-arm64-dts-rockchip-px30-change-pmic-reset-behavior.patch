@@ -1,0 +1,24 @@
+From 98fd598894cb5c89f574eab97d4a96d66ef849db Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Wed, 22 Jun 2022 11:12:41 +0200
+Subject: [PATCH 1/2] arm64: dts: rockchip: px30: change pmic reset behavior
+
+---
+ arch/arm/dts/px30-evb.dts | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/dts/px30-evb.dts b/arch/arm/dts/px30-evb.dts
+index 1b5243157571..edf9b0b2dd7e 100644
+--- a/arch/arm/dts/px30-evb.dts
++++ b/arch/arm/dts/px30-evb.dts
+@@ -119,6 +119,7 @@
+ 		wakeup-source;
+ 		#clock-cells = <1>;
+ 		clock-output-names = "xin32k", "rk808-clkout2";
++		pmic-reset-func = <1>;
+ 
+ 		vcc1-supply = <&vcc5v0_sys>;
+ 		vcc2-supply = <&vcc5v0_sys>;
+-- 
+2.30.2
+
