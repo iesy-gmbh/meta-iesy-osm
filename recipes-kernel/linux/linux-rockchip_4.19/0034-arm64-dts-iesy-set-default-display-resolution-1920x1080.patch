@@ -1,0 +1,88 @@
+From 5965c6360757b511cfaf360af9c8844852d28af0 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Mon, 13 Jun 2022 15:29:03 +0200
+Subject: [PATCH 1/2] arm64: dts: iesy: set default display resolution to
+ 1920x1080
+
+---
+ .../arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 22 +++++++++++++++++--
+ drivers/gpu/drm/bridge/lt8912.c               |  2 +-
+ 2 files changed, 21 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 23d788114c1c..30e341ce6858 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -138,7 +138,7 @@
+ 	rockchip,lane-rate = <891>;
+ 
+ 	panel@0 {
+-		compatible = "sitronix,st7703","simple-panel-dsi";
++		compatible = "simple-panel-dsi";
+ 		reg = <0>;
+ 		power-supply = <&vcc3v3_lcd>;
+ 		prepare-delay-ms = <2>;
+@@ -157,7 +157,7 @@
+ 		dsi,lanes = <2>;
+ 
+ 		display-timings {
+-			native-mode = <&timing1>;
++			native-mode = <&timing2>;
+ 
+ 			timing1: timing1 {
+ 				clock-frequency = <74250000>;
+@@ -174,6 +174,22 @@
+ 				de-active = <0>;
+ 				pixelclk-active = <0>;
+ 			};
++
++			timing2: timing2 {
++				clock-frequency = <74250000>;
++				hactive = <1920>;
++				vactive = <1080>;
++				hfront-porch = <88>;
++				hsync-len = <44>;
++				hback-porch = <148>;
++				vfront-porch = <4>;
++				vsync-len = <5>;
++				vback-porch = <36>;
++				hsync-active = <0>;
++				vsync-active = <0>;
++				de-active = <0>;
++				pixelclk-active = <0>;
++			};
+ 		};
+ 
+ 		ports {
+@@ -542,6 +558,7 @@
+ 		status = "okay";
+ 		//swap-mipi-pn = <1>;
+ 
++/*
+ 		display-timings {
+ 			native-mode = <&timing0>;
+ 			timing0: timing0 {
+@@ -560,6 +577,7 @@
+ 				pixelclk-active = <0>;
+ 			};
+ 		};
++*/
+     };
+ };
+ 
+diff --git a/drivers/gpu/drm/bridge/lt8912.c b/drivers/gpu/drm/bridge/lt8912.c
+index dc93475afc51..f3636ebabfc8 100644
+--- a/drivers/gpu/drm/bridge/lt8912.c
++++ b/drivers/gpu/drm/bridge/lt8912.c
+@@ -266,7 +266,7 @@ static void lt8912_audio_config(struct lt8912 *lt)
+ static void lt8912_mipi_config(struct lt8912 *lt)
+ {
+ 	//const struct drm_display_mode *mode = &lt->mode;
+-	struct video_timing *video = &video_1280x720_60Hz;
++	struct video_timing *video = &video_1920x1080_30Hz;
+ 
+ 	u32 hactive, hfp, hsync, hbp, vfp, vsync, vbp, htotal, vtotal;
+ 	unsigned int hsync_activehigh, vsync_activehigh, reg;
+-- 
+2.30.2
+
