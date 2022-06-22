@@ -1,0 +1,347 @@
+From 04946f41d4bac426242c95ebf040c39674868697 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Wed, 6 Apr 2022 15:43:23 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: remove all devices not available on
+ cm006 and bb138
+
+---
+ .../arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 193 +++---------------
+ 1 file changed, 25 insertions(+), 168 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 0aa79d4d910c..c93c7cf6d20e 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -26,44 +26,6 @@
+ 		status = "okay";
+ 	};
+ 
+-	adc-keys {
+-		compatible = "adc-keys";
+-		io-channels = <&saradc 2>;
+-		io-channel-names = "buttons";
+-		poll-interval = <100>;
+-		keyup-threshold-microvolt = <1800000>;
+-
+-		esc-key {
+-			linux,code = <KEY_ESC>;
+-			label = "esc";
+-			press-threshold-microvolt = <1310000>;
+-		};
+-
+-		home-key {
+-			linux,code = <KEY_HOME>;
+-			label = "home";
+-			press-threshold-microvolt = <624000>;
+-		};
+-
+-		menu-key {
+-			linux,code = <KEY_MENU>;
+-			label = "menu";
+-			press-threshold-microvolt = <987000>;
+-		};
+-
+-		vol-down-key {
+-			linux,code = <KEY_VOLUMEDOWN>;
+-			label = "volume down";
+-			press-threshold-microvolt = <300000>;
+-		};
+-
+-		vol-up-key {
+-			linux,code = <KEY_VOLUMEUP>;
+-			label = "volume up";
+-			press-threshold-microvolt = <17000>;
+-		};
+-	};
+-
+ 	backlight: backlight {
+ 		compatible = "pwm-backlight";
+ 		pwms = <&pwm1 0 25000 0>;
+@@ -112,30 +74,6 @@
+ 		status = "okay";
+ 	};
+ 
+-	rk_headset: rk-headset {
+-		compatible = "rockchip_headset";
+-		headset_gpio = <&gpio2 RK_PB0 GPIO_ACTIVE_LOW>;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&hp_det>;
+-		io-channels = <&saradc 1>;
+-	};
+-
+-	sdio_pwrseq: sdio-pwrseq {
+-		compatible = "mmc-pwrseq-simple";
+-		/*clocks = <&rk809 1>;*/
+-		/*clock-names = "ext_clock";*/
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&wifi_enable_h>;
+-
+-		/*
+-		 * On the module itself this is one of these (depending
+-		 * on the actual card populated):
+-		 * - SDIO_RESET_L_WL_REG_ON
+-		 * - PDN (power down when low)
+-		 */
+-		reset-gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_LOW>; /* GPIO3_A4 */
+-	};
+-
+ 	vcc_phy: vcc-phy-regulator {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc_phy";
+@@ -152,27 +90,6 @@
+ 		regulator-max-microvolt = <5000000>;
+ 	};
+ 
+-	wireless-wlan {
+-		compatible = "wlan-platdata";
+-		wifi_chip_type = "AP6210";
+-		WIFI,host_wake_irq = <&gpio0 RK_PB2 GPIO_ACTIVE_HIGH>;
+-		/* status = "okay"; */
+-	};
+-
+-	wireless-bluetooth {
+-		compatible = "bluetooth-platdata";
+-		clocks = <&rk809 1>;
+-		clock-names = "ext_clock";
+-		uart_rts_gpios = <&gpio1 RK_PC3 GPIO_ACTIVE_LOW>;
+-		pinctrl-names = "default","rts_gpio";
+-		pinctrl-0 = <&uart1_rts>;
+-		pinctrl-1 = <&uart1_rts_gpio>;
+-		BT,reset_gpio = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
+-		BT,wake_gpio = <&gpio2 RK_PB0 GPIO_ACTIVE_HIGH>;
+-		BT,wake_host_irq = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
+-		/* status = "okay"; */
+-	};
+-
+ 	/* regulator for USB OTG port */
+ 	usb_a_vbus_regulator: regulator@1 {
+     	compatible = "regulator-fixed";
+@@ -213,12 +130,14 @@
+ 		pinctrl-names = "default";
+         pinctrl-0 = <&pinctrl_leds_bb138>; 
+ 
++		/* green user led (LD4) on BB138 */
+ 		led@0 {
+ 			label = "USER_LED_00";
+ 			gpios = <&gpio3 RK_PA0 GPIO_ACTIVE_LOW>;
+ 			default-state = "off";
+ 		};
+ 
++		/* yellow user led (LD9)) on BB138 */
+ 		led@1 {
+ 			label = "USER_LED_01";
+ 			gpios = <&gpio3 RK_PA1 GPIO_ACTIVE_LOW>;
+@@ -528,6 +447,7 @@
+ 	status = "okay";
+ };
+ 
++/* what's this? */
+ &bus_apll {
+ 	bus-supply = <&vdd_logic>;
+ 	status = "okay";
+@@ -537,15 +457,18 @@
+ 	cpu-supply = <&vdd_arm>;
+ };
+ 
++/* DDR PHY Interface - used for DDR monitoring */
+ &dfi {
+ 	status = "okay";
+ };
+ 
++/* Dynamic Memory Controller */
+ &dmc {
+ 	center-supply = <&vdd_logic>;
+ 	status = "okay";
+ };
+ 
++/* eMMC on CM006 */
+ &emmc {
+ 	bus-width = <8>;
+ 	cap-mmc-highspeed;
+@@ -574,6 +497,7 @@
+ &i2c0 {
+ 	status = "okay";
+ 
++	/* Power Management IC */
+ 	rk809: pmic@20 {
+ 		compatible = "rockchip,rk809";
+ 		reg = <0x20>;
+@@ -816,12 +740,14 @@
+ 		};
+ 	};
+ 
++	/* LM75 sensor on BB138 */
+ 	sensor@4e {
+ 		status = "okay";
+ 		compatible = "lm75";
+ 		reg = <0x4e>;
+ 	};
+ 
++	/* EEPROM on CM006 */
+ 	eeprom@50 {
+ 		status = "okay";
+ 		compatible = "atmel,24c32";
+@@ -829,6 +755,7 @@
+ 		pagesize = <32>;
+ 	};
+ 
++	/* EEPROM on BB138 */
+ 	eeprom@51 {
+ 		status = "okay";
+ 		compatible = "atmel,24c64";
+@@ -838,38 +765,7 @@
+ };
+ 
+ &i2c1 {
+-	/* status = "okay"; */
+-
+-	sensor@f {
+-		status = "okay";
+-		compatible = "ak8963";
+-		reg = <0x0f>;
+-		type = <SENSOR_TYPE_COMPASS>;
+-		irq_enable = <0>;
+-		poll_delay_ms = <30>;
+-		layout = <1>;
+-		reprobe_en = <1>;
+-	};
+-
+-	gt1x: gt1x@14 {
+-		compatible = "goodix,gt1x";
+-		reg = <0x14>;
+-		power-supply = <&vcc3v3_lcd>;
+-		goodix,rst-gpio = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
+-		goodix,irq-gpio = <&gpio0 RK_PA5 IRQ_TYPE_LEVEL_LOW>;
+-	};
+-
+-	sensor@4c {
+-		status = "okay";
+-		compatible = "gs_mma7660";
+-		reg = <0x4c>;
+-		type = <SENSOR_TYPE_ACCEL>;
+-		irq-gpio = <&gpio0 RK_PB7 IRQ_TYPE_LEVEL_LOW>;
+-		irq_enable = <0>;
+-		poll_delay_ms = <30>;
+-		layout = <2>;
+-		reprobe_en = <1>;
+-	};
++	status = "okay";
+ };
+ 
+ &i2c2 {
+@@ -881,30 +777,6 @@
+ 	i2c-scl-falling-time-ns = <50>;
+ 	i2c-scl-rising-time-ns = <300>;
+ 
+-	/*
+-	ov5695: ov5695@36 {
+-		compatible = "ovti,ov5695";
+-		reg = <0x36>;
+-		clocks = <&cru SCLK_CIF_OUT>;
+-		clock-names = "xvclk";
+-
+-		avdd-supply = <&vcc2v8_dvp>;
+-		dovdd-supply = <&vcc1v8_dvp>;
+-		dvdd-supply = <&vdd1v5_dvp>;
+-
+-		/*reset-gpios = <&gpio2 14 GPIO_ACTIVE_HIGH>;
+-		pwdn-gpios = <&gpio2 14 GPIO_ACTIVE_HIGH>;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&cif_clkout_m0>;
+-		port {
+-			ucam_out: endpoint {
+-				remote-endpoint = <&mipi_in_ucam>;
+-				data-lanes = <1 2>;
+-			};
+-		};
+-	};
+-	*/
+-
+ 	imx219: sensor@10 {
+ 		status = "okay";
+ 		compatible = "sony,imx219";
+@@ -930,6 +802,16 @@
+ 			clock-frequency = <24000000>;
+ 		};
+ 
++		port {
++			imx219_0: endpoint {
++				remote-endpoint = <&mipi_in_ucam>;
++				clock-lanes = <0>;
++				data-lanes = <1 2>;
++				clock-noncontinuous;
++				link-frequencies = /bits/ 64 <456000000>;
++			};
++		};
++
+         mode0 { // IMX219_MODE_1920X1080
+         	mclk_khz = "24000";
+             mclk_multiplier = "25";
+@@ -1027,16 +909,6 @@
+           max_exp_time = "358731";
+             embedded_metadata_height = "0";
+         };
+-
+-		port {
+-			imx219_0: endpoint {
+-				remote-endpoint = <&mipi_in_ucam>;
+-				clock-lanes = <0>;
+-				data-lanes = <1 2>;
+-				clock-noncontinuous;
+-				link-frequencies = /bits/ 64 <456000000>;
+-			};
+-		};
+ 	};
+ 
+ };
+@@ -1136,11 +1008,13 @@
+ 	rockchip,sleep-debug-en = <1>;
+ };
+ 
++/* 2 SAR ADC inputs on BB138 */
+ &saradc {
+-	/* status = "okay"; */
++	status = "okay";
+ 	vref-supply = <&vcc1v8_soc>;
+ };
+ 
++/* SD card connector on BB138 */
+ &sdmmc {
+ 	bus-width = <4>;
+ 	cap-mmc-highspeed;
+@@ -1158,18 +1032,7 @@
+ 	status = "okay";
+ };
+ 
+-&sdio {
+-	bus-width = <4>;
+-	cap-sd-highspeed;
+-	supports-sdio;
+-	ignore-pm-notify;
+-	keep-power-in-suspend;
+-	non-removable;
+-	mmc-pwrseq = <&sdio_pwrseq>;
+-	sd-uhs-sdr104;
+-	status = "okay";
+-};
+-
++/* used for reading gpu temperature */
+ &tsadc {
+ 	pinctrl-names = "gpio", "otpout";
+ 	pinctrl-0 = <&tsadc_otp_gpio>;
+@@ -1303,12 +1166,6 @@
+ 		};
+ 	};
+ 
+-	sdio-pwrseq {
+-		wifi_enable_h: wifi-enable-h {
+-			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
+-		};
+-	};
+-
+ 	leds {
+ 		pinctrl_leds_bb138: pinctrl-leds-bb138 {
+ 			rockchip,pins = <3 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none
+-- 
+2.30.2
+
