@@ -1,0 +1,41 @@
+From 9524bbb2bb68d3f74c9b03c2e0e9f57af18da6b3 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Wed, 22 Jun 2022 11:14:07 +0200
+Subject: [PATCH 2/2] drm/rockchip: change default video resolution to 1280x720
+
+---
+ drivers/video/drm/rockchip_display.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/video/drm/rockchip_display.c b/drivers/video/drm/rockchip_display.c
+index 117d0c61f0d7..57840e3f1707 100644
+--- a/drivers/video/drm/rockchip_display.c
++++ b/drivers/video/drm/rockchip_display.c
+@@ -1974,15 +1974,15 @@ void rockchip_display_fixup(void *blob)
+ 		FDT_SET_U32("logo,height", s->logo.height);
+ 		FDT_SET_U32("logo,bpp", s->logo.bpp);
+ 		FDT_SET_U32("logo,ymirror", s->logo.ymirror);
+-		FDT_SET_U32("video,clock", s->conn_state.mode.clock);
+-		FDT_SET_U32("video,hdisplay", s->conn_state.mode.hdisplay);
+-		FDT_SET_U32("video,vdisplay", s->conn_state.mode.vdisplay);
+-		FDT_SET_U32("video,crtc_hsync_end", s->conn_state.mode.crtc_hsync_end);
+-		FDT_SET_U32("video,crtc_vsync_end", s->conn_state.mode.crtc_vsync_end);
+-		FDT_SET_U32("video,vrefresh",
+-			    drm_mode_vrefresh(&s->conn_state.mode));
+-		FDT_SET_U32("video,flags", s->conn_state.mode.flags);
+-		FDT_SET_U32("video,aspect_ratio", s->conn_state.mode.picture_aspect_ratio);
++		FDT_SET_U32("video,clock", 74250); //s->conn_state.mode.clock);
++		FDT_SET_U32("video,hdisplay", 1280); //s->conn_state.mode.hdisplay);
++		FDT_SET_U32("video,vdisplay", 720); //s->conn_state.mode.vdisplay);
++		FDT_SET_U32("video,crtc_hsync_end", 1430); //s->conn_state.mode.crtc_hsync_end);
++		FDT_SET_U32("video,crtc_vsync_end", 730); //s->conn_state.mode.crtc_vsync_end);
++		FDT_SET_U32("video,vrefresh", 60);
++			    //drm_mode_vrefresh(&s->conn_state.mode));
++		FDT_SET_U32("video,flags", 5); //10); //s->conn_state.mode.flags);
++		FDT_SET_U32("video,aspect_ratio", 2); //s->conn_state.mode.picture_aspect_ratio);
+ 		FDT_SET_U32("overscan,left_margin", s->conn_state.overscan.left_margin);
+ 		FDT_SET_U32("overscan,right_margin", s->conn_state.overscan.right_margin);
+ 		FDT_SET_U32("overscan,top_margin", s->conn_state.overscan.top_margin);
+-- 
+2.30.2
+

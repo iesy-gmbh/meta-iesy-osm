@@ -6,6 +6,7 @@ SRC_URI += " \
 	file://0009-arm64-dts-rockchip-px30-change-uart2-pinctrl.patch \
 	file://0010-arm64-dts-rockchip-px30-adopt-iesy-rpx30-eva-mi-changes-from-linux-kernel.patch \
 	file://0011-arm64-dts-rockchip-px30-change-pmic-reset-behavior.patch \
+	file://0012-drm-rockchip-change-default-video-resolution-to-1280x720.patch \
 	file://defconfig.cfg \
 	file://ddrbin_param.txt \
 "
