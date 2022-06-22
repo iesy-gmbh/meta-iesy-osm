@@ -25,6 +25,7 @@ SRC_URI += " \
 	file://0026-arm64-dts-iesy-add-definitions-for-user-leds.patch \
 	file://0027-drivers-gpu-drm-bridge-add-missing-support-for-Lontium-LT8912.patch \
 	file://0028-arm64-dts-iesy-use-gpio3_b0-as-chip-select-for-spi1.patch \
+	file://0029-arm64-dts-iesy-add-support-for-imx219-and-raspi-camera.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:

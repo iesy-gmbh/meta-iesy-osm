@@ -1,0 +1,222 @@
+From ffbe73a9673f62969462d08401fec2046e9075be Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Tue, 29 Mar 2022 14:29:49 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: add support for imx219 and raspi camera
+
+---
+ .../arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 157 +++++++++++++++++-
+ 1 file changed, 153 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index ba49c2b729c9..0aa79d4d910c 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -195,6 +195,18 @@
+ 		regulator-boot-on;
+ 	};
+ 
++	/* regulator for IMX219 camera */
++	vdd1v2_imx219: regulator@3 {
++		compatible = "regulator-fixed";
++		regulator-name = "cdd1v2_imx219";
++		regulator-min-microvolt = <1200000>;
++		regulator-max-microvolt = <1200000>;
++		gpio = <&gpio3 RK_PC7 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
+ 	leds {
+ 		compatible = "gpio-leds";
+ 
+@@ -861,7 +873,7 @@
+ };
+ 
+ &i2c2 {
+-	/* status = "okay"; */
++	status = "okay";
+ 
+ 	clock-frequency = <100000>;
+ 
+@@ -869,6 +881,7 @@
+ 	i2c-scl-falling-time-ns = <50>;
+ 	i2c-scl-rising-time-ns = <300>;
+ 
++	/*
+ 	ov5695: ov5695@36 {
+ 		compatible = "ovti,ov5695";
+ 		reg = <0x36>;
+@@ -879,7 +892,7 @@
+ 		dovdd-supply = <&vcc1v8_dvp>;
+ 		dvdd-supply = <&vdd1v5_dvp>;
+ 
+-		/*reset-gpios = <&gpio2 14 GPIO_ACTIVE_HIGH>;*/
++		/*reset-gpios = <&gpio2 14 GPIO_ACTIVE_HIGH>;
+ 		pwdn-gpios = <&gpio2 14 GPIO_ACTIVE_HIGH>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&cif_clkout_m0>;
+@@ -890,6 +903,142 @@
+ 			};
+ 		};
+ 	};
++	*/
++
++	imx219: sensor@10 {
++		status = "okay";
++		compatible = "sony,imx219";
++		reg = <0x10>;
++		/*clocks = <&cru SCLK_CIF_OUT>;*/
++		clocks = <&imx219_clk>;
++		clock-names = "xclk";
++
++		VANA-supply = <&vcc2v8_dvp>;
++		VDIG-supply = <&vcc1v8_dvp>;
++		VDDL-supply = <&vdd1v2_imx219>;
++
++    	rockchip,camera-module-index = <0>;
++		rockchip,camera-module-facing = "back";
++    	rockchip,camera-module-name = "A12N02A-202";
++    	rockchip,camera-module-lens-name = "LENS";
++
++		sensor_model ="imx219";
++
++		imx219_clk: camera-clk {
++			compatible = "fixed-clock";
++			#clock-cells = <0>;
++			clock-frequency = <24000000>;
++		};
++
++        mode0 { // IMX219_MODE_1920X1080
++        	mclk_khz = "24000";
++            mclk_multiplier = "25";
++            pix_clk_hz = "182400000";
++            //pix_clk_hz = "170000000";
++
++            num_lanes = "2";
++            tegra_sinterface = "serial_a";
++            discontinuous_clk = "yes";
++            cil_settletime = "0";
++            pixel_t = "bayer_rggb";
++            readout_orientation = "90";
++            inherent_gain = "1";
++
++            active_w = "1920";
++            active_h = "1080";
++
++            line_length = "3448";
++            dpcm_enable = "false";
++
++            min_gain_val = "1.0";
++            max_gain_val = "16";
++            min_hdr_ratio = "1";
++            max_hdr_ratio = "64";
++            min_framerate = "1";
++            max_framerate = "30";
++            //min_exp_time = "33";
++            min_exp_time = "11";
++            max_exp_time = "683709";
++            embedded_metadata_height = "0";
++        };
++
++        mode1 { // IMX219_MODE_1280X720
++            mclk_khz = "24000";
++            mclk_multiplier = "25";
++            pix_clk_hz = "182400000";
++            //pix_clk_hz = "170000000";
++
++            num_lanes = "2";
++            tegra_sinterface = "serial_a";
++            discontinuous_clk = "yes";
++            cil_settletime = "0";
++            pixel_t = "bayer_rggb";
++            readout_orientation = "90";
++            inherent_gain = "1";
++
++            active_w = "1280";
++            active_h = "720";
++
++            line_length = "3448";
++            dpcm_enable = "false";
++            //line_length = "1752";
++
++            min_gain_val = "1";
++            max_gain_val = "16";
++            min_hdr_ratio = "1";
++            max_hdr_ratio = "64";
++            min_framerate = "1";
++            max_framerate = "60";
++            //min_exp_time = "16";
++            min_exp_time = "11";
++            max_exp_time = "683710";
++            embedded_metadata_height = "0";
++        };
++
++        mode2 { // IMX219_MODE_640X480
++            //mclk_khz = "47000";
++            mclk_khz = "24000";
++            mclk_multiplier = "25.0";
++            pix_clk_hz = "182400000";
++            //pix_clk_hz = "170000000";
++
++            num_lanes = "2";
++            tegra_sinterface = "serial_a";
++            discontinuous_clk = "yes";
++            cil_settletime = "0";
++            pixel_t = "bayer_rggb";
++            readout_orientation = "90";
++            inherent_gain = "1";
++
++            active_w = "640";
++            active_h = "480";
++
++            //line_length = "3448";
++            line_length = "3559";
++            dpcm_enable = "false";
++
++            min_gain_val = "1";
++            max_gain_val = "16";
++            min_hdr_ratio = "1";
++            max_hdr_ratio = "64";
++            min_framerate = "1";
++            max_framerate = "90";
++            min_exp_time = "11";
++          max_exp_time = "358731";
++            embedded_metadata_height = "0";
++        };
++
++		port {
++			imx219_0: endpoint {
++				remote-endpoint = <&mipi_in_ucam>;
++				clock-lanes = <0>;
++				data-lanes = <1 2>;
++				clock-noncontinuous;
++				link-frequencies = /bits/ 64 <456000000>;
++			};
++		};
++	};
++
+ };
+ 
+ &io_domains {
+@@ -910,7 +1059,7 @@
+ };
+ 
+ &mipi_dphy_rx0 {
+-	/* status = "okay"; */
++	status = "okay";
+ 
+ 	ports {
+ 		#address-cells = <1>;
+@@ -923,7 +1072,7 @@
+ 
+ 			mipi_in_ucam: endpoint@1 {
+ 				reg = <1>;
+-				remote-endpoint = <&ucam_out>;
++				remote-endpoint = <&imx219_0>;
+ 				data-lanes = <1 2>;
+ 			};
+ 		};
+-- 
+2.30.2
+
