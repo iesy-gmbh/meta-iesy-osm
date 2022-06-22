@@ -1,0 +1,33 @@
+From a5edf8ce33f77726350845b5845c67f0f98c11d2 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Mon, 13 Jun 2022 15:30:46 +0200
+Subject: [PATCH 2/2] drivers: gpu: drm: integrate rockchip patch against
+ display corruption
+
+---
+ drivers/gpu/drm/rockchip/rockchip_vop_reg.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/gpu/drm/rockchip/rockchip_vop_reg.c b/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
+index 7c02fa511b43..3ba5cc9bd06d 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
++++ b/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
+@@ -1352,6 +1352,7 @@ static const struct vop_win_phy rk3366_lit_win0_data = {
+ 	.global_alpha_val = VOP_REG(RK3366_LIT_WIN0_ALPHA_CTRL, 0xff, 4),
+ 	.key_color = VOP_REG(RK3366_LIT_WIN0_COLOR_KEY, 0xffffff, 0),
+ 	.key_en = VOP_REG(RK3366_LIT_WIN0_COLOR_KEY, 0x1, 24),
++	.channel = VOP_REG(RK3366_LIT_WIN0_CTRL0, 0xff, 12),
+ };
+ 
+ static const struct vop_win_phy rk3366_lit_win1_data = {
+@@ -1372,6 +1373,7 @@ static const struct vop_win_phy rk3366_lit_win1_data = {
+ 	.global_alpha_val = VOP_REG(RK3366_LIT_WIN1_ALPHA_CTRL, 0xff, 4),
+ 	.key_color = VOP_REG(RK3366_LIT_WIN1_COLOR_KEY, 0xffffff, 0),
+ 	.key_en = VOP_REG(RK3366_LIT_WIN1_COLOR_KEY, 0x1, 24),
++	.channel = VOP_REG(RK3366_LIT_WIN1_CTRL1, 0xf, 8),
+ };
+ 
+ static const struct vop_win_data rk3366_vop_lit_win_data[] = {
+-- 
+2.30.2
+

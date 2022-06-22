@@ -31,6 +31,7 @@ SRC_URI += " \
 	file://0032-drivers-gpu-drm-lt8912-i2c-only-driver-plus-simple-panel.patch \
 	file://0033-arm64-dts-iesy-add-definitions-for-user-buttons.patch \
 	file://0034-arm64-dts-iesy-set-default-display-resolution-1920x1080.patch \
+	file://0035-drivers-gpu-drm-integrate-rockchip-display-corruption-workaround.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:
