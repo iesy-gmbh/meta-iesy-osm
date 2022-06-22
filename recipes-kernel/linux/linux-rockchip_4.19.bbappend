@@ -27,6 +27,7 @@ SRC_URI += " \
 	file://0028-arm64-dts-iesy-use-gpio3_b0-as-chip-select-for-spi1.patch \
 	file://0029-arm64-dts-iesy-add-support-for-imx219-and-raspi-camera.patch \
 	file://0030-arm64-dts-iesy-remove-all-devices-not-available-on-cm006-and-bb138.patch \
+	file://0031-arm64-dts-iesy-show-heartbeat-on-ld4.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:
