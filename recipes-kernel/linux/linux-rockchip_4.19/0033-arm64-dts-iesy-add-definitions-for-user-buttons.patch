@@ -1,0 +1,78 @@
+From 00237aa7c7bcd8797cc555e8ab704f12a8b7ad5e Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Thu, 9 Jun 2022 10:49:19 +0200
+Subject: [PATCH 1/1] arm64_ dts: iesy: add definitions for user buttons
+
+---
+ .../arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 41 +++++++++++++++++++
+ 1 file changed, 41 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 31d650063766..23d788114c1c 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -105,6 +105,28 @@
+ 			default-state = "off";
+ 		};
+ 	};
++
++	user-buttons {
++        compatible = "gpio-keys";
++    	#address-cells = <1>;
++        #size-cells = <0>;
++		autorepeat;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_buttons>;
++
++        user-button-1 {
++            label = "User Button 1";
++            gpios = <&gpio3 RK_PD1 GPIO_ACTIVE_LOW>;
++            linux,code = <KEY_X>;
++        };
++
++        user-button-2 {
++            label = "User Button 2";
++            gpios = <&gpio3 RK_PD0 GPIO_ACTIVE_LOW>;
++            linux,code = <KEY_Z>;
++        };
++	};
+ };
+ 
+ &display_subsystem {
+@@ -911,6 +933,18 @@
+ 	};
+ };
+ 
++/* 
++   Inserted to avoid error messages
++   "Looking up ...-supply property in node /power-management@ff000000/power-controller failed"
++   @MAS: Are the specified power domains correct?
++*/
++&power {
++	pd_vi-supply = <&vdd_logic>;
++	pd_vpu-supply = <&vdd_logic>;
++	pd_gpu-supply = <&vdd_logic>;
++	pd_usb-supply = <&vdd_logic>;
++};
++
+ &pinctrl {
+ 	headphone {
+ 		hp_det: hp-det {
+@@ -961,6 +995,13 @@
+ 							 1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
++
++	gpiokeys {
++		pinctrl_buttons: buttongrp {
++			rockchip,pins = <3 RK_PD0 RK_FUNC_GPIO &pcfg_pull_up
++							 3 RK_PD1 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
+ };
+ 
+ /* DON'T PUT ANYTHING BELOW HERE.  PUT IT ABOVE PINCTRL */
+-- 
+2.30.2
+
