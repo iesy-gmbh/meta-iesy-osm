@@ -1,0 +1,2138 @@
+From a0aed8fbbd5980fdc190e619d929849f580eaaa3 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Thu, 9 Jun 2022 10:00:44 +0200
+Subject: [PATCH 1/1] drivers: gpu: drm: lt8912 i2c-only driver plus simple
+ panel
+
+integrate lt8912 as i2c- only device that behaves like a simple panel; do not use bridge driver which does not work on 4.19 kernel;
+---
+ .../arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts |  351 +---
+ drivers/gpu/drm/bridge/lt8912.c               | 1541 +++++++++++++----
+ 2 files changed, 1282 insertions(+), 610 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index fec4d523e887..31d650063766 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -26,45 +26,6 @@
+ 		status = "okay";
+ 	};
+ 
+-	backlight: backlight {
+-		compatible = "pwm-backlight";
+-		pwms = <&pwm1 0 25000 0>;
+-		brightness-levels = <
+-			  0   1   2   3   4   5   6   7
+-			  8   9  10  11  12  13  14  15
+-			 16  17  18  19  20  21  22  23
+-			 24  25  26  27  28  29  30  31
+-			 32  33  34  35  36  37  38  39
+-			 40  41  42  43  44  45  46  47
+-			 48  49  50  51  52  53  54  55
+-			 56  57  58  59  60  61  62  63
+-			 64  65  66  67  68  69  70  71
+-			 72  73  74  75  76  77  78  79
+-			 80  81  82  83  84  85  86  87
+-			 88  89  90  91  92  93  94  95
+-			 96  97  98  99 100 101 102 103
+-			104 105 106 107 108 109 110 111
+-			112 113 114 115 116 117 118 119
+-			120 121 122 123 124 125 126 127
+-			128 129 130 131 132 133 134 135
+-			136 137 138 139 140 141 142 143
+-			144 145 146 147 148 149 150 151
+-			152 153 154 155 156 157 158 159
+-			160 161 162 163 164 165 166 167
+-			168 169 170 171 172 173 174 175
+-			176 177 178 179 180 181 182 183
+-			184 185 186 187 188 189 190 191
+-			192 193 194 195 196 197 198 199
+-			200 201 202 203 204 205 206 207
+-			208 209 210 211 212 213 214 215
+-			216 217 218 219 220 221 222 223
+-			224 225 226 227 228 229 230 231
+-			232 233 234 235 236 237 238 239
+-			240 241 242 243 244 245 246 247
+-			248 249 250 251 252 253 254 255>;
+-		default-brightness-level = <200>;
+-	};
+-
+ 	charge-animation {
+ 		compatible = "rockchip,uboot-charge";
+ 		rockchip,uboot-charge-on = <0>;
+@@ -147,259 +108,45 @@
+ };
+ 
+ &display_subsystem {
+-	/* status = "okay"; */
++	status = "okay";
+ };
+ 
+ &dsi {
+-	/* status = "okay"; */
++	status = "okay";
++	rockchip,lane-rate = <891>;
+ 
+ 	panel@0 {
+-		compatible = "sitronix,st7703", "simple-panel-dsi";
++		compatible = "sitronix,st7703","simple-panel-dsi";
+ 		reg = <0>;
+ 		power-supply = <&vcc3v3_lcd>;
+-		backlight = <&backlight>;
+-		prepare-delay-ms = <0>;
+-		reset-delay-ms = <0>;
+-		init-delay-ms = <80>;
+-		enable-delay-ms = <0>;
+-		disable-delay-ms = <10>;
+-		unprepare-delay-ms = <60>;
++		prepare-delay-ms = <2>;
++		reset-delay-ms = <1>;
++		init-delay-ms = <20>;
++		enable-delay-ms = <120>;
++		disable-delay-ms = <50>;
++		unprepare-delay-ms = <20>;
+ 
+ 		width-mm = <68>;
+ 		height-mm = <121>;
+ 
+ 		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST |
+-			      MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_EOT_PACKET)>;
++					  MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_EOT_PACKET)>;
+ 		dsi,format = <MIPI_DSI_FMT_RGB888>;
+-		dsi,lanes = <4>;
+-
+-		panel-init-sequence = [
+-			39 00 04 ff 98 81 03
+-			15 00 02 01 00
+-			15 00 02 02 00
+-			15 00 02 03 53
+-			15 00 02 04 53
+-			15 00 02 05 13
+-			15 00 02 06 04
+-			15 00 02 07 02
+-			15 00 02 08 02
+-			15 00 02 09 00
+-			15 00 02 0a 00
+-			15 00 02 0b 00
+-			15 00 02 0c 00
+-			15 00 02 0d 00
+-			15 00 02 0e 00
+-			15 00 02 0f 00
+-
+-			15 00 02 10 00
+-			15 00 02 11 00
+-			15 00 02 12 00
+-			15 00 02 13 00
+-			15 00 02 14 00
+-			15 00 02 15 08
+-			15 00 02 16 10
+-			15 00 02 17 00
+-			15 00 02 18 08
+-			15 00 02 19 00
+-			15 00 02 1a 00
+-			15 00 02 1b 00
+-			15 00 02 1c 00
+-			15 00 02 1d 00
+-			15 00 02 1e c0
+-			15 00 02 1f 80
+-
+-			15 00 02 20 02
+-			15 00 02 21 09
+-			15 00 02 22 00
+-			15 00 02 23 00
+-			15 00 02 24 00
+-			15 00 02 25 00
+-			15 00 02 26 00
+-			15 00 02 27 00
+-			15 00 02 28 55
+-			15 00 02 29 03
+-			15 00 02 2a 00
+-			15 00 02 2b 00
+-			15 00 02 2c 00
+-			15 00 02 2d 00
+-			15 00 02 2e 00
+-			15 00 02 2f 00
+-
+-			15 00 02 30 00
+-			15 00 02 31 00
+-			15 00 02 32 00
+-			15 00 02 33 00
+-			15 00 02 34 04
+-			15 00 02 35 05
+-			15 00 02 36 05
+-			15 00 02 37 00
+-			15 00 02 38 3c
+-			15 00 02 39 35
+-			15 00 02 3a 00
+-			15 00 02 3b 40
+-			15 00 02 3c 00
+-			15 00 02 3d 00
+-			15 00 02 3e 00
+-			15 00 02 3f 00
+-
+-			15 00 02 40 00
+-			15 00 02 41 88
+-			15 00 02 42 00
+-			15 00 02 43 00
+-			15 00 02 44 1f
+-
+-			15 00 02 50 01
+-			15 00 02 51 23
+-			15 00 02 52 45
+-			15 00 02 53 67
+-			15 00 02 54 89
+-			15 00 02 55 ab
+-			15 00 02 56 01
+-			15 00 02 57 23
+-			15 00 02 58 45
+-			15 00 02 59 67
+-			15 00 02 5a 89
+-			15 00 02 5b ab
+-			15 00 02 5c cd
+-			15 00 02 5d ef
+-			15 00 02 5e 03
+-			15 00 02 5f 14
+-
+-			15 00 02 60 15
+-			15 00 02 61 0c
+-			15 00 02 62 0d
+-			15 00 02 63 0e
+-			15 00 02 64 0f
+-			15 00 02 65 10
+-			15 00 02 66 11
+-			15 00 02 67 08
+-			15 00 02 68 02
+-			15 00 02 69 0a
+-			15 00 02 6a 02
+-			15 00 02 6b 02
+-			15 00 02 6c 02
+-			15 00 02 6d 02
+-			15 00 02 6e 02
+-			15 00 02 6f 02
+-
+-			15 00 02 70 02
+-			15 00 02 71 02
+-			15 00 02 72 06
+-			15 00 02 73 02
+-			15 00 02 74 02
+-			15 00 02 75 14
+-			15 00 02 76 15
+-			15 00 02 77 0f
+-			15 00 02 78 0e
+-			15 00 02 79 0d
+-			15 00 02 7a 0c
+-			15 00 02 7b 11
+-			15 00 02 7c 10
+-			15 00 02 7d 06
+-			15 00 02 7e 02
+-			15 00 02 7f 0a
+-
+-			15 00 02 80 02
+-			15 00 02 81 02
+-			15 00 02 82 02
+-			15 00 02 83 02
+-			15 00 02 84 02
+-			15 00 02 85 02
+-			15 00 02 86 02
+-			15 00 02 87 02
+-			15 00 02 88 08
+-			15 00 02 89 02
+-			15 00 02 8a 02
+-
+-			39 00 04 ff 98 81 04
+-			15 00 02 00 80
+-			15 00 02 70 00
+-			15 00 02 71 00
+-			15 00 02 66 fe
+-			15 00 02 82 15
+-			15 00 02 84 15
+-			15 00 02 85 15
+-			15 00 02 3a 24
+-			15 00 02 32 ac
+-			15 00 02 8c 80
+-			15 00 02 3c f5
+-			15 00 02 88 33
+-
+-			39 00 04 ff 98 81 01
+-			15 00 02 22 0a
+-			15 00 02 31 00
+-			15 00 02 53 78
+-			15 00 02 50 5b
+-			15 00 02 51 5b
+-			15 00 02 60 20
+-			15 00 02 61 00
+-			15 00 02 62 0d
+-			15 00 02 63 00
+-
+-			15 00 02 a0 00
+-			15 00 02 a1 10
+-			15 00 02 a2 1c
+-			15 00 02 a3 13
+-			15 00 02 a4 15
+-			15 00 02 a5 26
+-			15 00 02 a6 1a
+-			15 00 02 a7 1d
+-			15 00 02 a8 67
+-			15 00 02 a9 1c
+-			15 00 02 aa 29
+-			15 00 02 ab 5b
+-			15 00 02 ac 26
+-			15 00 02 ad 28
+-			15 00 02 ae 5c
+-			15 00 02 af 30
+-			15 00 02 b0 31
+-			15 00 02 b1 2e
+-			15 00 02 b2 32
+-			15 00 02 b3 00
+-
+-			15 00 02 c0 00
+-			15 00 02 c1 10
+-			15 00 02 c2 1c
+-			15 00 02 c3 13
+-			15 00 02 c4 15
+-			15 00 02 c5 26
+-			15 00 02 c6 1a
+-			15 00 02 c7 1d
+-			15 00 02 c8 67
+-			15 00 02 c9 1c
+-			15 00 02 ca 29
+-			15 00 02 cb 5b
+-			15 00 02 cc 26
+-			15 00 02 cd 28
+-			15 00 02 ce 5c
+-			15 00 02 cf 30
+-			15 00 02 d0 31
+-			15 00 02 d1 2e
+-			15 00 02 d2 32
+-			15 00 02 d3 00
+-			39 00 04 ff 98 81 00
+-			05 00 01 11
+-			05 01 01 29
+-		];
+-
+-		panel-exit-sequence = [
+-			05 00 01 28
+-			05 00 01 10
+-		];
++		dsi,lanes = <2>;
+ 
+ 		display-timings {
+ 			native-mode = <&timing1>;
+ 
+ 			timing1: timing1 {
+-				clock-frequency = <64000000>;
+-				hactive = <720>;
+-				vactive = <1280>;
+-				hfront-porch = <40>;
+-				hsync-len = <10>;
+-				hback-porch = <40>;
+-				vfront-porch = <22>;
+-				vsync-len = <4>;
+-				vback-porch = <11>;
++				clock-frequency = <74250000>;
++				hactive = <1280>;
++				vactive = <720>;
++				hfront-porch = <110>;
++				hsync-len = <40>;
++				hback-porch = <220>;
++				vfront-porch = <5>;
++				vsync-len = <5>;
++				vback-porch = <20>;
+ 				hsync-active = <0>;
+ 				vsync-active = <0>;
+ 				de-active = <0>;
+@@ -442,11 +189,6 @@
+ 	status = "disabled";
+ };
+ 
+-&route_dsi {
+-	connect = <&vopb_out_dsi>;
+-	status = "okay";
+-};
+-
+ /* what's this? */
+ &bus_apll {
+ 	bus-supply = <&vdd_logic>;
+@@ -766,6 +508,37 @@
+ 
+ &i2c1 {
+ 	status = "okay";
++
++	lt8912@48 {
++        compatible = "lontium,lt8912";
++        reg = <0x48>;
++        ddc-i2c-bus = <&i2c1>;
++		hpd-gpios = <&gpio1 RK_PC4 GPIO_ACTIVE_HIGH>;
++		reset-gpios = <&gpio1 RK_PC5 GPIO_ACTIVE_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_lt8912>;
++		status = "okay";
++		//swap-mipi-pn = <1>;
++
++		display-timings {
++			native-mode = <&timing0>;
++			timing0: timing0 {
++				clock-frequency = <74250000>;
++				hactive = <1280>;
++				vactive = <720>;
++				hfront-porch = <110>;
++				hsync-len = <40>;
++				hback-porch = <220>;
++				vfront-porch = <5>;
++				vsync-len = <5>;
++				vback-porch = <20>;
++				hsync-active = <0>;
++				vsync-active = <0>;
++				de-active = <0>;
++				pixelclk-active = <0>;
++			};
++		};
++    };
+ };
+ 
+ &i2c2 {
+@@ -924,6 +697,7 @@
+ 	vccio6-supply = <&vcc1v8_soc>;
+ 	pmuio1-supply = <&vcc3v0_pmu>;
+ 	pmuio2-supply = <&vcc1v8_soc>;
++	//vccio-oscgpi-supply = <???>;
+ };
+ 
+ &isp_mmu {
+@@ -1089,11 +863,11 @@
+ };
+ 
+ &vopl {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &vopl_mmu {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &mpp_srv {
+@@ -1172,6 +946,21 @@
+ 							 3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
++
++	i2c1 {
++		i2c1_xfer: i2c1-xfer {
++			rockchip,pins =
++				<0 RK_PC2 1 &pcfg_pull_none_8ma>,
++				<0 RK_PC3 1 &pcfg_pull_none_8ma>;
++			};
++		};
++
++	lt8912 {
++		pinctrl_lt8912: pinctrl-lt8912 {
++			rockchip,pins = <1 RK_PC4 RK_FUNC_GPIO &pcfg_pull_none
++							 1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
+ };
+ 
+ /* DON'T PUT ANYTHING BELOW HERE.  PUT IT ABOVE PINCTRL */
+diff --git a/drivers/gpu/drm/bridge/lt8912.c b/drivers/gpu/drm/bridge/lt8912.c
+index db33c8181f5e..dc93475afc51 100644
+--- a/drivers/gpu/drm/bridge/lt8912.c
++++ b/drivers/gpu/drm/bridge/lt8912.c
+@@ -1,352 +1,1209 @@
+-// SPDX-License-Identifier: GPL-2.0
+-/*
+- * Copyright (c) 2018 Rockchip Electronics Co. Ltd.
++/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details. *
+  */
+ 
+-#include <linux/kernel.h>
+-#include <linux/delay.h>
+-#include <linux/gpio.h>
+-#include <linux/gpio/consumer.h>
+-#include <linux/i2c.h>
+-#include <linux/module.h>
+-#include <linux/of.h>
+-#include <linux/of_irq.h>
+-#include <linux/of_graph.h>
++#define DEBUG
++
++#include <linux/types.h>
++# include <linux/kernel.h>
++# include <linux/module.h>
++# include <linux/init.h>
++# include <linux/device.h>
++# include <linux/platform_device.h>
++# include <linux/fs.h>
++# include <linux/delay.h>
++# include <linux/i2c.h>
++# include <linux/gpio.h>
++# include <linux/interrupt.h>
++# include <linux/of_gpio.h>
++# include <linux/of_irq.h>
++# include <linux/pm.h>
++# include <linux/pm_runtime.h>
++# include <linux/regulator/consumer.h>
+ #include <linux/regmap.h>
+-#include <video/of_display_timing.h>
++#include <linux/of_platform.h>
++#include <linux/kobject.h>
++
++
++#define STRING_OFF         "off"
++#define STRING_ON          "on"
++
++#ifdef notdef
++#define single_port_mipi  1
++#define dual_port_mipi    2
++
++//Do not support 3lane
++#define lane_cnt_1   1
++#define lane_cnt_2   2  
++#define lane_cnt_4   0
++
++#define audio_i2s     0
++#define audio_spdif   1
++
++#define lt9611_dsi           0
++#define lt9611_csi           1
+ 
+-#include <drm/drmP.h>
+-#include <drm/drm_of.h>
+-#include <drm/drm_atomic.h>
+-#include <drm/drm_crtc_helper.h>
+-#include <drm/drm_atomic_helper.h>
+-#include <drm/drm_panel.h>
+-#include <drm/drm_mipi_dsi.h>
++#define Non_Burst_Mode_with_Sync_Events 0x00
++#define Non_Burst_Mode_with_Sync_Pulses 0x01
++#define Burst_Mode                      0x02
++
++#define ac_mode     0
++#define dc_mode     1
++
++#define hdcp_diable 0
++#define hdcp_enable 1
++
++
++#define  Output_RGB888           0
++#define	Output_YCbCr444          1
++#define	Output_YCbCr422_16BIT    2
++#define	Output_YCbCr422_20BIT    3
++#define	Output_YCbCr422_24BIT    4
++#endif
++
++#define Video_Output_Mode  Output_RGB888
++
++enum video_format
++{
++ video_640x480_60Hz_vic1,       //vic 1
++ video_720x480_60Hz_vic3,       //vic 2
++ video_1280x720_60Hz_vic4,      //vic 3
++ video_1920x1080_60Hz_vic16,    //vic 4
++ 
++ video_1920x1080i_60Hz_169=5,  //vic 5
++ video_720x480i_60Hz_43=6,     //vic 6
++ video_720x480i_60Hz_169=7,    //vic 7
++ video_720x240P_60Hz_43=8,     //vic 8
++ video_720x240P_60Hz_169=9,    //vic 9
++ video_1920x1080_30Hz_vic, 
++ video_1280x720_30Hz_vic,
++ 
++ video_3840x2160_30Hz_vic,
++ video_3840x1080_60Hz_vic,
++ video_1024x600_60Hz_vic,
++ video_none
++};
++
++struct video_timing {
++	int hfp;
++	int hs;
++	int	hbp;
++	int hact;
++	int htotal;
++	int vfp;
++	int vs;
++	int vbp;
++	int vact;
++	int vtotal;
++	int pclk_khz;
++	int hs_positive;
++	int vs_positive;
++};
++
++struct lontium_ic_mode {
++int mipi_port_cnt; //1 or 2
++int mipi_lane_cnt; //1 or 2 or 4
++bool mipi_mode;   //dsi or csi
++int video_mode;    //Non-Burst Mode with Sync Pulses; Non-Burst Mode with Sync Events
++bool audio_out;   //i2s or spdif
++bool hdmi_coupling_mode;//ac_mode or dc_mode
++bool hdcp_encryption; //hdcp_enable or hdcp_diable
++};
++
++
++/*
++struct lontium_ic_mode lt9611_mode= {
++dual_port_mipi, //mipi_port_cnt; //single_port_mipi or dual_port_mipi
++//dual_port_mipi, //mipi_port_cnt; //single_port_mipi or dual_port_mipi
++lane_cnt_4,       //mipi_lane_cnt; //1 or 2 or 4
++lt9611_dsi,              //mipi_mode;     //lt9611_dsi or lt9611_csi
++Non_Burst_Mode_with_Sync_Events,
++audio_i2s,       //audio_out      //audio_i2s or audio_spdif
++//dc_mode,       //hdmi_coupling_mode;//ac_mode or dc_mode
++ac_mode,         //hdmi_coupling_mode;//ac_mode or dc_mode
++hdcp_enable      //hdcp_encryption //hdcp_enable or hdcp_diable
++};
++*/
++											//  hfp, hs, hbp, hact,htotal,vfp, vs, vbp, vact,vtotal, pclk_khz, hs_pos, vs_pos
++struct video_timing video_640x480_60Hz		= {   8, 96,  40,  640,   800, 33,  2,  10,  480,   525,  25000,        0,      0 };
++struct video_timing video_720x480_60Hz		= {  16, 62,  60,  720,   858,  9,  6,  30,  480,   525,  27000,        0,      0 };
++struct video_timing video_1280x720_60Hz		= { 110, 40, 220, 1280,  1650,  5,  5,  20,  720,   750,  49500,        1,      1 };
++struct video_timing video_1280x720_30Hz		= { 110, 40, 220, 1280,  1650,  5,  5,  20,  720,   750,  37125,        1,      1 };
++struct video_timing video_1920x1080_30Hz	= {  88, 44, 148, 1920,  2200,  4,  5,  36, 1080,  1125,  74250,        1,      1 };
++struct video_timing video_1920x1080_60Hz	= {  88, 44, 148, 1920,  2200,  4,  5,  36, 1080,  1125, 148500,        1,      1 };
++struct video_timing video_3840x1080_60Hz	= { 176, 88, 296, 3840,  4400,  4,  5,  36, 1080,  1125, 297000,        1,      1 };
++struct video_timing video_3840x2160_30Hz	= { 176, 88, 296, 3840,  4400,  8, 10,  72, 2160,  2250, 297000,        1,      1 };
++struct video_timing video_1024x600_60Hz		= {  60, 60, 100, 1024,  1154,  2,  5,  10,  600,   617,  34000,        1,      1 };
++
++struct video_timing *video;
++
++enum {
++	LT8912_AUDIO_NONE,
++	LT8912_AUDIO_SPDIF,
++	LT8912_AUDIO_I2S
++};
+ 
+ struct lt8912 {
+-	struct drm_bridge bridge;
+-	struct drm_connector connector;
+-	struct drm_display_mode mode;
+-	struct device *dev;
+-	struct mipi_dsi_device *dsi;
+-	struct regmap *regmap[3];
+ 	struct gpio_desc *reset_n;
++    struct regmap *regmap[3];
++	struct video_timing *video;
++	int mipi_lane_cnt;
++	bool is_dual;
++	bool audio_status;
++	int  hfp;
++	int hs_width;
++	int hbp;
++	int h_act;
++	int h_tal;
++	int vfp;
++	int vs_width;
++	int vbp;
++	int v_act;
++	int v_tal;
++	int mipi_video_format;
++	enum video_format video_format;
++	int hdmi_vic;
++	int hdmi_y;    //0x00:RGB, 0x01:YCbCr422 0x02:YCbCr 444
++    u8 sink_edid[256];
++	u8 audio_mode;					/* selected audio mode - valid only for HDMI output */
+ };
+ 
+-static inline struct lt8912 *bridge_to_lt8912(struct drm_bridge *b)
++
++static void lt8912_dds_config(struct lt8912 *lt)
+ {
+-	return container_of(b, struct lt8912, bridge);
++	pr_debug("lt8912_dds_config() called\n");
++
++	/* DDSConfig */
++	regmap_write(lt->regmap[1], 0x4e, 0x6a); // RGD_MIPIRX_STRM_SW_FREQ_ WORD[7:0]
++	regmap_write(lt->regmap[1], 0x4f, 0xad); // RGD_MIPIRX_STRM_SW_FREQ_ WORD[15:8]
++	regmap_write(lt->regmap[1], 0x50, 0xf3); // RGD_MIPIRX_STRM_SW_FREQ_ WORD[23:16]
++	regmap_write(lt->regmap[1], 0x51, 0x80); // Bit 0: RGD_MIPIRX_STRM_SW_FREQ_ WORD[24]
++											 // Bit 6: RGD_MIPIRX_STRM_ERR_CLR 
++											 // Bit 7: RGD_MIPIRX_STRM_SW_FREQ_ WORD_EN
++
++	regmap_write(lt->regmap[1], 0x1f, 0x5e);
++	regmap_write(lt->regmap[1], 0x20, 0x01);
++	regmap_write(lt->regmap[1], 0x21, 0x2c);
++	regmap_write(lt->regmap[1], 0x22, 0x01);
++	regmap_write(lt->regmap[1], 0x23, 0xfa);
++	regmap_write(lt->regmap[1], 0x24, 0x00);
++	regmap_write(lt->regmap[1], 0x25, 0xc8);
++	regmap_write(lt->regmap[1], 0x26, 0x00);
++	regmap_write(lt->regmap[1], 0x27, 0x5e);
++	regmap_write(lt->regmap[1], 0x28, 0x01);
++	regmap_write(lt->regmap[1], 0x29, 0x2c);
++	regmap_write(lt->regmap[1], 0x2a, 0x01);
++	regmap_write(lt->regmap[1], 0x2b, 0xfa);
++	regmap_write(lt->regmap[1], 0x2c, 0x00);
++	regmap_write(lt->regmap[1], 0x2d, 0xc8);
++	regmap_write(lt->regmap[1], 0x2e, 0x00);
++	regmap_write(lt->regmap[1], 0x42, 0x64);
++	regmap_write(lt->regmap[1], 0x43, 0x00);
++	regmap_write(lt->regmap[1], 0x44, 0x04);
++	regmap_write(lt->regmap[1], 0x45, 0x00);
++	regmap_write(lt->regmap[1], 0x46, 0x59);
++	regmap_write(lt->regmap[1], 0x47, 0x00);
++	regmap_write(lt->regmap[1], 0x48, 0xf2);
++	regmap_write(lt->regmap[1], 0x49, 0x06);
++	regmap_write(lt->regmap[1], 0x4a, 0x00);
++	regmap_write(lt->regmap[1], 0x4b, 0x72);
++	regmap_write(lt->regmap[1], 0x4c, 0x45);
++	regmap_write(lt->regmap[1], 0x4d, 0x00);
++	regmap_write(lt->regmap[1], 0x52, 0x08);
++	regmap_write(lt->regmap[1], 0x53, 0x00);
++	regmap_write(lt->regmap[1], 0x54, 0xb2);
++	regmap_write(lt->regmap[1], 0x55, 0x00);
++	regmap_write(lt->regmap[1], 0x56, 0xe4);
++	regmap_write(lt->regmap[1], 0x57, 0x0d);
++	regmap_write(lt->regmap[1], 0x58, 0x00);
++	regmap_write(lt->regmap[1], 0x59, 0xe4);
++	regmap_write(lt->regmap[1], 0x5a, 0x8a);
++	regmap_write(lt->regmap[1], 0x5b, 0x00);
++	regmap_write(lt->regmap[1], 0x5c, 0x34);
++	regmap_write(lt->regmap[1], 0x1e, 0x4f);
++	regmap_write(lt->regmap[1], 0x51, 0x00);
+ }
+ 
+-static inline struct lt8912 *connector_to_lt8912(struct drm_connector *c)
++static void lt8912_audio_config(struct lt8912 *lt)
+ {
+-	return container_of(c, struct lt8912, connector);
++	pr_debug("lt8912_audio_config() called\n");
++
++	//regmap_write(lt->regmap[0], 0xb2, lt->sink_is_hdmi);	// 0x01:HDMI; 0x00: DVI
++	regmap_write(lt->regmap[0], 0xb2, 0x01);
++
++	lt->audio_mode = LT8912_AUDIO_NONE;
++
++	switch(lt->audio_mode) {
++		case LT8912_AUDIO_NONE:
++			regmap_write(lt->regmap[2], 0x06, 0x00);
++			regmap_write(lt->regmap[2], 0x07, 0x00);
++			regmap_write(lt->regmap[2], 0x34, 0xd2);
++			regmap_write(lt->regmap[2], 0x3c, 0x41);
++			break;
++		case LT8912_AUDIO_SPDIF:
++			regmap_write(lt->regmap[2], 0x06, 0x0e);
++			regmap_write(lt->regmap[2], 0x07, 0x00);
++			regmap_write(lt->regmap[2], 0x34, 0xD2);
++			break;
++		case LT8912_AUDIO_I2S:
++			regmap_write(lt->regmap[2], 0x08, 0x00);
++			regmap_write(lt->regmap[2], 0x07, 0xf0);
++			regmap_write(lt->regmap[2], 0x0f, 0x28); // Audio 16bit, 48K
++			regmap_write(lt->regmap[2], 0x34, 0xe2); // sclk = 64fs, 0xd2; sclk = 32fs, 0xe2.
++			break;
++	}
++
+ }
+ 
+-/* LT8912 MIPI to HDMI & LVDS REG setting - 20180115.txt */
+-static void lt8912_init(struct lt8912 *lt8912)
++static void lt8912_mipi_config(struct lt8912 *lt)
+ {
+-	u8 lanes = lt8912->dsi->lanes;
+-	const struct drm_display_mode *mode = &lt8912->mode;
++	//const struct drm_display_mode *mode = &lt->mode;
++	struct video_timing *video = &video_1280x720_60Hz;
++
+ 	u32 hactive, hfp, hsync, hbp, vfp, vsync, vbp, htotal, vtotal;
+-	unsigned int version[2];
++	unsigned int hsync_activehigh, vsync_activehigh, reg;
+ 
+-	/* TODO: lvds output init */
++	pr_debug("lt8912_mipi_config() called\n");
+ 
++	/*
+ 	hactive = mode->hdisplay;
+ 	hfp = mode->hsync_start - mode->hdisplay;
+ 	hsync = mode->hsync_end - mode->hsync_start;
++	hsync_activehigh = !!(mode->flags & DRM_MODE_FLAG_PHSYNC);
+ 	hbp = mode->htotal - mode->hsync_end;
+ 	vfp = mode->vsync_start - mode->vdisplay;
+ 	vsync = mode->vsync_end - mode->vsync_start;
++	vsync_activehigh = !!(mode->flags & DRM_MODE_FLAG_PVSYNC);
+ 	vbp = mode->vtotal - mode->vsync_end;
+ 	htotal = mode->htotal;
+ 	vtotal = mode->vtotal;
+-
+-	regmap_read(lt8912->regmap[0], 0x00, &version[0]);
+-	regmap_read(lt8912->regmap[0], 0x01, &version[1]);
+-
+-	dev_info(lt8912->dev, "LT8912 ID: %02x, %02x\n",
+-		 version[0], version[1]);
+-
+-	/* DigitalClockEn */
+-	regmap_write(lt8912->regmap[0], 0x08, 0xff);
+-	regmap_write(lt8912->regmap[0], 0x09, 0x81);
+-	regmap_write(lt8912->regmap[0], 0x0a, 0xff);
+-	regmap_write(lt8912->regmap[0], 0x0b, 0x64);
+-	regmap_write(lt8912->regmap[0], 0x0c, 0xff);
+-
+-	regmap_write(lt8912->regmap[0], 0x44, 0x31);
+-	regmap_write(lt8912->regmap[0], 0x51, 0x1f);
+-
+-	/* TxAnalog */
+-	regmap_write(lt8912->regmap[0], 0x31, 0xa1);
+-	regmap_write(lt8912->regmap[0], 0x32, 0xa1);
+-	regmap_write(lt8912->regmap[0], 0x33, 0x03);
+-	regmap_write(lt8912->regmap[0], 0x37, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x38, 0x22);
+-	regmap_write(lt8912->regmap[0], 0x60, 0x82);
+-
+-	/* CbusAnalog */
+-	regmap_write(lt8912->regmap[0], 0x39, 0x45);
+-	regmap_write(lt8912->regmap[0], 0x3b, 0x00);
+-
+-	/* HDMIPllAnalog */
+-	regmap_write(lt8912->regmap[0], 0x44, 0x31);
+-	regmap_write(lt8912->regmap[0], 0x55, 0x44);
+-	regmap_write(lt8912->regmap[0], 0x57, 0x01);
+-	regmap_write(lt8912->regmap[0], 0x5a, 0x02);
+-
+-	/* MipiBasicSet */
+-	regmap_write(lt8912->regmap[1], 0x10, 0x01);
+-	regmap_write(lt8912->regmap[1], 0x11, 0x08);
+-	regmap_write(lt8912->regmap[1], 0x12, 0x04);
+-	regmap_write(lt8912->regmap[1], 0x13, lanes % 4);
+-	regmap_write(lt8912->regmap[1], 0x14, 0x00);
+-
+-	regmap_write(lt8912->regmap[1], 0x15, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x1a, 0x03);
+-	regmap_write(lt8912->regmap[1], 0x1b, 0x03);
++	*/
++
++	hactive = video->hact;
++	hfp = video->hfp;
++	hsync = video->hs;
++	hsync_activehigh = hsync_activehigh;
++	hbp = video->hbp;
++	vfp = video->vfp;
++	vsync = video->vs;
++	vsync_activehigh = vsync_activehigh;
++	vbp = video->vbp;
++	htotal = video->htotal;
++	vtotal = video->vtotal;
+ 
+ 	/* MIPIDig */
+-	regmap_write(lt8912->regmap[1], 0x18, hsync);
+-	regmap_write(lt8912->regmap[1], 0x19, vsync);
+-	regmap_write(lt8912->regmap[1], 0x1c, hactive);
+-	regmap_write(lt8912->regmap[1], 0x1d, hactive >> 8);
+-
+-	regmap_write(lt8912->regmap[1], 0x1e, 0x67);
+-	regmap_write(lt8912->regmap[1], 0x2f, 0x0c);
+-
+-	regmap_write(lt8912->regmap[1], 0x34, htotal);
+-	regmap_write(lt8912->regmap[1], 0x35, htotal >> 8);
+-	regmap_write(lt8912->regmap[1], 0x36, vtotal);
+-	regmap_write(lt8912->regmap[1], 0x37, vtotal >> 8);
+-	regmap_write(lt8912->regmap[1], 0x38, vbp);
+-	regmap_write(lt8912->regmap[1], 0x39, vbp >> 8);
+-	regmap_write(lt8912->regmap[1], 0x3a, vfp);
+-	regmap_write(lt8912->regmap[1], 0x3b, vfp >> 8);
+-	regmap_write(lt8912->regmap[1], 0x3c, hbp);
+-	regmap_write(lt8912->regmap[1], 0x3d, hbp >> 8);
+-	regmap_write(lt8912->regmap[1], 0x3e, hfp);
+-	regmap_write(lt8912->regmap[1], 0x3f, hfp >> 8);
++	regmap_write(lt->regmap[1], 0x10, 0x01); // The analog PHY for trans LP mode to HS mode.
++	regmap_write(lt->regmap[1], 0x11, 0x0a); // The time for DPHY trans state from PRPR to SOT state.
++
++	/* video timing (1:1 from driver developer guide) */
++	regmap_write(lt->regmap[1], 0x18, hsync);
++	regmap_write(lt->regmap[1], 0x19, vsync);
++	regmap_write(lt->regmap[1], 0x1c, hactive % 0x100);
++	regmap_write(lt->regmap[1], 0x1d, hactive >> 8);
++	regmap_write(lt->regmap[1], 0x2f, 0x0c); // This field configures the length of writing to fifo before reading from fifo.
++	regmap_write(lt->regmap[1], 0x34, htotal % 0x100);
++	regmap_write(lt->regmap[1], 0x35, htotal >> 8);
++	regmap_write(lt->regmap[1], 0x36, vtotal % 0x100);
++	regmap_write(lt->regmap[1], 0x37, vtotal >> 8);
++	regmap_write(lt->regmap[1], 0x38, vbp % 0x100);
++	regmap_write(lt->regmap[1], 0x39, vbp >> 8);
++	regmap_write(lt->regmap[1], 0x3a, vfp % 0x100);
++	regmap_write(lt->regmap[1], 0x3b, vfp >> 8);
++	regmap_write(lt->regmap[1], 0x3c, hbp % 0x100);
++	regmap_write(lt->regmap[1], 0x3d, hbp >> 8);
++	regmap_write(lt->regmap[1], 0x3e, hfp % 0x100);
++	regmap_write(lt->regmap[1], 0x3f, hfp >> 8);
++
++	/* set HSYNC and VSYNC polarity */
++	regmap_read(lt->regmap[0], 0xab, &reg);
++	reg &= 0xfc;
++	reg |= (hsync_activehigh < 1) | vsync_activehigh;
++	regmap_write(lt->regmap[0], 0xab, reg);
++}
+ 
+-	/* DDSConfig */
+-	regmap_write(lt8912->regmap[1], 0x4e, 0x52);
+-	regmap_write(lt8912->regmap[1], 0x4f, 0xde);
+-	regmap_write(lt8912->regmap[1], 0x50, 0xc0);
+-	regmap_write(lt8912->regmap[1], 0x51, 0x80);
+-	regmap_write(lt8912->regmap[1], 0x51, 0x00);
+-
+-	regmap_write(lt8912->regmap[1], 0x1f, 0x5e);
+-	regmap_write(lt8912->regmap[1], 0x20, 0x01);
+-	regmap_write(lt8912->regmap[1], 0x21, 0x2c);
+-	regmap_write(lt8912->regmap[1], 0x22, 0x01);
+-	regmap_write(lt8912->regmap[1], 0x23, 0xfa);
+-	regmap_write(lt8912->regmap[1], 0x24, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x25, 0xc8);
+-	regmap_write(lt8912->regmap[1], 0x26, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x27, 0x5e);
+-	regmap_write(lt8912->regmap[1], 0x28, 0x01);
+-	regmap_write(lt8912->regmap[1], 0x29, 0x2c);
+-	regmap_write(lt8912->regmap[1], 0x2a, 0x01);
+-	regmap_write(lt8912->regmap[1], 0x2b, 0xfa);
+-	regmap_write(lt8912->regmap[1], 0x2c, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x2d, 0xc8);
+-	regmap_write(lt8912->regmap[1], 0x2e, 0x00);
+-
+-	regmap_write(lt8912->regmap[0], 0x03, 0x7f);
+-	usleep_range(10000, 20000);
+-	regmap_write(lt8912->regmap[0], 0x03, 0xff);
+-
+-	regmap_write(lt8912->regmap[1], 0x42, 0x64);
+-	regmap_write(lt8912->regmap[1], 0x43, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x44, 0x04);
+-	regmap_write(lt8912->regmap[1], 0x45, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x46, 0x59);
+-	regmap_write(lt8912->regmap[1], 0x47, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x48, 0xf2);
+-	regmap_write(lt8912->regmap[1], 0x49, 0x06);
+-	regmap_write(lt8912->regmap[1], 0x4a, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x4b, 0x72);
+-	regmap_write(lt8912->regmap[1], 0x4c, 0x45);
+-	regmap_write(lt8912->regmap[1], 0x4d, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x52, 0x08);
+-	regmap_write(lt8912->regmap[1], 0x53, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x54, 0xb2);
+-	regmap_write(lt8912->regmap[1], 0x55, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x56, 0xe4);
+-	regmap_write(lt8912->regmap[1], 0x57, 0x0d);
+-	regmap_write(lt8912->regmap[1], 0x58, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x59, 0xe4);
+-	regmap_write(lt8912->regmap[1], 0x5a, 0x8a);
+-	regmap_write(lt8912->regmap[1], 0x5b, 0x00);
+-	regmap_write(lt8912->regmap[1], 0x5c, 0x34);
+-	regmap_write(lt8912->regmap[1], 0x1e, 0x4f);
+-	regmap_write(lt8912->regmap[1], 0x51, 0x00);
+-
+-	regmap_write(lt8912->regmap[0], 0xb2, 0x01);
+-
+-	/* AudioIIsEn */
+-	regmap_write(lt8912->regmap[2], 0x06, 0x08);
+-	regmap_write(lt8912->regmap[2], 0x07, 0xf0);
+-
+-	regmap_write(lt8912->regmap[2], 0x34, 0xd2);
+-
+-	regmap_write(lt8912->regmap[2], 0x3c, 0x41);
+-
+-	/* MIPIRxLogicRes */
+-	regmap_write(lt8912->regmap[0], 0x03, 0x7f);
++static void lt8912_configure_lvds(struct lt8912 *lt)
++{
++	pr_debug("lt8912_configure_lvds() called\n");
++
++	//core pll bypass
++	regmap_write(lt->regmap[0], 0x50, 0x24); // cp=50uA
++	regmap_write(lt->regmap[0], 0x51, 0x2d); // Pix_clk as reference,second order passive LPF PLL
++	regmap_write(lt->regmap[0], 0x52, 0x04); // loopdiv=0;use second-order PLL
++	regmap_write(lt->regmap[0], 0x69, 0x0e); // CP_PRESET_DIV_RATIO
++	regmap_write(lt->regmap[0], 0x69, 0x8e);
++	regmap_write(lt->regmap[0], 0x6a, 0x00);
++	regmap_write(lt->regmap[0], 0x6c, 0xb8); // RGD_CP_SOFT_K_EN,RGD_CP_SOFT_K[13:8]
++	regmap_write(lt->regmap[0], 0x6b, 0x51);
++
++	regmap_write(lt->regmap[0], 0x04, 0xfb); // core pll reset
++	regmap_write(lt->regmap[0], 0x04, 0xff);
++
++	//scaler bypass
++	regmap_write(lt->regmap[0], 0x7f, 0x00); // disable scaler
++	regmap_write(lt->regmap[0], 0xa8, 0x13); // 0x13 : JEIDA, 0x33:VSEA  bit[1]:H_HOL, bit[0]:V_HOL,
++
++	regmap_write(lt->regmap[0], 0x02, 0xf7); // lvds pll soft reset
++	regmap_write(lt->regmap[0], 0x02, 0xff);
++	regmap_write(lt->regmap[0], 0x03, 0xcb); // scaler module reset
++	regmap_write(lt->regmap[0], 0x03, 0xfb); // lvds tx module reset
++	regmap_write(lt->regmap[0], 0x03, 0xff);
++
++	regmap_write(lt->regmap[0], 0x44, 0x30); // enable lvds output
++}
++
++/* LT8912 MIPI to HDMI & LVDS REG setting - 20180115.txt */
++static void lt8912_init(struct lt8912 *lt)
++{
++	u8 lanes = 2; //lt->dsi->lanes;
++	//const struct drm_display_mode *mode = &lt->mode;
++	unsigned int version[2];
++
++	pr_debug("lt8912_init() called\n");
++
++	gpiod_direction_output(lt->reset_n, 1);
++	msleep(120);
++	gpiod_direction_output(lt->reset_n, 0);
++	msleep(120);
++
++	/* Only Display a HDMI test pattern, all other lt8912 accesses disabled */
++	//lt8912_hdmi_pattern(lt);
++	//return;
++
++	//dev_info(lt->dev, DRM_MODE_FMT "\n", DRM_MODE_ARG(mode));
++
++	regmap_read(lt->regmap[0], 0x00, &version[0]); // Higher byte of the chip ID
++	regmap_read(lt->regmap[0], 0x01, &version[1]); // Lower byte of the chip ID
++
++	//dev_info(lt->dev, "LT8912 ID: %02x, %02x\n",
++	//	 version[0], version[1]);
++
++	/* DigitalClockEn (1:1 from driver developer guide) */
++	regmap_write(lt->regmap[0], 0x08, 0xff);
++	regmap_write(lt->regmap[0], 0x09, 0xff);
++	regmap_write(lt->regmap[0], 0x0a, 0xff);
++	regmap_write(lt->regmap[0], 0x0b, 0x7c);
++	regmap_write(lt->regmap[0], 0x0c, 0xff);
++
++	/* TxAnalog (1:1 from driver developer guide) */
++	//if(!lt->lvds_mode) {
++	if (true) {
++		pr_debug("lt8912_init(): not in lvds mode\n");
++
++		regmap_write(lt->regmap[0], 0x31, 0xa1);
++		regmap_write(lt->regmap[0], 0x32, 0xa1);
++		regmap_write(lt->regmap[0], 0x33, 0x03);
++		regmap_write(lt->regmap[0], 0x37, 0x00);
++		regmap_write(lt->regmap[0], 0x38, 0x22);
++		regmap_write(lt->regmap[0], 0x60, 0x82);
++	}
++	/* CbusAnalog (register 0x3a not mentioned in driver developer guide and register description) */
++	regmap_write(lt->regmap[0], 0x39, 0x45);
++	regmap_write(lt->regmap[0], 0x3a, 0x00);
++	regmap_write(lt->regmap[0], 0x3b, 0x00);
++
++	/* HDMIPllAnalog (1:1 from driver developer guide) */
++	regmap_write(lt->regmap[0], 0x44, 0x31);
++	regmap_write(lt->regmap[0], 0x55, 0x44);
++	regmap_write(lt->regmap[0], 0x57, 0x01);
++	regmap_write(lt->regmap[0], 0x5a, 0x02);
++
++	/* MIPIAnalog */
++	//if(lt->swap_mipi_pn) {
++	if (true) {
++		pr_debug("lt8912_init(): MIPI P/N lines swapped\n");
++
++		// P/N mipi lines are swapped, lp rx trigger point 700mV
++		regmap_write(lt->regmap[0], 0x3e, 0xf6); 
++	} else {
++		// P/N mipi lines not swapped, lp rx trigger point 500mV
++		regmap_write(lt->regmap[0], 0x3e, 0xce); 
++	}
++	regmap_write(lt->regmap[0], 0x3f, 0xd4);
++	regmap_write(lt->regmap[0], 0x41, 0x3c);
++
++	/* MipiBasicSet (0x10, 0x11 handled in lt8912_mipi_config(), rest 1:1 from driver developer guide) */
++	regmap_write(lt->regmap[1], 0x12, 0x04);
++	regmap_write(lt->regmap[1], 0x13, lanes % 4);
++	regmap_write(lt->regmap[1], 0x14, 0x00);
++	regmap_write(lt->regmap[1], 0x15, 0x00);
++	regmap_write(lt->regmap[1], 0x1a, 0x03);
++	regmap_write(lt->regmap[1], 0x1b, 0x03);
++
++	lt8912_mipi_config(lt);
++
++	lt8912_dds_config(lt);
++
++	lt8912_audio_config(lt);
++
++	/* MIPIRxLogicRes (1:1 from driver developer guide) */
++	regmap_write(lt->regmap[0], 0x03, 0x7f);
+ 	usleep_range(10000, 20000);
+-	regmap_write(lt8912->regmap[0], 0x03, 0xff);
++	regmap_write(lt->regmap[0], 0x03, 0xff);
+ 
+-	regmap_write(lt8912->regmap[1], 0x51, 0x80);
++
++	regmap_write(lt->regmap[1], 0x51, 0x80);
+ 	usleep_range(10000, 20000);
+-	regmap_write(lt8912->regmap[1], 0x51, 0x00);
++	regmap_write(lt->regmap[1], 0x51, 0x00);
++
++	//if(lt->lvds_mode){
++	if (false) {
++		pr_debug("lt8912_init(): configure lvds mode\n");
++
++		lt8912_configure_lvds(lt);
++	}
++
++	// 19.05.2022 bie
++	//regmap_write(lt->regmap[0], 0x7f, 0x00);//disable scaler
+ }
+ 
+-static void lt8912_exit(struct lt8912 *lt8912)
++static void lt8912_wakeup(struct lt8912 *lt)
+ {
+-	regmap_write(lt8912->regmap[0], 0x08, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x09, 0x81);
+-	regmap_write(lt8912->regmap[0], 0x0a, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x0b, 0x20);
+-	regmap_write(lt8912->regmap[0], 0x0c, 0x00);
++	pr_debug("lt8912_wakeup() called\n");
++
++/*
++	gpiod_direction_output(lt->reset_n, 1);
++	msleep(120);
++	gpiod_direction_output(lt->reset_n, 0);
++	msleep(120);
++*/
+ 
+-	regmap_write(lt8912->regmap[0], 0x54, 0x1d);
+-	regmap_write(lt8912->regmap[0], 0x51, 0x15);
++	regmap_write(lt->regmap[0], 0x08, 0xff); /* enable clk gating */
++	regmap_write(lt->regmap[0], 0x41, 0x3c); /* MIPI Rx Power On */
++	regmap_write(lt->regmap[0], 0x05, 0xfb); /* DDS logical reset */
++	regmap_write(lt->regmap[0], 0x05, 0xff);
++	regmap_write(lt->regmap[0], 0x03, 0x7f); /* MIPI RX logical reset */
++	usleep_range(10000, 20000);
++	regmap_write(lt->regmap[0], 0x03, 0xff);
++	regmap_write(lt->regmap[0], 0x32, 0xa1);
++
++	// 20.05.22 bie
++	regmap_write(lt->regmap[0], 0x33, 0x03);
++}
+ 
+-	regmap_write(lt8912->regmap[0], 0x44, 0x31);
+-	regmap_write(lt8912->regmap[0], 0x41, 0xbd);
+-	regmap_write(lt8912->regmap[0], 0x5c, 0x11);
++static void lt8912_sleep(struct lt8912 *lt)
++{
++	pr_debug("lt8912_sleep() called\n");
++
++	regmap_write(lt->regmap[0], 0x32, 0xa0);
++	regmap_write(lt->regmap[0], 0x33, 0x00); /* Disable HDMI output. */
++	regmap_write(lt->regmap[0], 0x41, 0x3d); /* MIPI Rx Power Down. */
++	regmap_write(lt->regmap[0], 0x08, 0x00); /* diable DDS clk. */
++	regmap_write(lt->regmap[0], 0x44, 0x00); // disable lvds output
+ 
+-	regmap_write(lt8912->regmap[0], 0x30, 0x08);
+-	regmap_write(lt8912->regmap[0], 0x31, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x32, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x33, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x34, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x35, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x36, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x37, 0x00);
+-	regmap_write(lt8912->regmap[0], 0x38, 0x00);
++	gpiod_direction_output(lt->reset_n, 1);
+ }
+ 
++
++
++
++#ifdef notdef
+ static void lt8912_power_on(struct lt8912 *lt8912)
+ {
++	PR_DEBUG("lt8912_power_on() called\n");
++
++	gpiod_direction_output(lt8912->reset_n, 0);
++	msleep(20);
+ 	gpiod_direction_output(lt8912->reset_n, 1);
+-	msleep(120);
++	msleep(20);
+ 	gpiod_direction_output(lt8912->reset_n, 0);
++	msleep(20);
++}
++
++
++static void lt9611_chip_id(struct lt9611 *lt9611)
++{
++   int rev[16];
++   regmap_write(lt9611->regmap, 0xff, 0x80);
++   regmap_write(lt9611->regmap, 0xee, 0x01);
++   regmap_read(lt9611->regmap, 0x00, &rev[0]);
++   regmap_read(lt9611->regmap, 0x01, &rev[1]);
++   regmap_read(lt9611->regmap, 0x02, &rev[2]);
++   DEBUG("ADLINK %s: lt9611 chip id: 0x%x 0x%x 0x%x\n", __func__, rev[0],rev[1],rev[2]);
++
+ }
+ 
+-static void lt8912_power_off(struct lt8912 *lt8912)
++static void lt9611_system_init(struct lt9611 *lt9611)
+ {
+-	gpiod_direction_output(lt8912->reset_n, 1);
++    DEBUG("ADLINK %s: lt9611 system init\n", __func__);
++	regmap_write(lt9611->regmap, 0xFF, 0x82);
++	regmap_write(lt9611->regmap, 0x51, 0x01);
++		//Timer for Frequency meter
++	regmap_write(lt9611->regmap, 0xFF, 0x82);
++	regmap_write(lt9611->regmap, 0x1b, 0x69); //Timer 2
++	regmap_write(lt9611->regmap, 0x1c, 0x78);
++	regmap_write(lt9611->regmap, 0xcb, 0x69); //Timer 1
++	regmap_write(lt9611->regmap, 0xcc, 0x78);
++
++	regmap_write(lt9611->regmap, 0xff, 0x80); 
++	regmap_write(lt9611->regmap, 0x04, 0xf0);
++	regmap_write(lt9611->regmap, 0x06, 0xf0);
++	regmap_write(lt9611->regmap, 0x0a, 0x80);
++	regmap_write(lt9611->regmap, 0x0b, 0x40);
++	regmap_write(lt9611->regmap, 0x0d, 0xef);
++	regmap_write(lt9611->regmap, 0x11, 0xfa);
++	
+ }
+ 
+-static enum drm_connector_status
+-lt8912_connector_detect(struct drm_connector *connector, bool force)
++void lt9611_hdmi_out_disable(struct lt9611 *lt9611) //dsren
+ {
+-	/* TODO: HPD handing (reg[0xc1] - bit[7]) */
+-	return connector_status_connected;
++	regmap_write(lt9611->regmap, 0xff,0x81);
++	regmap_write(lt9611->regmap, 0x30,0x00); /* Txphy PD */
++	regmap_write(lt9611->regmap, 0x23,0x80); /* Txpll PD */ 
+ }
+ 
+-static const struct drm_connector_funcs lt8912_connector_funcs = {
+-	.dpms = drm_atomic_helper_connector_dpms,
+-	.detect = lt8912_connector_detect,
+-	.fill_modes = drm_helper_probe_single_connector_modes,
+-	.destroy = drm_connector_cleanup,
+-	.reset = drm_atomic_helper_connector_reset,
+-	.atomic_duplicate_state = drm_atomic_helper_connector_duplicate_state,
+-	.atomic_destroy_state = drm_atomic_helper_connector_destroy_state,
+-};
++static void lt9611_mipi_input_analog(struct lt9611 *lt9611)//xuxi
++{
++	DEBUG("ADLINK %s\n",__func__);
++	//mipi mode
++	regmap_write(lt9611->regmap, 0xff, 0x81);
++	regmap_write(lt9611->regmap, 0x06, 0x40); //port A rx current
++	regmap_write(lt9611->regmap, 0x0a, 0xfe); //port A ldo voltage set
++	regmap_write(lt9611->regmap, 0x0b, 0xbf); //enable port A lprx
++	regmap_write(lt9611->regmap, 0x11, 0x40); //port B rx current
++	regmap_write(lt9611->regmap, 0x15, 0xfe); //port B ldo voltage set
++	regmap_write(lt9611->regmap, 0x16, 0xbf); //enable port B lprx
++	
++	regmap_write(lt9611->regmap, 0x1c, 0x03); //PortA clk lane no-LP mode.
++	regmap_write(lt9611->regmap, 0x20, 0x03); //PortB clk lane no-LP mode.
++}
+ 
+-static struct drm_encoder *
+-lt8912_connector_best_encoder(struct drm_connector *connector)
++static void lt9611_mipi_input_digtal(struct lt9611 *lt9611) //weiguo
+ {
+-	struct lt8912 *lt8912 = connector_to_lt8912(connector);
++	DEBUG("ADLINK %s \n",__func__);
++	regmap_write(lt9611->regmap, 0xff, 0x82); 
++	regmap_write(lt9611->regmap, 0x4f, 0x80);    //[7] = Select ad_txpll_d_clk.
++	regmap_write(lt9611->regmap, 0x50, 0x10);
++	
++	regmap_write(lt9611->regmap, 0xff, 0x83); 
++	regmap_write(lt9611->regmap, 0x00, lt9611->mipi_lane_cnt); 
++	regmap_write(lt9611->regmap, 0x02, 0x0a); //settle
++	regmap_write(lt9611->regmap, 0x06, 0x0a); //settle
++
++	if(0) //dual_port_mipi
++	{
++	  DEBUG("ADLINK %s dual port mipi \n",__func__);	
++	  regmap_write(lt9611->regmap, 0x0a, 0x03); //1=dual_lr, 0=dual_en
++    }
++	else               //single_port_mipi       
++	{
++	  DEBUG("ADLINK %s single port mipi \n",__func__);
++	  regmap_write(lt9611->regmap, 0x0a, 0x00); //1=dual_lr, 0=dual_en	
++	}
++}
+ 
+-	return lt8912->bridge.encoder;
++static int lt9611_htotal_sysclk(struct lt9611 *lt9611)
++{
++	int  reg, temp;
++	regmap_write(lt9611->regmap, 0xff, 0x82);
++	regmap_read(lt9611->regmap, 0x86, &reg);
++	regmap_read(lt9611->regmap, 0x87, &temp);
++	reg = reg*256+temp;
++	DEBUG("ADLINK %s: lt9611 htotal sysclk: %d\n", __func__, reg);
++	return reg;
+ }
+ 
+-static int lt8912_connector_get_modes(struct drm_connector *connector)
++static void lt9611_video_check(struct lt9611 *lt9611) //dsren
+ {
+-	int num_modes = 0;
++  	int htotal_sysclk;
++	int temp,temp_l;
++	regmap_write(lt9611->regmap, 0xff, 0x82); // top video check module
++
++	regmap_read(lt9611->regmap, 0x82, &(lt9611->v_act));
++    regmap_read(lt9611->regmap, 0x83, &temp);
++	lt9611->v_act = ((lt9611->v_act)<<8) + temp;
++    
++	regmap_read(lt9611->regmap, 0x6c, &(lt9611->v_tal));
++    regmap_read(lt9611->regmap, 0x6d, &temp);
++    lt9611->v_tal = ((lt9611->v_tal)<<8) + temp;
++
++
++	regmap_write(lt9611->regmap, 0xff, 0x83);
++
++	regmap_read(lt9611->regmap, 0x82, &(lt9611->h_act));
++    regmap_read(lt9611->regmap, 0x83, &temp);
++	lt9611->h_act = ((lt9611->h_act)<<8) + temp;
++	lt9611->h_act = (lt9611->h_act/3);
++	
++	//if(lt9611.mipi_port_cnt==dual_port_mipi)
++	if(lt9611->is_dual) 
++	{
++		regmap_read(lt9611->regmap, 0x86, &temp);
++		regmap_read(lt9611->regmap, 0x87, &temp_l);
++	    temp = (temp<<8)+temp_l;
++		temp = (temp/3);
++		lt9611->h_act = lt9611->h_act+temp;
++	
++	}
++	regmap_read(lt9611->regmap, 0x88, &(lt9611->mipi_video_format));
++	htotal_sysclk = lt9611_htotal_sysclk(lt9611);
++printk("--YYS---111 \n");
++	if((lt9611->h_act==video_640x480_60Hz.hact)&&
++		 (lt9611->h_act == video_640x480_60Hz.vact)&&
++		 (lt9611->v_tal==video_640x480_60Hz.vtotal)){
++
++			DEBUG("ADLINK %s: Video_Check = video_640x480_60Hz\n", __func__);
++			lt9611->video_format = video_640x480_60Hz_vic1;
++			lt9611->hdmi_vic=1;
++			lt9611->video = &video_640x480_60Hz;
++
++			
++	}	
++	else if((lt9611->h_act == video_720x480_60Hz.hact)&&
++		 (lt9611->v_act == video_720x480_60Hz.vact)&&
++		 (lt9611->v_tal == video_720x480_60Hz.vtotal)){
++
++			DEBUG("ADLINK %s: Video_Check = video_720x480_60Hz\n", __func__);
++			lt9611->video_format = video_720x480_60Hz_vic3;
++			lt9611->video = &video_720x480_60Hz;
++			lt9611->hdmi_vic = 3;
++	}	
++	
++	else if((lt9611->h_act == video_1280x720_60Hz.hact)&&
++		 (lt9611->v_act == video_1280x720_60Hz.vact)&&
++		 (lt9611->v_tal == video_1280x720_60Hz.vtotal)){
++
++			DEBUG("ADLINK %s: Video_Check = video_1280x720_60Hz\n", __func__);
++			lt9611->video_format = video_1280x720_60Hz_vic4;
++			lt9611->video = &video_1280x720_60Hz;
++			lt9611->hdmi_vic = 4;
++	}
++	else if((lt9611->h_act == video_1920x1080_60Hz.hact)&&
++		 (lt9611->v_act == video_1920x1080_60Hz.vact)){
++
++			if(htotal_sysclk > 500){
++	
++			    DEBUG("ADLINK %s: Video_Check = video_1920x1080_30Hz\n", __func__);
++				lt9611->video_format = video_1920x1080_30Hz_vic;
++				lt9611->video = &video_1920x1080_30Hz;
++				lt9611->hdmi_vic = 34;
++		    }
++			else{
++			
++			    DEBUG("ADLINK %s: Video_Check = video_1920x1080_60Hz\n", __func__);
++				lt9611->video_format = video_1920x1080_60Hz_vic16;
++				lt9611->video = &video_1920x1080_60Hz;
++				lt9611->hdmi_vic = 16;
++		    }
++    }else if((lt9611->h_act == video_3840x2160_30Hz.hact)&&
++		 (lt9611->v_act == video_3840x2160_30Hz.vact)){
++
++			DEBUG("ADLINK %s: Video_Check = video_3840x2160_30Hz\n", __func__);
++			lt9611->video_format = video_3840x2160_30Hz_vic;
++			lt9611->video = &video_3840x2160_30Hz;
++			lt9611->hdmi_vic = 95;
++
++    }else if((lt9611->h_act == video_3840x1080_60Hz.hact)&&
++		 (lt9611->v_act == video_3840x1080_60Hz.vact)){
++			
++			DEBUG("ADLINK %s: Video_Check = video_3840x1080_60Hz\n", __func__);
++			lt9611->video_format = video_3840x1080_60Hz_vic;
++			lt9611->video = &video_3840x1080_60Hz;
++			lt9611->hdmi_vic = 0;
++
++	}else if((lt9611->h_act == video_1024x600_60Hz.hact)&&
++		 (lt9611->v_act == video_1024x600_60Hz.vact)){
++			
++			DEBUG("ADLINK %s: Video_Check = video_1024x600_60Hz\n", __func__);
++			lt9611->video_format = video_1024x600_60Hz_vic;
++			lt9611->video = &video_1024x600_60Hz;
++			lt9611->hdmi_vic = 0;
++	}		
++	else{//YYS
++
++			lt9611->video_format = video_1280x720_60Hz_vic4;
++			lt9611->video = &video_1280x720_60Hz;
++			lt9611->hdmi_vic = 4;
++
++         		lt9611->video_format = video_1920x1080_30Hz_vic;
++			lt9611->video = &video_1920x1080_30Hz;
++			lt9611->hdmi_vic = 34;
++
++			DEBUG("ADLINK %s:Video_Check = unknown video format\n", __func__);
++	}	
+ 
+-	num_modes = drm_add_modes_noedid(connector, 1920, 1080);
+-	drm_set_preferred_mode(connector, 1920, 1080);
+ 
+-	return num_modes;
+ }
+ 
+-static const struct drm_connector_helper_funcs lt8912_connector_helper_funcs = {
+-	.get_modes = lt8912_connector_get_modes,
+-	.best_encoder = lt8912_connector_best_encoder,
+-};
+-
+-static void lt8912_bridge_post_disable(struct drm_bridge *bridge)
++static void lt9611_frequency_meter_byte_clk(struct lt9611 *lt9611)
+ {
+-	struct lt8912 *lt8912 = bridge_to_lt8912(bridge);
++	int temp;
++	int reg = 0x00;
++	
++	/* port A byte clk meter */
++	regmap_write(lt9611->regmap, 0xff, 0x82);
++	regmap_write(lt9611->regmap, 0xff, 0x83);//PortA
++	msleep(50);
++	regmap_read(lt9611->regmap, 0xcd, &temp);
++	if((temp&0x60) == 0x60) /* clk stable */
++	{
++		reg = (temp&0x0f) * 65536;
++		regmap_read(lt9611->regmap, 0xce, &temp);
++		reg = reg + temp*256;
++		regmap_read(lt9611->regmap, 0xcf, &temp);
++		reg = reg + temp;
++		DEBUG("ADLINK %s:port A byte clk = %d\n", __func__, reg);
+ 
+-	lt8912_power_off(lt8912);
++	}
++	else /* clk unstable */
++	  	DEBUG("ADLINK %s:port A byte clk unstable\n", __func__);
++	
++	/* port B byte clk meter */
++	regmap_write(lt9611->regmap, 0xff, 0x82);
++	regmap_write(lt9611->regmap, 0xc7, 0x04);//PortA
++	msleep(50);
++	regmap_read(lt9611->regmap, 0xcd, &temp);
++
++	if((temp&0x60) == 0x60) /* clk stable */
++	{
++		reg = (temp&0x0f) * 65536;
++		regmap_read(lt9611->regmap, 0xce, &temp);
++		reg =reg + temp*256;
++		regmap_read(lt9611->regmap, 0xcf, &temp);
++		reg = reg + temp;
++
++		DEBUG("ADLINK %s:port B byte clk = %d\n", __func__, reg);
++
++	}
++	else /* clk unstable */
++	  	DEBUG("ADLINK %s:port B byte clk unstable\n", __func__);
+ }
+ 
+-static void lt8912_bridge_disable(struct drm_bridge *bridge)
++static void lt9611_mipi_video_timing(struct lt9611 *lt9611) //weiguo
+ {
+-	struct lt8912 *lt8912 = bridge_to_lt8912(bridge);
++	struct video_timing *video_format = lt9611->video;
++	regmap_write(lt9611->regmap, 0xff, 0x83);
++	regmap_write(lt9611->regmap, 0x0d, (video_format->vtotal/256));
++	regmap_write(lt9611->regmap, 0x0e, (video_format->vtotal%256));//vtotal
++	regmap_write(lt9611->regmap, 0x0f, (video_format->vact/256));
++	regmap_write(lt9611->regmap, 0x10, (video_format->vact%256));  //vactive
++	regmap_write(lt9611->regmap, 0x11, (video_format->htotal/256));
++	regmap_write(lt9611->regmap, 0x12, (video_format->htotal%256));//htotal
++	regmap_write(lt9611->regmap, 0x13, (video_format->hact/256));
++	regmap_write(lt9611->regmap, 0x14, (video_format->hact%256)); //hactive
++	regmap_write(lt9611->regmap, 0x15, (video_format->vs%256));   //vsa
++	regmap_write(lt9611->regmap, 0x16, (video_format->hs%256));   //hsa
++	regmap_write(lt9611->regmap, 0x17, (video_format->vfp%256));  //vfp
++	regmap_write(lt9611->regmap, 0x18, ((video_format->vs+video_format->vbp)%256));  //vss
++	regmap_write(lt9611->regmap, 0x19, (video_format->hfp%256));  //hfp
++	regmap_write(lt9611->regmap, 0x1a, ((video_format->hs+video_format->hbp)/256));
++	regmap_write(lt9611->regmap, 0x1b, ((video_format->hs+video_format->hbp)%256));  //hss
+ 
+-	lt8912_exit(lt8912);
+ }
+ 
+-static void lt8912_bridge_enable(struct drm_bridge *bridge)
++static void lt9611_mipi_pcr(struct lt9611 *lt9611) //weiguo
+ {
+-	struct lt8912 *lt8912 = bridge_to_lt8912(bridge);
++	regmap_write(lt9611->regmap, 0xff, 0x83); 
++	regmap_write(lt9611->regmap, 0x0b, 0x01); //vsync read delay(reference value)
++	regmap_write(lt9611->regmap, 0x0c, 0x10); //
++	
++	regmap_write(lt9611->regmap, 0x48, 0x00); //de mode delay
++	regmap_write(lt9611->regmap, 0x49, 0x81); //=1/4 hact
++	
++	/* stage 1 */
++	regmap_write(lt9611->regmap, 0x21, 0x4a); //bit[3:0] step[11:8]
++	//regmap_write(lt9611->regmap,0x22,0x40);//step[7:0]
++	
++	regmap_write(lt9611->regmap, 0x24, 0x71); //bit[7:4]v/h/de mode; line for clk stb[11:8]
++	regmap_write(lt9611->regmap, 0x25, 0x50); //line for clk stb[7:0]
++	
++	regmap_write(lt9611->regmap, 0x2a, 0x02); //clk stable in
++	
++	/* stage 2 */
++	regmap_write(lt9611->regmap, 0x4a, 0x40); //offset //0x10
++	regmap_write(lt9611->regmap, 0x1d, 0x80); //PCR de mode step setting.
++	//regmap_write(lt9611->regmap,0x23,0x01); //
++	
++	/* MK limit */
++	regmap_write(lt9611->regmap, 0x2d, 0x38); //M up limit
++	regmap_write(lt9611->regmap, 0x31, 0x08); //M down limit
++	
++	switch(lt9611->video_format)
++	{
++		case video_3840x1080_60Hz_vic:
++		case video_3840x2160_30Hz_vic:
++		
++	       regmap_write(lt9611->regmap, 0x0b, 0x03); //vsync mode
++	       regmap_write(lt9611->regmap, 0x0c, 0xd0); //=1/4 hact
++	
++	       regmap_write(lt9611->regmap, 0x48, 0x03); //de mode delay
++	       regmap_write(lt9611->regmap, 0x49, 0xe0); //
++		
++	       regmap_write(lt9611->regmap, 0x24, 0x72);  //bit[7:4]v/h/de mode; line for clk stb[11:8]
++           regmap_write(lt9611->regmap, 0x25, 0x00);  //line for clk stb[7:0]
++	
++	       regmap_write(lt9611->regmap, 0x2a, 0x01);  //clk stable in
++		
++	       regmap_write(lt9611->regmap, 0x4a, 0x10); //offset
++	       regmap_write(lt9611->regmap, 0x1d, 0x10); //PCR de mode step setting.
++		
++	       regmap_write(lt9611->regmap, 0x26, 0x37);
++		   break;
++		
++		case video_1920x1080_60Hz_vic16:
++		    regmap_write(lt9611->regmap, 0x26, 0x37);
++		    break;
++		
++		case video_1920x1080_30Hz_vic:
++		
++		   regmap_write(lt9611->regmap, 0x26, 0x1c);
++		   break;
++		
++		case video_1280x720_60Hz_vic4:
++		case video_1280x720_30Hz_vic:
++		   regmap_write(lt9611->regmap, 0x26, 0x1c);
++		   break;
++	
++		case video_1024x600_60Hz_vic:
++		   regmap_write(lt9611->regmap, 0x24, 0x70); //bit[7:4]v/h/de mode; line for clk stb[11:8]
++		   regmap_write(lt9611->regmap, 0x25, 0x80); //line for clk stb[7:0]
++		
++		   regmap_write(lt9611->regmap, 0x2a, 0x10); //clk stable in
++		
++	    	/* stage 2 */
++		   //regmap_write(lt9611->regmap,0x23,0x04); //pcr h mode step
++		   //regmap_write(lt9611->regmap,0x4a,0x10); //offset //0x10
++		   regmap_write(lt9611->regmap, 0x1d, 0xf0); //PCR de mode step setting.
++		
++		   regmap_write(lt9611->regmap,0x26,0x19); //pcr_m 
++
++		   break;
++		
++		case video_720x480_60Hz_vic3:
++		case video_640x480_60Hz_vic1:
++		
++		  regmap_write(lt9611->regmap, 0x26, 0x14);
++		  break;
++		
++		default: break;
++	}
+ 
+-	lt8912_init(lt8912);
++	lt9611_mipi_video_timing(lt9611);
++
++    regmap_write(lt9611->regmap, 0xff, 0x80);
++	regmap_write(lt9611->regmap, 0x11, 0x5a); //Pcr reset
++	regmap_write(lt9611->regmap, 0x11, 0xfa);
++		
+ }
+ 
+-static void lt8912_bridge_pre_enable(struct drm_bridge *bridge)
++static void lt9611_pll(struct lt9611 *lt9611) //zhangzhichun
+ {
+-	struct lt8912 *lt8912 = bridge_to_lt8912(bridge);
++	int pclk;
++	int pll_lock_flag;
++	int i;
++	struct video_timing *video_format = lt9611->video;
++	pclk = video_format->pclk_khz;
++	DEBUG("ADLINK %s:set rx pll = %d\n", __func__, pclk);
++	
++	regmap_write(lt9611->regmap, 0xff, 0x81);
++	regmap_write(lt9611->regmap, 0x23, 0x40);
++	regmap_write(lt9611->regmap, 0x24, 0x64);
++	regmap_write(lt9611->regmap, 0x25, 0x80); //pre-divider
++	regmap_write(lt9611->regmap, 0x26, 0x55);
++	regmap_write(lt9611->regmap, 0x2c, 0x37);
++	
++	regmap_write(lt9611->regmap, 0x2f, 0x01);
++	regmap_write(lt9611->regmap, 0x26, 0x55);
++	regmap_write(lt9611->regmap, 0x27, 0x66);
++	regmap_write(lt9611->regmap, 0x28, 0x88);
++	
++	if(pclk > 150000)
++	  regmap_write(lt9611->regmap, 0x2d, 0x88);
++	else if(pclk > 70000)
++		regmap_write(lt9611->regmap, 0x2d, 0x99);
++	else
++		regmap_write(lt9611->regmap, 0x2d, 0xaa); //0xaa
++		
++	pclk = pclk / 2;
++	regmap_write(lt9611->regmap, 0xff, 0x82);     //13.5M
++	regmap_write(lt9611->regmap, 0xe3, pclk/65536);
++	pclk = pclk % 65536;
++	regmap_write(lt9611->regmap, 0xe4, pclk/256);
++	regmap_write(lt9611->regmap, 0xe5, pclk%256);
++	
++	regmap_write(lt9611->regmap, 0xde, 0x20);
++	regmap_write(lt9611->regmap, 0xde, 0xe0);
++		
++	regmap_write(lt9611->regmap, 0xff, 0x80);
++	regmap_write(lt9611->regmap, 0x11, 0x5a); /* Pcr clk reset */
++	regmap_write(lt9611->regmap, 0x11, 0xfa);
++	regmap_write(lt9611->regmap, 0x18, 0xdc); /* pll analog reset */
++	regmap_write(lt9611->regmap, 0x18, 0xfc);
++	regmap_write(lt9611->regmap, 0x16, 0xf1);
++	regmap_write(lt9611->regmap, 0x16, 0xf3);
++   
++	/* pll lock status */
++	for(i = 0; i < 6 ; i++)
++	{   
++			regmap_write(lt9611->regmap, 0xff, 0x80);	
++			regmap_write(lt9611->regmap, 0x16, 0xe3); /* pll lock logic reset */
++			regmap_write(lt9611->regmap, 0x16, 0xf3);
++			regmap_write(lt9611->regmap, 0xff, 0x82);
++			regmap_read(lt9611->regmap, 0x15, &pll_lock_flag);
++			if(pll_lock_flag & 0x80)
++			{
++				DEBUG("ADLINK %s:HDMI pll locked\n", __func__);
++				break;
++			}
++			else
++			{
++			    regmap_write(lt9611->regmap, 0xff, 0x80);
++				regmap_write(lt9611->regmap, 0x11, 0x5a); /* Pcr clk reset */
++	            regmap_write(lt9611->regmap, 0x11, 0xfa);
++				regmap_write(lt9611->regmap, 0x18, 0xdc); /* pll analog reset */
++			    regmap_write(lt9611->regmap, 0x18, 0xfc);
++				regmap_write(lt9611->regmap, 0x16, 0xf1); /* pll cal reset*/
++		        regmap_write(lt9611->regmap,0x16, 0xf3);
++				DEBUG(" ADLINK  %sHDMI pll unlocked, reset pll\n", __func__);
++			}
++	}
++}
+ 
+-	lt8912_power_on(lt8912);
++static void lt9611_audio_init(struct lt9611 *lt9611) //sujin
++{
++	#if 1
++	if(lt9611_mode.audio_out==audio_i2s)
++	{
++		DEBUG("%s:Audio inut = I2S 2ch\n", __func__);
++		regmap_write(lt9611->regmap, 0xff, 0x82);
++		regmap_write(lt9611->regmap, 0xd6, 0x8c);
++		regmap_write(lt9611->regmap, 0xd7, 0x04); //sync polarity
++		
++		regmap_write(lt9611->regmap, 0xff, 0x84);
++		regmap_write(lt9611->regmap, 0x06, 0x08);
++		regmap_write(lt9611->regmap, 0x07, 0x10);
++		
++		regmap_write(lt9611->regmap, 0x34, 0xd4); //CTS_N
++		lt9611->audio_status = 1;  
++	}
++	
++	if(lt9611_mode.audio_out==audio_spdif)
++	{
++		DEBUG("%s:Audio inut = SPDIF\n", __func__);
++		regmap_write(lt9611->regmap, 0xff, 0x82);
++		regmap_write(lt9611->regmap, 0xd6, 0x8c);
++		regmap_write(lt9611->regmap, 0xd7, 0x04); //sync polarity
++		
++		regmap_write(lt9611->regmap, 0xff, 0x84);
++		regmap_write(lt9611->regmap, 0x06, 0x0c);
++		regmap_write(lt9611->regmap, 0x07, 0x10);
++	
++		regmap_write(lt9611->regmap, 0x34, 0xd4); //CTS_N
++	}
++	#endif
+ }
+ 
+-static void lt8912_bridge_mode_set(struct drm_bridge *bridge,
+-				   struct drm_display_mode *mode,
+-				   struct drm_display_mode *adj)
++
++static void lt9611_csc(struct lt9611 *lt9611) //dsren
+ {
+-	struct lt8912 *lt8912 = bridge_to_lt8912(bridge);
++	#if (Video_Output_Mode == Output_RGB888)
++	{
++		lt9611->hdmi_y=0;
++		regmap_write(lt9611->regmap,0xff,0x82);
++		regmap_write(lt9611->regmap,0xb9,0x00); //No csc
++	}
++	#elif (Video_Output_Mode == Output_YCbCr444)
++	{
++		 lt9611->hdmi_y=1;
++		 regmap_write(lt9611->regmap,0xb9,0x00); //RGB to YCbCr
++	}
++	#elif (Video_Output_Mode == Output_YCbCr22)
++	{
++		 lt9611->hdmi_y=2;
++		 regmap_write(lt9611->regmap,0xb9,0x00); //RGB to YCbCr
++	}
++	#endif
++}
+ 
+-	drm_mode_copy(&lt8912->mode, adj);
++static void lt9611_hdcp_init(struct lt9611 *lt9611) //luodexing
++{
++	regmap_write(lt9611->regmap,0xff,0x85); 
++	regmap_write(lt9611->regmap,0x07,0x1f);
++	regmap_write(lt9611->regmap,0x13,0xfe);// [7]=force_hpd, [6]=force_rsen, [5]=vsync_pol, [4]=hsync_pol,
++	                              // [3]=hdmi_mode, [2]=no_accs_when_rdy, [1]=skip_wt_hdmi
++	regmap_write(lt9611->regmap,0x17,0x0f);// [7]=ri_short_read, [3]=sync_pol_mode, [2]=srm_chk_done, 
++	                              // [1]=bksv_srm_pass, [0]=ksv_list_vld
++	regmap_write(lt9611->regmap,0x15,0x05);
++	//regmap_write(lt9611->regmap,0x15,0x65);// [7]=key_ddc_st_sel, [6]=tx_hdcp_en,[5]=tx_auth_en, [4]=tx_re_auth
+ }
+ 
+-static int lt8912_bridge_attach(struct drm_bridge *bridge)
++static void lt9611_hdmi_tx_digital(struct lt9611 *lt9611) //dsren
+ {
+-	struct lt8912 *lt8912 = bridge_to_lt8912(bridge);
+-	struct drm_connector *connector = &lt8912->connector;
+-	int ret;
++	  //AVI
++		regmap_write(lt9611->regmap,0xff,0x84);
++		regmap_write(lt9611->regmap,0x43,0x56-lt9611->hdmi_vic-((lt9611->hdmi_y<<5)+0x10));   //AVI_PB0
++		regmap_write(lt9611->regmap,0x44,(lt9611->hdmi_y<<5)+0x10); //AVI_PB1
++		regmap_write(lt9611->regmap,0x47,lt9611->hdmi_vic); //AVI_PB1
++}
+ 
+-	ret = drm_connector_init(bridge->dev, connector,
+-				 &lt8912_connector_funcs,
+-				 DRM_MODE_CONNECTOR_HDMIA);
+-	if (ret) {
+-		dev_err(lt8912->dev, "failed to initialize connector\n");
+-		return ret;
++static void lt9611_hdmi_tx_phy(struct lt9611 *lt9611) //xyji
++{
++	regmap_write(lt9611->regmap,0xff,0x81);
++	regmap_write(lt9611->regmap,0x30,0x6a);
++	if(lt9611_mode.hdmi_coupling_mode==ac_mode)
++	{
++		regmap_write(lt9611->regmap,0x31,0x73); //DC: 0x44, AC:0x73
++    }
++	else //lt9611.hdmi_coupling_mode==dc_mode
++	{
++		regmap_write(lt9611->regmap,0x31,0x44);
+ 	}
++		regmap_write(lt9611->regmap,0x32,0x4a);
++		regmap_write(lt9611->regmap,0x33,0x0b);
++		regmap_write(lt9611->regmap,0x34,0x00);
++		regmap_write(lt9611->regmap,0x35,0x00);
++		regmap_write(lt9611->regmap,0x36,0x00);
++		regmap_write(lt9611->regmap,0x37,0x44);
++		regmap_write(lt9611->regmap,0x3f,0x0f);
++		regmap_write(lt9611->regmap,0x40,0xa0);
++		regmap_write(lt9611->regmap,0x41,0xa0);
++		regmap_write(lt9611->regmap,0x42,0xa0);
++		regmap_write(lt9611->regmap,0x43,0xa0);
++		regmap_write(lt9611->regmap,0x44,0x0a);
++}
++
++void lt9611_hdmi_out_enable(struct lt9611 *lt9611) //dsren
++{
++	regmap_write(lt9611->regmap,0xff,0x81);
++	regmap_write(lt9611->regmap,0x23,0x40);
++	
++	regmap_write(lt9611->regmap,0xff,0x82);
++	regmap_write(lt9611->regmap,0xde,0x20);
++	regmap_write(lt9611->regmap,0xde,0xe0);
++		
++	regmap_write(lt9611->regmap,0xff,0x80); 
++	regmap_write(lt9611->regmap,0x18,0xdc); /* txpll sw rst */
++	regmap_write(lt9611->regmap,0x18,0xfc);
++	regmap_write(lt9611->regmap,0x16,0xf1); /* txpll calibration rest */ 
++	regmap_write(lt9611->regmap,0x16,0xf3);
++	
++	regmap_write(lt9611->regmap,0x11,0x5a); //Pcr reset
++	regmap_write(lt9611->regmap,0x11,0xfa);
++	
++	regmap_write(lt9611->regmap,0xff,0x81);
++	regmap_write(lt9611->regmap,0x30,0xea);
++}
++
++static void lt9611_hdcp_enable(struct lt9611 *lt9611) //luodexing
++{
++#if 0
++	regmap_write(lt9611->regmap,0xff,0x80); 
++	regmap_write(lt9611->regmap,0x14,0x7f);
++    regmap_write(lt9611->regmap,0x14,0xff); 	
++	regmap_write(lt9611->regmap,0xff,0x85); 
++	regmap_write(lt9611->regmap,0x15,0x01); //disable HDCP
++	regmap_write(lt9611->regmap,0x15,0x71); //enable HDCP
++	regmap_write(lt9611->regmap,0x15,0x65); //enable HDCP
++#endif
++}
+ 
+-	drm_connector_helper_add(connector, &lt8912_connector_helper_funcs);
+-	drm_mode_connector_attach_encoder(connector, bridge->encoder);
++#endif
+ 
++
++static int lt8912_bridge_suspend(struct device *dev)
++{
++	struct lt8912 *lt8912 = dev_get_drvdata(dev);
++#ifdef notdef	
++	lt9611_hdmi_out_disable(lt9611);
++#endif
++	lt8912_sleep(lt8912);
+ 	return 0;
+ }
+ 
+-static const struct drm_bridge_funcs lt8912_bridge_funcs = {
+-	.attach = lt8912_bridge_attach,
+-	.mode_set = lt8912_bridge_mode_set,
+-	.pre_enable = lt8912_bridge_pre_enable,
+-	.enable = lt8912_bridge_enable,
+-	.disable = lt8912_bridge_disable,
+-	.post_disable = lt8912_bridge_post_disable,
+-};
++
++static int lt8912_bridge_resume(struct device *dev)
++{
++	struct lt8912 *lt8912 = dev_get_drvdata(dev);
++#ifdef notdef	
++	lt9611_pll(lt9611);
++	lt9611_mipi_pcr(lt9611);
++	lt9611_hdmi_tx_digital(lt9611);	
++	lt9611_hdmi_out_enable(lt9611);
++#endif	
++	lt8912_wakeup(lt8912);
++	return 0;
++}
++
++
++static SIMPLE_DEV_PM_OPS(lt8912_bridge_pm_ops,
++			 lt8912_bridge_suspend,
++			 lt8912_bridge_resume);
++
++
++static void lt8912_audio_enable(struct lt8912 *lt8912)
++{
++#ifdef notdef
++	regmap_write(lt9611->regmap,0xff,0x84); 
++	regmap_write(lt9611->regmap,0x06,0x08);
++#endif
++}
++
++
++static void lt8912_audio_disable(struct lt8912 *lt8912)
++{
++#ifdef notdef
++	regmap_write(lt9611->regmap,0xff,0x84); 
++	regmap_write(lt9611->regmap,0x06,0x00);
++#endif
++}
++
++
++static ssize_t audio_show(struct device *dev, struct device_attribute *attr, char *buf)
++{
++	char *s= buf;
++    int len;
++	struct lt8912 *lt8912 = dev_get_drvdata(dev);
++
++	pr_debug("audio_show() called\n");
++
++	if (lt8912->audio_status){
++		s += sprintf(s, "%s\n", STRING_ON);
++	} else {
++        s += sprintf(s,"%s\n", STRING_OFF);
++	}
++
++	if (s != buf)
++   	{
++		*(s-1) = '\n';
++    }
++    
++    len = (s - buf);
++
++	return len;
++}
++ 
++static ssize_t audio_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
++{
++	char *p;
++	int len;
++	struct lt8912 *lt8912 = dev_get_drvdata(dev);
++
++	pr_debug("audio_store() called\n");
++
++    p = memchr(buf, '\n', count);
++	len = p ? p - buf : count;   
++
++	if (!strncmp(buf, STRING_ON, len )) {
++        lt8912->audio_status = 1;
++		lt8912_audio_enable(lt8912);
++    }
++    else if (!strncmp(buf, STRING_OFF, len )) {
++        lt8912->audio_status = 0;
++		lt8912_audio_disable(lt8912);
++    }
++
++	return count;
++}
++
++static DEVICE_ATTR(audio, 0664, audio_show, audio_store);
++
+ 
+ static const struct regmap_config lt8912_regmap_config = {
+ 	.reg_bits = 8,
+@@ -354,8 +1211,9 @@ static const struct regmap_config lt8912_regmap_config = {
+ 	.max_register = 0xff,
+ };
+ 
+-static int lt8912_i2c_init(struct lt8912 *lt8912,
+-			   struct i2c_adapter *adapter)
++
++static int lt8912_i2c_init(struct lt8912 *lt,
++			   struct i2c_client *client)
+ {
+ 	struct i2c_board_info info[] = {
+ 		{ I2C_BOARD_INFO("lt8912p0", 0x48), },
+@@ -366,119 +1224,144 @@ static int lt8912_i2c_init(struct lt8912 *lt8912,
+ 	unsigned int i;
+ 	int ret;
+ 
+-	for (i = 0; i < ARRAY_SIZE(info); i++) {
+-		struct i2c_client *client;
+-
+-		client = i2c_new_device(adapter, &info[i]);
+-		if (!client)
+-			return -ENODEV;
++	if (!lt || !client)
++		return -ENODEV;
+ 
++	for (i = 0; i < ARRAY_SIZE(info); i++) {
++		if (i > 0 ) {
++			client = i2c_new_dummy(client->adapter, info[i].addr);
++			if (!client)
++				return -ENODEV;
++		}
+ 		regmap = devm_regmap_init_i2c(client, &lt8912_regmap_config);
+ 		if (IS_ERR(regmap)) {
+ 			ret = PTR_ERR(regmap);
+-			dev_err(lt8912->dev,
+-				"Failed to initialize regmap: %d\n", ret);
++			pr_debug("lt8912_i2c_init(): failed to initialize regmap %d\n", ret);
+ 			return ret;
+ 		}
+ 
+-		lt8912->regmap[i] = regmap;
++		lt->regmap[i] = regmap;
+ 	}
+ 
+ 	return 0;
+ }
+ 
+-static int lt8912_probe(struct mipi_dsi_device *dsi)
++
++static int lt8912_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ {
+-	struct device *dev = &dsi->dev;
+-	struct lt8912 *lt8912;
+-	struct device_node *node;
+-	struct i2c_adapter *adapter;
+-	int ret;
++	struct device *dev = &client->dev;
++    int ret;
++    struct lt8912 *lt8912;
++
++	pr_debug("lt8912_probe() called\n");
+ 
++    printk("ADLINK ,LT8912 DRIVER \n");	
+ 	lt8912 = devm_kzalloc(dev, sizeof(*lt8912), GFP_KERNEL);
+-	if (!lt8912)
++	if (!lt8912) {
++		dev_err(dev, "failed to alloc memory\n");
++		printk("ADLINK :%s failed to alloc memory \n",__func__);
+ 		return -ENOMEM;
++	}
++	dev_set_drvdata(dev, lt8912);
+ 
+-	lt8912->dev = dev;
+-	lt8912->dsi = dsi;
+-	mipi_dsi_set_drvdata(dsi, lt8912);
+-
++	
+ 	lt8912->reset_n = devm_gpiod_get(dev, "reset", GPIOD_ASIS);
+ 	if (IS_ERR(lt8912->reset_n)) {
+ 		ret = PTR_ERR(lt8912->reset_n);
++        printk("ADLINK :%s failed to request reset GPIO \n",__func__);
++
+ 		dev_err(dev, "failed to request reset GPIO: %d\n", ret);
+ 		return ret;
+ 	}
+ 
+-	node = of_parse_phandle(dev->of_node, "i2c-bus", 0);
+-	if (!node) {
+-		dev_err(dev, "No i2c-bus found\n");
+-		return -ENODEV;
+-	}
+-
+-	adapter = of_find_i2c_adapter_by_node(node);
+-	of_node_put(node);
+-	if (!adapter) {
+-		dev_err(dev, "No i2c adapter found\n");
+-		return -EPROBE_DEFER;
+-	}
+-
+-	ret = lt8912_i2c_init(lt8912, adapter);
++	ret = lt8912_i2c_init(lt8912, client);
+ 	if (ret)
+ 		return ret;
+ 
+-	/* TODO: interrupt handing */
++    ret = device_create_file(dev, &dev_attr_audio);
++	if (ret < 0) {
++		dev_err(dev, "failed to create attribute file\n");
++        printk("ADLINK :%s failed to create attribute \n",__func__);
+ 
+-	lt8912->bridge.funcs = &lt8912_bridge_funcs;
+-	lt8912->bridge.of_node = dev->of_node;
+-	ret = drm_bridge_add(&lt8912->bridge);
+-	if (ret) {
+-		dev_err(dev, "failed to add bridge: %d\n", ret);
+ 		return ret;
+ 	}
++ 
++/*
++	lt9611_power_on(lt9611);
++	lt9611_hdcp_enable(lt9611); //dummy
++    lt9611_chip_id(lt9611);
++	lt9611_system_init(lt9611);
++	lt9611_mipi_input_analog(lt9611);
++	lt9611_mipi_input_digtal(lt9611);
++	msleep(1000);
++	lt9611_video_check(lt9611);
++    lt9611_frequency_meter_byte_clk(lt9611);
++	lt9611_mipi_pcr(lt9611);
++	lt9611_pll(lt9611);
++	lt9611_audio_init(lt9611);
++	lt9611_csc(lt9611);
++	lt9611_hdcp_init(lt9611);
++	lt9611_hdmi_tx_digital(lt9611);
++	lt9611_hdmi_tx_phy(lt9611);
++	lt9611_hdmi_out_enable(lt9611);
++*/
++	lt8912_init(lt8912);
++	lt8912_wakeup(lt8912);
+ 
+-	dsi->lanes = 4;
+-	dsi->format = MIPI_DSI_FMT_RGB888;
+-	dsi->mode_flags = MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST |
+-			  MIPI_DSI_MODE_VIDEO_HBP | MIPI_DSI_MODE_LPM |
+-			  MIPI_DSI_MODE_EOT_PACKET;
++    return 0;
++}
+ 
+-	ret = mipi_dsi_attach(dsi);
+-	if (ret) {
+-		drm_bridge_remove(&lt8912->bridge);
+-		dev_err(dev, "failed to attach dsi to host: %d\n", ret);
+-		return ret;
+-	}
+ 
++static int lt8912_remove(struct i2c_client *client)
++{
++	pr_debug("lt8912_remove() called\n");
+ 	return 0;
+ }
+ 
+-static int lt8912_remove(struct mipi_dsi_device *dsi)
+-{
+-	struct lt8912 *lt8912 = mipi_dsi_get_drvdata(dsi);
+ 
+-	mipi_dsi_detach(dsi);
+-	drm_bridge_remove(&lt8912->bridge);
++static struct i2c_device_id lt8912_id[] = {
++	{ "lt8912", 0 },
++	{}
++};
+ 
+-	return 0;
+-}
+ 
+-static const struct of_device_id lt8912_of_match[] = {
++static const struct of_device_id lt8912_match_table[] = {
+ 	{ .compatible = "lontium,lt8912" },
+ 	{}
+ };
+-MODULE_DEVICE_TABLE(of, lt8912_of_match);
+ 
+-static struct mipi_dsi_driver lt8912_driver = {
+-	.driver = {
+-		.name = "lt8912",
+-		.of_match_table = lt8912_of_match,
++MODULE_DEVICE_TABLE(of, lt8912_match_table);
++
++static struct i2c_driver lt8912_driver = {
++	.driver				= {
++		.name			= "lt8912",
++		.owner			= THIS_MODULE,
++		.of_match_table = lt8912_match_table,
++		.pm				= &lt8912_bridge_pm_ops,
+ 	},
+-	.probe = lt8912_probe,
+-	.remove = lt8912_remove,
++    .probe			= lt8912_probe,
++	.remove			= lt8912_remove,
++	.id_table		= lt8912_id,
+ };
+-module_mipi_dsi_driver(lt8912_driver);
+ 
+-MODULE_AUTHOR("Wyon Bi <bivvy.bi@rock-chips.com>");
+-MODULE_DESCRIPTION("Lontium LT8912 MIPI-DSI to LVDS and HDMI/MHL bridge");
+-MODULE_LICENSE("GPL v2");
++
++static int __init lt8912_i2c_drv_init(void)
++{
++	pr_debug("lt8912_init() called\n");
++	return i2c_add_driver(&lt8912_driver);
++}
++
++
++static void __exit lt8912_i2c_drv_exit(void)
++{
++	pr_debug("lt8912_exit() called\n");
++	i2c_del_driver(&lt8912_driver);
++}
++
++
++module_init(lt8912_i2c_drv_init);
++module_exit(lt8912_i2c_drv_exit);
++
++MODULE_AUTHOR("xhguo@lontium.com");
++MODULE_DESCRIPTION("Lontium bridge IC LT8912 that convert mipi to hdmi)");
++MODULE_LICENSE("GPL");
+-- 
+2.30.2
+
