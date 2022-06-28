@@ -1,0 +1,26 @@
+From afe644ae7224fcb0ae421ce066e464a411a1647f Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Tue, 28 Jun 2022 13:38:20 +0200
+Subject: [PATCH 1/1] rk809: change pmic reset behaviour
+
+Do not restart PMIC, only reset PMIC DCDC and LDO registers
+---
+ drivers/power/pmic/rk8xx.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/power/pmic/rk8xx.c b/drivers/power/pmic/rk8xx.c
+index b11695562bd5..98550e0b5a37 100644
+--- a/drivers/power/pmic/rk8xx.c
++++ b/drivers/power/pmic/rk8xx.c
+@@ -152,6 +152,8 @@ static struct reg_data rk817_init_reg[] = {
+ 	{ RK817_PMIC_SYS_CFG1, 0x20, 0x70},
+ 	/* Set pmic_sleep as none function */
+ 	{ RK817_PMIC_SYS_CFG3, 0x00, 0x18 },
++	/* Do not restart PMU, only reset DCDC and LDO */
++	{ RK817_PMIC_SYS_CFG3, 0x40, 0xc0 },
+ 
+ #ifdef CONFIG_DM_CHARGE_DISPLAY
+ 	/* Set pmic_int active low */
+-- 
+2.30.2
+
