@@ -1,7 +1,6 @@
 # meta-iesy-osm
 
-Yocto BSP Layer providing support for [iesy Open Standard Module](https://www.iesy.com/en/products/modules/open-standard-module) hardware.  
-
+Yocto BSP Layer providing support for [iesy Open Standard Module](https://www.iesy.com/en/products/modules/open-standard-module).  
 
 #### Dependencies
 
@@ -12,6 +11,6 @@ Yocto BSP Layer providing support for [iesy Open Standard Module](https://www.ie
 
 Documentation is available in the [Project Wiki](https://github.com/iesy-gmbh/meta-iesy-osm/wiki) containing information on:
 
-* Working with the BSP
-* Starting up the hardware
+* Hardware startup
 * Demo images
+* Working with Yocto
