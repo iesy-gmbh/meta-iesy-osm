@@ -1,0 +1,25 @@
+From 68b996eb61110c24918d7d1c773bc91ea1365ef5 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Thu, 7 Jul 2022 08:55:04 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: set micro usb port to peripheral mode
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 30e341ce6858..1852d323ffec 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -880,7 +880,7 @@
+ 
+ &usb20_otg {
+     /*vbus-supply = <&usb_a_vbus_regulator>;*/
+-    dr_mode = "host";
++    dr_mode = "peripheral";
+ 	status = "okay";
+ };
+ 
+-- 
+2.30.2
+
