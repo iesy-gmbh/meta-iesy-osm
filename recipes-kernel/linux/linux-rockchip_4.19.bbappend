@@ -34,6 +34,7 @@ SRC_URI += " \
 	file://0035-drivers-gpu-drm-integrate-rockchip-display-corruption-workaround.patch \
 	file://0036-drivers-gpu-drm-separate-lt8912-drivers-for-bridge-and-i2c-mode.patch \
 	file://0037-arm64-dts-iesy-set-micro-usb-port-to-peripheral-mode.patch \
+	file://0038-arm64-dts-iesy-px30-set-drive-strength-for-i2c0-to-8mA.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:
