@@ -8,6 +8,7 @@ SRC_URI += " \
 	file://0011-arm64-dts-rockchip-px30-change-pmic-reset-behavior.patch \
 	file://0012-drm-rockchip-change-default-video-resolution-to-1280x720.patch \
 	file://0013-rk809-change-pmic-reset-behaviour.patch \
+	file://0014-arm64-dts-rockchip-px30-set-drive-strength-for-i2c0-to-8mA.patch \
 	file://defconfig.cfg \
 	file://ddrbin_param.txt \
 "
