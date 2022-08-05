@@ -1,0 +1,42 @@
+From 68aa3788f6f136b3c3b1147c176508dd6231c3a0 Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Fri, 5 Aug 2022 13:31:14 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: px30: add missing node for Microchip
+ VSC8541
+
+The default edge rate setting (0%) was to fast which resulted in ethernet instability. Therefore we set this value to -76% (slowest).
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index d5c708453290..76cb3aad2d0e 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -263,10 +263,21 @@
+ 
+ &gmac {
+ 	phy-supply = <&vcc_phy>;
++	phy-handle = <&gmac0_phy>;
+ 	clock_in_out = "input";
+ 	assigned-clocks = <&cru SCLK_GMAC>;
+ 	assigned-clock-parents = <&cru SCLK_GMAC>;
+ 	status = "okay";
++
++	gmdio0: gmac0_mdio {
++		compatible = "snps,dwmac-mdio";
++
++		gmac0_phy: ethernet-phy@1 {
++			//compatible = "ethernet-phy-id0007.0770";
++			vsc8531,vddmac = <1800>;
++			vsc8531,edge-slowdown = <76>;
++		};
++	};
+ };
+ 
+ &gpu {
+-- 
+2.30.2
+
