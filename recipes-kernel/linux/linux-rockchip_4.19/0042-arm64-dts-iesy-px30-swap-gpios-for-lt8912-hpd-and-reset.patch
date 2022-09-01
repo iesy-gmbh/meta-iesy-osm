@@ -1,0 +1,29 @@
+From 4dbce6637fbd27a3fc7256310b3d970e4cddc9d5 Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Wed, 31 Aug 2022 16:49:31 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: px30: swap gpios for lt8912 hpd and
+ reset
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 76cb3aad2d0e..6e4ab19e871c 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -562,8 +562,8 @@
+         compatible = "lontium,lt8912";
+         reg = <0x48>;
+         ddc-i2c-bus = <&i2c1>;
+-		hpd-gpios = <&gpio1 RK_PC4 GPIO_ACTIVE_HIGH>;
+-		reset-gpios = <&gpio1 RK_PC5 GPIO_ACTIVE_LOW>;
++		hpd-gpios = <&gpio1 RK_PC5 GPIO_ACTIVE_HIGH>;
++		reset-gpios = <&gpio1 RK_PC4 GPIO_ACTIVE_LOW>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_lt8912>;
+ 		status = "okay";
+-- 
+2.30.2
+
