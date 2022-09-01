@@ -1,0 +1,27 @@
+From 31fb4bdc3a0bcdc5059d9799343dd98d975c0a2f Mon Sep 17 00:00:00 2001
+From: Stefan Lellwitz <lel@iesy.com>
+Date: Wed, 24 Aug 2022 14:34:21 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: px30: add comment to swap-mipi-pn
+ property
+
+Signed-off-by: Stefan Lellwitz <lel@iesy.com>
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 76cb3aad2d0e..479c6ac6ed04 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -567,7 +567,7 @@
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_lt8912>;
+ 		status = "okay";
+-		//swap-mipi-pn = <1>;
++		//swap-mipi-pn = <1>;	/* needs to be unset to NOT swap MIPI P/N lines */
+ 
+ /*
+ 		display-timings {
+-- 
+2.30.2
+
