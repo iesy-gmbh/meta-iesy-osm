@@ -36,4 +36,5 @@ X11_INSTALL = " \
 CORE_IMAGE_BASE_INSTALL += "\
     ${@bb.utils.contains('DISTRO', 'iesy-wayland', '${WAYLAND_INSTALL}', '', d)} \
     ${@bb.utils.contains('DISTRO', 'iesy-x11', '${X11_INSTALL}', '', d)} \
+    i2c-tools \
     "
