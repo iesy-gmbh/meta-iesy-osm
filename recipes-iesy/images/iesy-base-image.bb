@@ -9,6 +9,7 @@ IMAGE_FEATURES += " \
 inherit core-image features_check
 
 IMAGE_FEATURES += " \
+    ssh-server-openssh \
     "
 
 # This would also be set by default in local.conf. debug-tweaks is useful for development purposes.
