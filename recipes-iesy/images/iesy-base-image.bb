@@ -41,4 +41,8 @@ CORE_IMAGE_BASE_INSTALL += "\
     sysbench \
     iperf3 \
     usbutils \
+    gstreamer1.0-rockchip \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-good \
     "
