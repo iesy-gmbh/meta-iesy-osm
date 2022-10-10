@@ -1,15 +1,23 @@
 SUMMARY = "A default sample image supporting all different iesy distributions"
 DESCRIPTION = "iesy sample image supporting iesy-wayland, iesy-x11 and iesy-fb distros."
 
-USE_WAYLAND = "${@bb.utils.contains("DISTRO", "iesy-wayland", "yes", "no", d)}"
-USE_X11 = "${@bb.utils.contains("DISTRO", "iesy-x11", "yes", "no", d)}"
-
 IMAGE_FEATURES += " \
-    ${@bb.utils.contains('USE_WAYLAND', 'yes', 'package-management', '', d)} \
-    ${@bb.utils.contains('USE_X11', 'yes', 'package-management x11', '', d)} \
+    package-management \
+    ${@bb.utils.contains('DISTRO', 'iesy-x11', 'x11', '', d)} \
     "
 
 inherit core-image features_check
+
+IMAGE_FEATURES += " \
+    "
+
+# This would also be set by default in local.conf. debug-tweaks is useful for development purposes.
+# - debug-tweaks        - makes an image suitable for development, e.g. allowing passwordless root logins
+#   - empty-root-password
+#   - allow-empty-password
+#   - allow-root-login
+#   - post-install-logging
+EXTRA_IMAGE_FEATURES = "debug-tweaks"
 
 WAYLAND_INSTALL = " \
     weston \
@@ -25,6 +33,6 @@ X11_INSTALL = " \
     "
 
 CORE_IMAGE_BASE_INSTALL += "\
-    ${@bb.utils.contains('USE_WAYLAND', 'yes', '${WAYLAND_INSTALL}', '', d)} \
-    ${@bb.utils.contains('USE_X11', 'yes', '${X11_INSTALL}', '', d)} \
+    ${@bb.utils.contains('DISTRO', 'iesy-wayland', '${WAYLAND_INSTALL}', '', d)} \
+    ${@bb.utils.contains('DISTRO', 'iesy-x11', '${X11_INSTALL}', '', d)} \
     "
