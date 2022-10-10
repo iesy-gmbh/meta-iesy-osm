@@ -39,4 +39,5 @@ CORE_IMAGE_BASE_INSTALL += "\
     i2c-tools \
     glmark2 \
     sysbench \
+    iperf3 \
     "
