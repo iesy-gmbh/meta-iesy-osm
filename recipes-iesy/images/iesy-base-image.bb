@@ -40,4 +40,5 @@ CORE_IMAGE_BASE_INSTALL += "\
     glmark2 \
     sysbench \
     iperf3 \
+    usbutils \
     "
