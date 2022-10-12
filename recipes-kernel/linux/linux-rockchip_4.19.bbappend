@@ -39,6 +39,7 @@ SRC_URI += " \
 	file://0040-drivers-drm-bridge-lt8912-make-sure-to-use-device-tree-for-setting-MIPI-PN-lines-swap.patch \
 	file://0041-arm64-dts-iesy-px30-add-comment-to-swap-mipi-pn-property.patch \
 	file://0042-arm64-dts-iesy-px30-swap-gpios-for-lt8912-hpd-and-reset.patch \
+	file://0043-arm64-dts-iesy-Config-Eth-LED.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:

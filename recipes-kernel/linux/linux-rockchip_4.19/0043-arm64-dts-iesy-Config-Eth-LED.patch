@@ -1,0 +1,76 @@
+From 228069f7b60d0b4747edb0e4a7f89263e5bbb578 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 12 Oct 2022 16:50:48 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: Config Eth-LED
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts |  3 +++
+ drivers/net/phy/mscc.c                         | 16 ++++++++++++++++
+ 2 files changed, 19 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 374a98907054..aee81b2a21a1 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -11,6 +11,7 @@
+ #include <dt-bindings/input/input.h>
+ #include <dt-bindings/display/drm_mipi_dsi.h>
+ #include <dt-bindings/sensor-dev.h>
++#include <dt-bindings/net/mscc-phy-vsc8531.h>
+ #include "../rockchip/px30.dtsi"
+ #include "../rockchip/rk3326-linux.dtsi"
+ #include <dt-bindings/leds/common.h>
+@@ -276,6 +277,8 @@
+ 			//compatible = "ethernet-phy-id0007.0770";
+ 			vsc8531,vddmac = <1800>;
+ 			vsc8531,edge-slowdown = <76>;
++			vsc8531,led-0-mode		= <VSC8531_LINK_100_ACTIVITY>;
++			vsc8531,led-1-mode		= <VSC8531_LINK_100_ACTIVITY>;
+ 		};
+ 	};
+ };
+diff --git a/drivers/net/phy/mscc.c b/drivers/net/phy/mscc.c
+index 36647b70b9a3..945122ad4ddc 100644
+--- a/drivers/net/phy/mscc.c
++++ b/drivers/net/phy/mscc.c
+@@ -57,6 +57,7 @@ enum rgmii_rx_clock_delay {
+ #define LED_1_MODE_SEL_MASK		  0x00F0
+ #define LED_0_MODE_SEL_MASK		  0x000F
+ #define LED_1_MODE_SEL_POS		  4
++#define MSCC_PHY_LED_MODE_BEH	      30
+ 
+ #define MSCC_EXT_PAGE_ACCESS		  31
+ #define MSCC_PHY_PAGE_STANDARD		  0x0000 /* Standard registers */
+@@ -139,6 +140,8 @@ static int vsc85xx_led_cntl_set(struct phy_device *phydev,
+ 	u16 reg_val;
+ 
+ 	mutex_lock(&phydev->lock);
++
++	//set led mode
+ 	reg_val = phy_read(phydev, MSCC_PHY_LED_MODE_SEL);
+ 	if (led_num) {
+ 		reg_val &= ~LED_1_MODE_SEL_MASK;
+@@ -148,7 +151,20 @@ static int vsc85xx_led_cntl_set(struct phy_device *phydev,
+ 		reg_val &= ~LED_0_MODE_SEL_MASK;
+ 		reg_val |= ((u16)mode & LED_0_MODE_SEL_MASK);
+ 	}
++	
+ 	rc = phy_write(phydev, MSCC_PHY_LED_MODE_SEL, reg_val);
++	if (rc) {
++		return rc;
++	}
++
++	//set led behavior
++	reg_val = phy_read(phydev, MSCC_PHY_LED_MODE_BEH);
++	if (led_num) {
++		reg_val |= 0x0002;
++	}
++	
++	rc = phy_write(phydev, MSCC_PHY_LED_MODE_BEH, reg_val);
++	
+ 	mutex_unlock(&phydev->lock);
+ 
+ 	return rc;
+-- 
+2.30.2
+
