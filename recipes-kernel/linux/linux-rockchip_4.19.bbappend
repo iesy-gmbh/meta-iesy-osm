@@ -41,6 +41,7 @@ SRC_URI += " \
 	file://0042-arm64-dts-iesy-px30-swap-gpios-for-lt8912-hpd-and-reset.patch \
 	file://0043-arm64-dts-iesy-Config-Eth-LED.patch \
 	file://0044-arm64-dts-iesy-set-drive-strength.patch \
+	file://0045-arm64-dts-iesy-disable-unused-regulators.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:

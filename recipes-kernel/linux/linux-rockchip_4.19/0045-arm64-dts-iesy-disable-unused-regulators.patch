@@ -1,0 +1,64 @@
+From 0ec324583b50187a789d1ac1c4089be5466d4b58 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 18 Oct 2022 16:14:31 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: disable unused regulators
+
+disabled regulators vcc_sd and vcc_3v0, not in use.
+Switched pmuio2-supply to vcc1v8, as given in schematic
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index c1884f3a7665..05ac3f4e93a7 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -388,7 +388,7 @@
+ 					regulator-on-in-suspend;
+ 				};
+ 			};
+-
++			/*
+ 			vcc_3v0: DCDC_REG4 {
+ 				regulator-min-microvolt = <3000000>;
+ 				regulator-max-microvolt = <3000000>;
+@@ -398,7 +398,7 @@
+ 					regulator-off-in-suspend;
+ 					regulator-suspend-microvolt = <3000000>;
+ 				};
+-			};
++			};*/
+ 
+ 			vcc3v3_sys: DCDC_REG5 {
+ 				regulator-always-on;
+@@ -476,7 +476,7 @@
+ 					regulator-suspend-microvolt = <3300000>;
+ 				};
+ 			};
+-
++			/*
+ 			vcc_sd: LDO_REG6 {
+ 				regulator-min-microvolt = <3300000>;
+ 				regulator-max-microvolt = <3300000>;
+@@ -487,7 +487,7 @@
+ 					regulator-suspend-microvolt = <3300000>;
+ 
+ 				};
+-			};
++			};*/
+ 
+ 			vcc2v8_dvp: LDO_REG7 {
+ 				regulator-min-microvolt = <2800000>;
+@@ -798,7 +798,8 @@
+ 	status = "okay";
+ 
+ 	pmuio1-supply = <&vcc3v0_pmu>;
+-	pmuio2-supply = <&vcc3v0_pmu>;
++	//pmuio2-supply = <&vcc3v0_pmu>;
++	pmuio2-supply = <&vcc1v8_soc>;
+ };
+ 
+ &pwm1 {
+-- 
+2.30.2
+
