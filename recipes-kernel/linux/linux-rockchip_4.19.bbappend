@@ -43,6 +43,7 @@ SRC_URI += " \
 	file://0044-arm64-dts-iesy-set-drive-strength.patch \
 	file://0045-arm64-dts-iesy-disable-unused-regulators.patch \
 	file://0046-arm64-dts-iesy-px30-set-RAM-odt-freq-odt-res.patch \
+	file://0047-arm64-dts-iesy-px30-revert-RAM-config-disable-auto-f.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:
