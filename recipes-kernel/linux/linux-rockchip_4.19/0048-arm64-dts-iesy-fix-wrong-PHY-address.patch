@@ -1,0 +1,31 @@
+From 434855ae62398823359894113cce3e8026fed56b Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 3 Nov 2022 10:49:55 +0100
+Subject: [PATCH 48/48] arm64: dts: iesy: fix wrong PHY-address
+
+Fix the boot-error 'ethernet-phy@1 has invalid phy address'. PHY is located @0
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index f61e56ff09d3f..adff547df16f1 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -274,8 +274,12 @@
+ 	gmdio0: gmac0_mdio {
+ 		compatible = "snps,dwmac-mdio";
+ 
+-		gmac0_phy: ethernet-phy@1 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		gmac0_phy: ethernet-phy@0 {
+ 			//compatible = "ethernet-phy-id0007.0770";
++			reg = <0x0>;
+ 			vsc8531,vddmac = <1800>;
+ 			vsc8531,edge-slowdown = <76>;
+ 			vsc8531,led-0-mode		= <VSC8531_LINK_100_ACTIVITY>;
+-- 
+2.30.2
+
