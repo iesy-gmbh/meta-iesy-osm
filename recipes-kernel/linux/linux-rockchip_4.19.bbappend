@@ -45,6 +45,7 @@ SRC_URI += " \
 	file://0046-arm64-dts-iesy-px30-set-RAM-odt-freq-odt-res.patch \
 	file://0047-arm64-dts-iesy-px30-revert-RAM-config-disable-auto-f.patch \
 	file://0048-arm64-dts-iesy-fix-wrong-PHY-address.patch \
+	file://0049-arm64-dts-iesy-px30-limit-sdmmc-speed.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:
