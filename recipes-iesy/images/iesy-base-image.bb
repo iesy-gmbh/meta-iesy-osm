@@ -41,7 +41,7 @@ CORE_IMAGE_BASE_INSTALL += "\
     sysbench \
     iperf3 \
     usbutils \
-    gstreamer1.0-rockchip \
+    ${@bb.utils.contains('MACHINE_NAME', 'RPX30', 'gstreamer1.0-rockchip', '', d)} \
     gstreamer1.0-plugins-base \
     gstreamer1.0-plugins-bad \
     gstreamer1.0-plugins-good \
