@@ -1,0 +1,30 @@
+From ded86d799aa606f0ff49afc82fad931f6a409671 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 7 Nov 2022 10:26:12 +0100
+Subject: [PATCH 16/16] arm64: dts: iesy: px30: fix phy-node
+
+---
+ arch/arm/dts/px30-evb.dts | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/px30-evb.dts b/arch/arm/dts/px30-evb.dts
+index b651bd7b4d5ff..d955e1a598bdd 100644
+--- a/arch/arm/dts/px30-evb.dts
++++ b/arch/arm/dts/px30-evb.dts
+@@ -108,8 +108,12 @@
+ 	gmdio0: gmac0_mdio {
+ 	compatible = "snps,dwmac-mdio";
+ 
+-		gmac0_phy: ethernet-phy@1 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		gmac0_phy: ethernet-phy@0 {
+ 			//compatible = "ethernet-phy-id0007.0770";
++			reg = <0x0>;
+ 			vsc8531,vddmac = <1800>;
+ 			vsc8531,edge-slowdown = <76>;
+ 		};
+-- 
+2.30.2
+

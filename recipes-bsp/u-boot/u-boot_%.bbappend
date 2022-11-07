@@ -12,6 +12,7 @@ SRC_URI += " \
 	file://0015-arm64-dts-iesy-px30-add-missing-node-for-Microchip-VSC8541.patch \
 	file://defconfig.cfg \
 	file://ddrbin_param.txt \
+	file://0016-arm64-dts-iesy-px30-fix-phy-node.patch \
 "
 
 DDR_BIN_FILE = "px30_ddr_333MHz_v*.bin"
