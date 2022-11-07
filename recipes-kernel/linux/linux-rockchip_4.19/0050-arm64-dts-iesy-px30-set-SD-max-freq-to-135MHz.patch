@@ -1,0 +1,25 @@
+From f35ce03befe7b552ed2514ebcb23762a0fca0252 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 7 Nov 2022 10:22:05 +0100
+Subject: [PATCH 50/50] arm64: dts: iesy: px30: set SD max-freq to 135MHz
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index 3e4931e6144f5..67a4f0f4dfe59 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -861,7 +861,7 @@
+ 	sd-uhs-sdr25;
+ 	sd-uhs-sdr50;
+ 	sd-uhs-sdr104;
+-	max-frequency = <104000000>;
++	max-frequency = <135000000>;
+ 	vqmmc-supply = <&vccio_sd>;
+ 	/* vmmc-supply = <&vcc_sd>; */
+ 	status = "okay";
+-- 
+2.30.2
+
