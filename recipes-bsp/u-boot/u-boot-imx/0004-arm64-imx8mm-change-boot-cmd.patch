@@ -1,0 +1,40 @@
+From 727e8572455da8b4908c5088352cb456360f8811 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 16 Dec 2022 11:28:56 +0100
+Subject: [PATCH 4/4] arm64: imx8mm: change boot-cmd
+
+---
+ include/configs/imx8mm_evk.h | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/include/configs/imx8mm_evk.h b/include/configs/imx8mm_evk.h
+index db07ebb544..5c19f283dd 100644
+--- a/include/configs/imx8mm_evk.h
++++ b/include/configs/imx8mm_evk.h
+@@ -168,7 +168,7 @@
+ 			"fi; " \
+ 		"fi;\0"
+ 
+-#define CONFIG_BOOTCOMMAND \
++/*#define CONFIG_BOOTCOMMAND \
+ 	   "mmc dev ${mmcdev}; if mmc rescan; then " \
+ 		   "if run loadbootscript; then " \
+ 			   "run bootscript; " \
+@@ -179,6 +179,14 @@
+ 			   "fi; " \
+ 		   "fi; " \
+ 	   "fi;"
++*/
++
++#define CONFIG_BOOTCOMMAND \
++	"setenv bootargs console=${console} root=${mmcroot} earlycon=ec_imx6q,0x30880000,115200; " \
++	"fatload mmc ${mmcdev} ${loadaddr} Image; " \
++	"fatload mmc ${mmcdev} ${fdt_addr} ${fdt_file}; " \
++	"booti ${loadaddr} - ${fdt_addr};"
++
+ #endif
+ 
+ /* Link Definitions */
+-- 
+2.30.2
+
