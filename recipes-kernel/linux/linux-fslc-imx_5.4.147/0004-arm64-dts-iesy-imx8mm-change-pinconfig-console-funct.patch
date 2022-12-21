@@ -1,0 +1,83 @@
+From cb2a0d89c235a6c150f07ee72edad1a96e121387 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 21 Dec 2022 11:26:23 +0100
+Subject: [PATCH 4/4] arm64: dts: iesy: imx8mm: change pinconfig, console
+ functional
+
+---
+ .../boot/dts/iesy/iesy-imx8mm-eva-mi.dts      | 28 +++----------------
+ 1 file changed, 4 insertions(+), 24 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index d36f0c1e97f3..7d53b276b321 100755
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -49,14 +49,6 @@
+ 		};
+ 	};
+ 
+-	modem_reset: modem-reset {
+-		compatible = "gpio-reset";
+-		reset-gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
+-		reset-delay-us = <2000>;
+-		reset-post-delay-ms = <40>;
+-		#reset-cells = <0>;
+-	};
+-
+ 	pcie0_refclk: pcie0-refclk {
+ 		compatible = "fixed-clock";
+ 		#clock-cells = <0>;
+@@ -289,25 +281,18 @@
+ &uart1 { /* BT */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart1>;
+-	assigned-clocks = <&clk IMX8MM_CLK_UART1>;
+-	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
+-	fsl,uart-has-rtscts;
+-	resets = <&modem_reset>;
+ 	status = "okay";
+ };
+ 
+-&uart2 { /* console */
++&uart2 { 
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart2>;
+ 	status = "okay";
+ };
+ 
+-&uart3 {
++&uart3 { /* console */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart3>;
+-	assigned-clocks = <&clk IMX8MM_CLK_UART3>;
+-	assigned-clock-parents = <&clk IMX8MM_SYS_PLL1_80M>;
+-	fsl,uart-has-rtscts;
+ 	status = "okay";
+ };
+ 
+@@ -737,9 +722,6 @@
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_UART1_RXD_UART1_DCE_RX	0x140
+ 			MX8MM_IOMUXC_UART1_TXD_UART1_DCE_TX	0x140
+-			MX8MM_IOMUXC_UART3_RXD_UART1_DCE_CTS_B	0x140
+-			MX8MM_IOMUXC_UART3_TXD_UART1_DCE_RTS_B	0x140
+-			MX8MM_IOMUXC_SD1_DATA4_GPIO2_IO6	0x19
+ 		>;
+ 	};
+ 
+@@ -752,10 +734,8 @@
+ 
+ 	pinctrl_uart3: uart3grp {
+ 		fsl,pins = <
+-			MX8MM_IOMUXC_ECSPI1_SCLK_UART3_DCE_RX		0x140
+-			MX8MM_IOMUXC_ECSPI1_MOSI_UART3_DCE_TX		0x140
+-			MX8MM_IOMUXC_ECSPI1_SS0_UART3_DCE_RTS_B		0x140
+-			MX8MM_IOMUXC_ECSPI1_MISO_UART3_DCE_CTS_B	0x140
++			MX8MM_IOMUXC_UART3_RXD_UART3_DCE_RX	0x140
++			MX8MM_IOMUXC_UART3_TXD_UART3_DCE_TX 0x140
+ 		>;
+ 	};
+ 
+-- 
+2.30.2
+
