@@ -13,6 +13,7 @@ SRC_URI += " \
 	file://defconfig.cfg \
 	file://ddrbin_param.txt \
 	file://0016-arm64-dts-iesy-px30-fix-phy-node.patch \
+	file://0017-arm64-dts-rockchip-px30-remove-adc-keys-backlight-battery-charger.patch \
 "
 
 DDR_BIN_FILE = "px30_ddr_333MHz_v*.bin"
