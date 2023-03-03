@@ -14,9 +14,9 @@ BBLAYERS ?= " \
   ${TOPDIR}/../sources/meta-browser/meta-chromium \
   ${TOPDIR}/../sources/meta-browser/meta-firefox \
   ${TOPDIR}/../sources/meta-python2 \
-  ${TOPDIR}/../sources/meta-rockchip \
   ${TOPDIR}/../sources/poky/meta \
   ${TOPDIR}/../sources/poky/meta-poky \
   ${TOPDIR}/../sources/poky/meta-yocto-bsp \
   ${TOPDIR}/../sources/meta-iesy-osm \
+  ${TOPDIR}/../sources/meta-rockchip \
 "
