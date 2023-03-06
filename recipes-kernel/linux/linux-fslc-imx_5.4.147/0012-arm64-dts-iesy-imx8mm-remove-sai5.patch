@@ -1,0 +1,86 @@
+From 02f38cd058096cf6831a998256c8c0772b9f6545 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 3 Mar 2023 11:09:10 +0100
+Subject: [PATCH 12/12] arm64: dts: iesy: imx8mm: remove sai5
+
+remove sai5 so that the pins can be used as gpio
+---
+ .../boot/dts/iesy/iesy-imx8mm-eva-mi.dts      | 48 -------------------
+ 1 file changed, 48 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index bf5cc4116658..9328d4535266 100755
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -185,21 +185,6 @@
+ // 	status = "okay";
+ // };
+ 
+-&sai5 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_sai5>;
+-	assigned-clocks = <&clk IMX8MM_CLK_SAI5>;
+-	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+-	assigned-clock-rates = <49152000>;
+-	clocks = <&clk IMX8MM_CLK_SAI5_IPG>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_CLK_SAI5_ROOT>, <&clk IMX8MM_CLK_DUMMY>,
+-		<&clk IMX8MM_CLK_DUMMY>, <&clk IMX8MM_AUDIO_PLL1_OUT>,
+-		<&clk IMX8MM_AUDIO_PLL2_OUT>;
+-	clock-names = "bus", "mclk0", "mclk1", "mclk2", "mclk3", "pll8k", "pll11k";
+-	fsl,sai-asynchronous;
+-	status = "disabled";
+-};
+-
+ &spdif1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_spdif1>;
+@@ -217,15 +202,6 @@
+ 	status = "okay";
+ };
+ 
+-&micfil {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_pdm>;
+-	assigned-clocks = <&clk IMX8MM_CLK_PDM>;
+-	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
+-	assigned-clock-rates = <196608000>;
+-	status = "okay";
+-};
+-
+ &snvs_pwrkey {
+ 	status = "okay";
+ };
+@@ -610,30 +586,6 @@
+ 		>;
+ 	};
+ 
+-	pinctrl_sai5: sai5grp {
+-		fsl,pins = <
+-			MX8MM_IOMUXC_SAI5_MCLK_SAI5_MCLK	0xd6
+-			MX8MM_IOMUXC_SAI5_RXC_SAI5_RX_BCLK	0xd6
+-			MX8MM_IOMUXC_SAI5_RXFS_SAI5_RX_SYNC	0xd6
+-			MX8MM_IOMUXC_SAI5_RXD0_SAI5_RX_DATA0	0xd6
+-			MX8MM_IOMUXC_SAI5_RXD1_SAI5_RX_DATA1    0xd6
+-			MX8MM_IOMUXC_SAI5_RXD2_SAI5_RX_DATA2    0xd6
+-			MX8MM_IOMUXC_SAI5_RXD3_SAI5_RX_DATA3    0xd6
+-		>;
+-	};
+-
+-	pinctrl_pdm: pdmgrp {
+-		fsl,pins = <
+-			MX8MM_IOMUXC_SAI5_MCLK_SAI5_MCLK	0xd6
+-			MX8MM_IOMUXC_SAI5_RXC_PDM_CLK		0xd6
+-			MX8MM_IOMUXC_SAI5_RXFS_SAI5_RX_SYNC	0xd6
+-			MX8MM_IOMUXC_SAI5_RXD0_PDM_DATA0	0xd6
+-			MX8MM_IOMUXC_SAI5_RXD1_PDM_DATA1	0xd6
+-			MX8MM_IOMUXC_SAI5_RXD2_PDM_DATA2	0xd6
+-			MX8MM_IOMUXC_SAI5_RXD3_PDM_DATA3	0xd6
+-		>;
+-	};
+-
+ 	pinctrl_spdif1: spdif1grp {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_SPDIF_TX_SPDIF1_OUT	0xd6
+-- 
+2.30.2
+

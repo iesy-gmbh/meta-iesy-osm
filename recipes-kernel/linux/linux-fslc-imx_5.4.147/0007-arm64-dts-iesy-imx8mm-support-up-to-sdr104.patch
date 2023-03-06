@@ -1,0 +1,128 @@
+From 3182662e795a4c8382bcf725f13e213f38e2d26e Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 9 Jan 2023 10:58:31 +0100
+Subject: [PATCH 7/7] arm64: dts: iesy: imx8mm: support up to sdr104
+
+---
+ .../boot/dts/iesy/iesy-imx8mm-eva-mi.dts      | 46 ++++++++++---------
+ 1 file changed, 25 insertions(+), 21 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index 7a82ede74f4c..adcaf02707c3 100755
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -71,8 +71,8 @@
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_reg_usdhc2_vmmc>;
+ 		regulator-name = "VCC_SD_reg";
+-		regulator-min-microvolt = <1800000>;
+-		regulator-max-microvolt = <1800000>;
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
+ 		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
+ 		off-on-delay-us = <20000>;
+ 		enable-active-high;
+@@ -191,24 +191,24 @@
+ 	status = "okay";
+ };
+ 
+-&uart1 { /* BT */
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_uart1>;
+-	status = "okay";
+-};
+-
+-&uart2 { 
++&uart2 { /* UART B */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart2>;
+ 	status = "okay";
+ };
+ 
+-&uart3 { /* console */
++&uart3 { /* UART Console */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart3>;
+ 	status = "okay";
+ };
+ 
++// &uart4 { /* UART A */ //Anpassung im ATF nötig
++// 	pinctrl-names = "default";
++// 	pinctrl-0 = <&pinctrl_uart4>;
++// 	status = "okay";
++// };
++
+ &usbotg1 {
+ 	dr_mode = "otg";
+ 	hnp-disable;
+@@ -226,12 +226,12 @@
+ 	};
+ };
+ 
+-&usdhc1 {
++&usdhc1 { /* SDIO A */
+ 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+ 	pinctrl-0 = <&pinctrl_usdhc1>, <&pinctrl_usdhc1_gpio>;
+ 	pinctrl-1 = <&pinctrl_usdhc1_100mhz>, <&pinctrl_usdhc1_gpio>;
+ 	pinctrl-2 = <&pinctrl_usdhc1_200mhz>, <&pinctrl_usdhc1_gpio>;
+-	bus-width = <4>;
++	bus-width = <8>;
+ 	vmmc-supply = <&reg_sd1_vmmc>;
+ 	pm-ignore-notify;
+ 	keep-power-in-suspend;
+@@ -239,7 +239,7 @@
+ 	status = "okay";
+ };
+ 
+-&usdhc2 {
++&usdhc2 { /* SD-Card */
+ 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+ 	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
+ 	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
+@@ -247,10 +247,14 @@
+ 	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
+ 	bus-width = <4>;
+ 	vmmc-supply = <&reg_usdhc2_vmmc>;
++	sd-uhs-sdr12;
++	sd-uhs-sdr25;
++	sd-uhs-sdr50;
++	sd-uhs-sdr104;
+ 	status = "okay";
+ };
+ 
+-&usdhc3 {
++&usdhc3 { /* eMMC */
+ 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+ 	pinctrl-0 = <&pinctrl_usdhc3>;
+ 	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
+@@ -579,13 +583,6 @@
+ 		>;
+ 	};
+ 
+-	pinctrl_uart1: uart1grp {
+-		fsl,pins = <
+-			MX8MM_IOMUXC_UART1_RXD_UART1_DCE_RX	0x140
+-			MX8MM_IOMUXC_UART1_TXD_UART1_DCE_TX	0x140
+-		>;
+-	};
+-
+ 	pinctrl_uart2: uart2grp {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_UART2_RXD_UART2_DCE_RX	0x140
+@@ -600,6 +597,13 @@
+ 		>;
+ 	};
+ 
++	pinctrl_uart4: uart4grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_ECSPI2_SCLK_UART4_DCE_RX 0x140
++			MX8MM_IOMUXC_ECSPI2_MOSI_UART4_DCE_TX 0x140
++		>;
++	};
++
+ 	pinctrl_usdhc1_gpio: usdhc1grpgpio {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_SD1_RESET_B_GPIO2_IO10	0x41
+-- 
+2.30.2
+

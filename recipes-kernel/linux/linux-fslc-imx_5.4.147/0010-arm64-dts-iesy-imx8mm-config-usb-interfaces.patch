@@ -1,0 +1,130 @@
+From d3846c8a1cd0a4eb11ae40f7f7f919441346d454 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 17 Jan 2023 11:02:24 +0100
+Subject: [PATCH 10/10] arm64: dts: iesy: imx8mm: config usb interfaces
+
+---
+ .../boot/dts/iesy/iesy-imx8mm-eva-mi.dts      | 92 ++++++++++++++++---
+ 1 file changed, 77 insertions(+), 15 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index 338f72087e74..e2c03fc6393c 100755
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -78,6 +78,26 @@
+ 		enable-active-high;
+ 	};
+ 
++	reg_usb_a_vbus: regulator@1 {
++		compatible = "regulator-fixed";
++		regulator-name = "USB_A_VBUS";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		gpio = <&gpio1 12 GPIO_ACTIVE_HIGH>;
++		off-on-delay = <20000>;
++		enable-active-high;
++    };
++
++	reg_usb_b_vbus: regulator@2 {
++		compatible = "regulator-fixed";
++		regulator-name = "USB_B_VBUS";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		gpio = <&gpio1 14 GPIO_ACTIVE_HIGH>;
++		off-on-delay = <20000>;
++		enable-active-high;
++    };
++
+ 	wm8524: audio-codec {
+ 		#sound-dai-cells = <0>;
+ 		compatible = "wlf,wm8524";
+@@ -221,22 +241,33 @@
+ 	uart-has-rtscts;
+ };
+ 
+-// &usbotg1 {
+-// 	dr_mode = "otg";
+-// 	hnp-disable;
+-// 	srp-disable;
+-// 	adp-disable;
+-// 	usb-role-switch;
+-// 	picophy,pre-emp-curr-control = <3>;
+-// 	picophy,dc-vol-level-adjust = <7>;
+-// 	status = "okay";
++&usbotg1 {
++	vbus-supply = <&reg_usb_a_vbus>;
++	over-current-active-low;
++	dr_mode = "host";
++	pinctrl-names = "idle", "active";
++	pinctrl-0 = <&pinctrl_usb1_idle>;
++	pinctrl-1 = <&pinctrl_usb1_active>;
++	status = "okay";
++};
+ 
+-// 	port {
+-// 		usb1_drd_sw: endpoint {
+-// 			remote-endpoint = <&typec1_dr_sw>;
+-// 		};
+-// 	};
+-// };
++&usbotg2 {
++	vbus-supply = <&reg_usb_b_vbus>;
++	over-current-active-low;
++	dr_mode = "host";
++	pinctrl-names = "idle", "active";
++	pinctrl-0 = <&pinctrl_usb2_idle>;
++	pinctrl-1 = <&pinctrl_usb2_active>;
++	status = "okay";
++};
++
++&usbphynop1 {
++	vcc-supply = <&reg_usb_a_vbus>;
++};
++
++&usbphynop2 {
++	vcc-supply = <&reg_usb_b_vbus>;
++};
+ 
+ &usdhc1 { /* SDIO A */
+ 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+@@ -598,6 +629,37 @@
+ 		>;
+ 	};
+ 
++	pinctrl_usb1_idle: usb1idl {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO10_USB1_OTG_ID 0x140
++			MX8MM_IOMUXC_GPIO1_IO12_GPIO1_IO12	0x0
++			MX8MM_IOMUXC_GPIO1_IO13_GPIO1_IO13	0x140
++		>;
++	};
++
++	pinctrl_usb1_active: usb1act {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO10_USB1_OTG_ID 0x140
++			MX8MM_IOMUXC_GPIO1_IO12_GPIO1_IO12	0x0		/* PWR_EN */
++			MX8MM_IOMUXC_GPIO1_IO13_USB1_OTG_OC	0x140
++		>;
++	};
++
++	pinctrl_usb2_idle: usb2idl {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO15_GPIO1_IO15	0x140
++			MX8MM_IOMUXC_GPIO1_IO14_GPIO1_IO14	0x0
++		>;
++	};
++
++	pinctrl_usb2_active: usb2act {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO15_USB2_OTG_OC	0x140
++			MX8MM_IOMUXC_GPIO1_IO14_GPIO1_IO14	0x0		/* PWR_EN */
++		>;
++	};
++
++
+ 	pinctrl_usdhc1_gpio: usdhc1grpgpio {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_SD1_RESET_B_GPIO2_IO10	0x41
+-- 
+2.30.2
+

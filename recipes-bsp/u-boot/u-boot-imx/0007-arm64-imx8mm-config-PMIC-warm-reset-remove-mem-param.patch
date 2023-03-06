@@ -1,0 +1,40 @@
+From 06e3228b6a6da84a07e703380ee723d8a14e2e1d Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 14 Feb 2023 14:17:37 +0100
+Subject: [PATCH 7/7] arm64: imx8mm: config PMIC warm reset, remove
+ mem-parameter
+
+---
+ board/freescale/imx8mm_evk/spl.c | 2 +-
+ include/configs/imx8mm_evk.h     | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/board/freescale/imx8mm_evk/spl.c b/board/freescale/imx8mm_evk/spl.c
+index f9df5d46e9..f463a5eeb5 100644
+--- a/board/freescale/imx8mm_evk/spl.c
++++ b/board/freescale/imx8mm_evk/spl.c
+@@ -222,7 +222,7 @@ int power_init_board(void)
+ #endif
+ 
+         /* set WDOG_B_CFG to 10b=Cold Reset, except LDO1/2 */
+-        pmic_reg_write(p, PCA9450_RESET_CTRL, 0xA1);
++        pmic_reg_write(p, PCA9450_RESET_CTRL, 0x11);
+ 
+         return 0;
+ }
+diff --git a/include/configs/imx8mm_evk.h b/include/configs/imx8mm_evk.h
+index 6e530c6404..19e5668fa0 100644
+--- a/include/configs/imx8mm_evk.h
++++ b/include/configs/imx8mm_evk.h
+@@ -183,7 +183,7 @@
+ */
+ 
+ #define CONFIG_BOOTCOMMAND \
+-	"setenv bootargs console=${console} root=${mmcroot} earlycon=ec_imx6q,0x30880000,115200 mem=${memory};" \
++	"setenv bootargs console=${console} root=${mmcroot} earlycon=ec_imx6q,0x30880000,115200;" \
+ 	"fatload mmc ${mmcdev} ${loadaddr} Image; " \
+ 	"fatload mmc ${mmcdev} ${fdt_addr} ${fdt_file}; " \
+ 	"booti ${loadaddr} - ${fdt_addr};"
+-- 
+2.30.2
+
