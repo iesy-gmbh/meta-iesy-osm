@@ -1,0 +1,69 @@
+From f423fbe4c2ea6f3121267b94df82197260d6ce44 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 23 Mar 2023 13:36:11 +0100
+Subject: [PATCH 14/14] arm64: dts: iesy: imx8mm: add ecspi1/spiB
+
+---
+ .../boot/dts/iesy/iesy-imx8mm-eva-mi.dts      | 32 ++++++++++++++++++-
+ 1 file changed, 31 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index 9e60738223b4..622b4e46320e 100755
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -188,7 +188,7 @@
+ 	pinctrl-0 = <&pinctrl_uart4>;
+ 	status = "okay";
+ 	cts-gpios = <&gpio5 12 GPIO_ACTIVE_LOW>;
+-	rts-gpios = <&gpio5 9 GPIO_ACTIVE_LOW>;
++	rts-gpios = <&gpio5 13 GPIO_ACTIVE_LOW>;
+ 	uart-has-rtscts;
+ };
+ 
+@@ -281,6 +281,22 @@
+ 	};
+ };
+ 
++&ecspi1 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	fsl,spi-num-chipselects = <1>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_ecspi1 &pinctrl_ecspi1_cs>;
++	cs-gpios = <&gpio5 9 GPIO_ACTIVE_LOW>;
++	status = "okay";
++
++	spidev0: spi@0 {
++		reg = <0>;
++		compatible = "linux,spidev";
++		spi-max-frequency = <10000000>;
++	};
++};
++
+ &i2c1 {
+ 	clock-frequency = <400000>;
+ 	pinctrl-names = "default", "gpio";
+@@ -462,6 +478,20 @@
+ 		>;
+ 	};
+ 
++	pinctrl_ecspi1: ecspi1grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_ECSPI1_SCLK_ECSPI1_SCLK	0x82
++			MX8MM_IOMUXC_ECSPI1_MOSI_ECSPI1_MOSI	0x82
++			MX8MM_IOMUXC_ECSPI1_MISO_ECSPI1_MISO	0x82
++		>;
++	};
++
++	pinctrl_ecspi1_cs: ecspi1csgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_ECSPI1_SS0_GPIO5_IO9		0x82
++		>;
++	};
++
+ 	pinctrl_leds_bb138: gpioledgrp {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_SAI1_TXFS_GPIO4_IO10	0x19
+-- 
+2.30.2
+

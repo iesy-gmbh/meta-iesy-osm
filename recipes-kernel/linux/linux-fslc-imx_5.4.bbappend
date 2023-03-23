@@ -14,6 +14,8 @@ SRC_URI += " \
     file://0010-arm64-dts-iesy-imx8mm-config-usb-interfaces.patch \
     file://0011-arm64-dts-iesy-imx8mm-config-buttons-pwm.patch \
     file://0012-arm64-dts-iesy-imx8mm-remove-sai5.patch \
+    file://0013-arm64-dts-iesy-imx8mm-remove-unused-nodes.patch \
+    file://0014-arm64-dts-iesy-imx8mm-add-ecspi1-spiB.patch \
 "
 
 

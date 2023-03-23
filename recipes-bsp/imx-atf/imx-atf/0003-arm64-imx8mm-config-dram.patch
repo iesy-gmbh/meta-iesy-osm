@@ -6,21 +6,8 @@ Subject: [PATCH 3/3] arm64-imx8mm-config-dram
 ---
  plat/imx/imx8m/imx8mm/include/platform_def.h | 2 +-
  plat/imx/imx8m/imx8mm/platform.mk            | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ 1 file changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/plat/imx/imx8m/imx8mm/include/platform_def.h b/plat/imx/imx8m/imx8mm/include/platform_def.h
-index 42b03613e..d3468d869 100644
---- a/plat/imx/imx8m/imx8mm/include/platform_def.h
-+++ b/plat/imx/imx8m/imx8mm/include/platform_def.h
-@@ -51,7 +51,7 @@
- 
- #define HAB_RVT_BASE			U(0x00000900) /* HAB_RVT for i.MX8MM */
- 
--#define IMX_BOOT_UART_BASE		U(0x30890000)
-+#define IMX_BOOT_UART_BASE		U(0x30880000)
- #define IMX_BOOT_UART_CLK_IN_HZ		24000000 /* Select 24MHz oscillator */
- 
- #define PLAT_CRASH_UART_BASE		IMX_BOOT_UART_BASE
 diff --git a/plat/imx/imx8m/imx8mm/platform.mk b/plat/imx/imx8m/imx8mm/platform.mk
 index 600a3c449..4bce08765 100644
 --- a/plat/imx/imx8m/imx8mm/platform.mk
