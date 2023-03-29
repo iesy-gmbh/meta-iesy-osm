@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot:"
 
 SRC_URI += " \
 	file://0007-ram-rockchip-px30-add-config-based-LPDDR3-selection.patch \
@@ -18,7 +18,7 @@ SRC_URI += " \
 
 DDR_BIN_FILE = "px30_ddr_333MHz_v*.bin"
 
-do_configure_append() {
+do_configure:append() {
 	# use parameters from given ddrbin_param.txt
 	${WORKDIR}/rkbin/tools/ddrbin_tool ${WORKDIR}/ddrbin_param.txt ${WORKDIR}/rkbin/bin/rk33/${DDR_BIN_FILE}
 }

@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}_${LINUX_VERSION}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}_${LINUX_VERSION}:"
 
 SRC_URI += " \
 	file://config.cfg \
@@ -80,6 +80,6 @@ python () {
 }
 
 # Add .cfg to Kernelconfig
-do_configure_append() {
+do_configure:append() {
     ${S}/scripts/kconfig/merge_config.sh -m -O ${B} ${B}/.config ${WORKDIR}/*.cfg
 }
