@@ -1,7 +1,7 @@
 From 51b710a6ad5883e0d83f8217ae99765a1ade8b97 Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
 Date: Wed, 8 Feb 2023 15:09:05 +0100
-Subject: [PATCH 3/3] arm64-imx8mm-config-dram
+Subject: [PATCH 2/2] arm64-imx8mm-config-dram
 
 ---
  plat/imx/imx8m/imx8mm/include/platform_def.h | 2 +-
