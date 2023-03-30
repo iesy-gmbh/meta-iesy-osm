@@ -10,7 +10,7 @@ IMAGE_FEATURES += " \
 # original one from poky forces us to specify our own bbclass here (pointing to poky) to keep it clean and
 # not being dependent on the user's bblayers.conf.
 # Some background: https://www.yoctoproject.org/pipermail/yocto/2012-January/004376.html
-inherit core-image ${@'features_check-poky' if "meta-rockchip" in d.getVar('BBLAYERS') else 'features_check'}
+inherit core-image ${@'features_check-poky' if "meta-rockchip" in d.getVar('BBLAYERS') else ''}
 
 IMAGE_FEATURES += " \
     ssh-server-openssh \
