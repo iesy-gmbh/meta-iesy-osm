@@ -2,11 +2,13 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot-imx:"
 
 SRC_URI += " \
     file://defconfig.cfg \
-    file://0001-arm64-imx8mm-change-console-uart2-3-config-new-pmic.patch \
-    file://0002-arm64-imx8mm-config-PMIC.patch \
-    file://0003-arm64-imx8mm-dts-change-pin-conf-for-sd-detection.patch \
-    file://0004-arm64-imx8mm-change-boot-cmd.patch \
-    file://0005-arm64-imx8mm-add-mem-parameter-to-boot-cmd.patch \
-    file://0006-arm64-imx8mm-config-DRAM.patch \
-    file://0007-arm64-imx8mm-config-PMIC-warm-reset-remove-mem-param.patch \
+    file://0001-arch-arm-dts-change-model-name.patch \
 "
+
+# file://0001-arm64-imx8mm-change-console-uart2-3-config-new-pmic.patch
+# file://0002-arm64-imx8mm-config-PMIC.patch
+# file://0003-arm64-imx8mm-dts-change-pin-conf-for-sd-detection.patch
+# file://0004-arm64-imx8mm-change-boot-cmd.patch
+# file://0005-arm64-imx8mm-add-mem-parameter-to-boot-cmd.patch
+# file://0006-arm64-imx8mm-config-DRAM.patch
+# file://0007-arm64-imx8mm-config-PMIC-warm-reset-remove-mem-param.patch

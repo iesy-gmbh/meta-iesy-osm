@@ -1,0 +1,25 @@
+From 812081863a6345ae4e5df524fe246530f26b3558 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 5 Apr 2023 11:09:49 +0200
+Subject: [PATCH] arch: arm: dts: change model name
+
+---
+ arch/arm/dts/imx8mm-evk.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/imx8mm-evk.dts b/arch/arm/dts/imx8mm-evk.dts
+index c07eb8be8e..809b3143b7 100644
+--- a/arch/arm/dts/imx8mm-evk.dts
++++ b/arch/arm/dts/imx8mm-evk.dts
+@@ -9,7 +9,7 @@
+ #include "imx8mm-evk.dtsi"
+ 
+ / {
+-	model = "NXP i.MX8MM EVK board";
++	model = "iesy i.MX8MM EVA MI";
+ 	compatible = "fsl,imx8mm-evk", "fsl,imx8mm";
+ 
+ 	chosen {
+-- 
+2.30.2
+
