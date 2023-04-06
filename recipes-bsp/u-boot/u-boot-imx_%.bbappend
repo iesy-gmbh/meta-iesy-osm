@@ -3,6 +3,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot-imx:"
 SRC_URI += " \
     file://defconfig.cfg \
     file://0001-arch-arm-dts-change-model-name.patch \
+    file://0002-arch-arm-dts-config-DRAM.patch \
 "
 
 # file://0001-arm64-imx8mm-change-console-uart2-3-config-new-pmic.patch
