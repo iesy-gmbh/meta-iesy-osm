@@ -48,6 +48,8 @@ SRC_URI += " \
 	file://0049-arm64-dts-iesy-px30-limit-sdmmc-speed.patch \
 	file://0050-arm64-dts-iesy-px30-set-SD-max-freq-to-135MHz.patch \
 	file://0051-arm64-dts-iesy-px30-fix-serial-pin-config.patch \
+	file://0052-arm64-dts-iesy-px30-add-missing-nodes-complained-in-kernel-log.patch \
+	file://0053-arm64-dts-iesy-px30-switch-usb-otg-port-to-correct-dual-role-mode.patch \
 "
 
 # do_kernel_metadata is executed before do_patch:

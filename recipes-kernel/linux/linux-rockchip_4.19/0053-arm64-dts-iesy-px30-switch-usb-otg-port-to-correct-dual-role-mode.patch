@@ -1,0 +1,26 @@
+From 59b4ce7c9421267964119b32ad30c332a2a250d5 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Thu, 6 Apr 2023 16:37:41 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: px30: switch usb otg port to correct
+ dual-role mode
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index af0a20687e0d..c9be32a3ab78 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -942,7 +942,7 @@
+ 
+ &usb20_otg {
+     /*vbus-supply = <&usb_a_vbus_regulator>;*/
+-    dr_mode = "peripheral";
++    dr_mode = "otg";
+ 	status = "okay";
+ 
+ 	/* should be defined to avoid kernel log error */
+-- 
+2.30.2
+

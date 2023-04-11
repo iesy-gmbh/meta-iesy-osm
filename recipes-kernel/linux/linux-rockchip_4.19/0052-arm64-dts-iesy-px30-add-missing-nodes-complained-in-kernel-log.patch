@@ -1,0 +1,154 @@
+From 50c5c9dd33f1f0e17eddfb8619918651604f9167 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Tue, 7 Mar 2023 13:23:53 +0100
+Subject: [PATCH 1/1] arm64: dts: iesy: px30: add missing nodes complained in
+ kernel log
+
+Nodes that could not be fully resolved are temporarily inserted as comments only
+---
+ .../arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts | 57 ++++++++++++++++---
+ 1 file changed, 50 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+index c159a6851fa5..af0a20687e0d 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi.dts
+@@ -77,7 +77,7 @@
+ 	/* regulator for IMX219 camera */
+ 	vdd1v2_imx219: regulator@3 {
+ 		compatible = "regulator-fixed";
+-		regulator-name = "cdd1v2_imx219";
++		regulator-name = "vdd1v2_imx219";
+ 		regulator-min-microvolt = <1200000>;
+ 		regulator-max-microvolt = <1200000>;
+ 		gpio = <&gpio3 RK_PC7 GPIO_ACTIVE_HIGH>;
+@@ -86,6 +86,16 @@
+ 		regulator-boot-on;
+ 	};
+ 
++	/* regulator for SD Card on BB138 */
++	vdd3v3_bb138: regulator@4 {
++		compatible = "regulator-fixed";
++		regulator-name = "vdd3v3_bb138";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
+ 	leds {
+ 		compatible = "gpio-leds";
+ 
+@@ -130,6 +140,12 @@
+ 	};
+ };
+ 
++&cpu0 {
++	/* should be defined to avoid kernel log error */
++	/* but no further info about cpu power_model available */
++	/* power_model = <?>; */
++};
++
+ &display_subsystem {
+ 	status = "okay";
+ };
+@@ -205,6 +221,11 @@
+ 			};
+ 		};
+ 
++		/* should be defined to avoid kernel log errors */
++		/* vsp-supply is positive voltage supply, vsn-supply is negative voltage supply */
++		/* will not be critical: is not even used in simple-panel devicetree example */
++		/* vsp-supply = <???>; */
++		/* vsn-supply = <???>; */
+ 	};
+ 
+ 	ports {
+@@ -261,6 +282,9 @@
+ 	non-removable;
+ 	num-slots = <1>;
+ 	status = "okay";
++
++	vmmc-supply = <&vcc3v3_sys>;
++	vqmmc-supply = <&vcc1v8_soc>;
+ };
+ 
+ &gmac {
+@@ -290,6 +314,7 @@
+ 
+ &gpu {
+ 	mali-supply = <&vdd_logic>;
++	shadercores-supply = <&vdd_logic>;
+ 	status = "okay";
+ };
+ 
+@@ -863,7 +888,7 @@
+ 	sd-uhs-sdr104;
+ 	max-frequency = <135000000>;
+ 	vqmmc-supply = <&vccio_sd>;
+-	/* vmmc-supply = <&vcc_sd>; */
++	vmmc-supply = <&vdd3v3_bb138>;
+ 	status = "okay";
+ };
+ 
+@@ -875,6 +900,14 @@
+ 	status = "okay";
+ };
+ 
++&grf {
++	io_domains: io-domains {
++		/* should be defined to avoid kernel log error */
++		/* but no further info about vccio-oscgpi for PX30 available */
++		/* vccio-oscgpi-supply = <???>; */
++	};
++};
++
+ &uart0 {
+ 	status = "okay";
+ };
+@@ -901,10 +934,23 @@
+ 	};
+ };
+ 
++&video_phy {
++	/* should be defined to avoid kernel log error */
++	/* no further info about video phy supply available */
++	/* phy-supply = "???"; */
++};
++
+ &usb20_otg {
+     /*vbus-supply = <&usb_a_vbus_regulator>;*/
+     dr_mode = "peripheral";
+ 	status = "okay";
++
++	/* should be defined to avoid kernel log error */
++	/* vusb_d: digital usb supply, 1.2V */
++	/* vusb_q: analog usb supply, 1.1V */
++	/* no further info available */
++	/* vusb_d-supply = <???>; */
++	/* vusb_a-supply = <???>; */
+ };
+ 
+ &usb_host0_ehci {
+@@ -974,16 +1020,13 @@
+ 	};
+ };
+ 
+-/* 
+-   Inserted to avoid error messages
+-   "Looking up ...-supply property in node /power-management@ff000000/power-controller failed"
+-   @MAS: Are the specified power domains correct?
+-*/
+ &power {
+ 	pd_vi-supply = <&vdd_logic>;
+ 	pd_vpu-supply = <&vdd_logic>;
+ 	pd_gpu-supply = <&vdd_logic>;
+ 	pd_usb-supply = <&vdd_logic>;
++	pd_mmc_nand-supply = <&vdd_logic>;
++	pd_vo-supply = <&vdd_logic>;
+ };
+ 
+ &pinctrl {
+-- 
+2.30.2
+
