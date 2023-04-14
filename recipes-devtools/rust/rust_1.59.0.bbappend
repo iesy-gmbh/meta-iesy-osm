@@ -1,0 +1,1 @@
+RUST_BUILD_ARCH = "x86_64"
