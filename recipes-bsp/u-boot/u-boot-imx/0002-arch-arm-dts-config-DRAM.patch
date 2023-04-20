@@ -1,7 +1,7 @@
-From a9f61cb68fe55c3364b3bc24a85df3b10b989021 Mon Sep 17 00:00:00 2001
+From 8cd5505a7964986bd440e06fd94fd9d7b54f4d65 Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
 Date: Thu, 6 Apr 2023 14:30:30 +0200
-Subject: [PATCH 2/2] arch: arm: dts: config DRAM
+Subject: [PATCH 2/5] arch: arm: dts: config DRAM
 
 ---
  board/freescale/imx8mm_evk/lpddr4_timing.c | 83 +++++++++++-----------

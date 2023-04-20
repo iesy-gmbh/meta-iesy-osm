@@ -1,0 +1,25 @@
+From ce1213504b69851f46eae29e73e3e289161ef430 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 20 Apr 2023 13:41:52 +0200
+Subject: [PATCH 5/5] include: configs: imx8mm_evk: change kernel console
+
+---
+ include/configs/imx8mm_evk.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/imx8mm_evk.h b/include/configs/imx8mm_evk.h
+index 0da9de9819..5aee2cff70 100644
+--- a/include/configs/imx8mm_evk.h
++++ b/include/configs/imx8mm_evk.h
+@@ -129,7 +129,7 @@
+ 	"bsp_script=boot.scr\0" \
+ 	"image=Image\0" \
+ 	"splashimage=0x50000000\0" \
+-	"console=ttymxc1,115200\0" \
++	"console=ttymxc2,115200\0" \
+ 	"fdt_addr_r=0x43000000\0"			\
+ 	"fdt_addr=0x43000000\0"			\
+ 	"fdt_high=0xffffffffffffffff\0"		\
+-- 
+2.30.2
+

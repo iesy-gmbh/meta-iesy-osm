@@ -1,7 +1,7 @@
-From 812081863a6345ae4e5df524fe246530f26b3558 Mon Sep 17 00:00:00 2001
+From b2bfd771bc486d30489cf4a624eaca52e2af65f6 Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
 Date: Wed, 5 Apr 2023 11:09:49 +0200
-Subject: [PATCH] arch: arm: dts: change model name
+Subject: [PATCH 1/5] arch: arm: dts: change model name
 
 ---
  arch/arm/dts/imx8mm-evk.dts | 2 +-
