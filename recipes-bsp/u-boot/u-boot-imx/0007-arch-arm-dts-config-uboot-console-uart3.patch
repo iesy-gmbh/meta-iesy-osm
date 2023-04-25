@@ -1,0 +1,159 @@
+From 3930cd399e3bf185a39af3dad3cb5ef98f4ccc72 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 21 Apr 2023 13:56:11 +0200
+Subject: [PATCH 7/7] arch: arm: dts: config uboot console uart3
+
+---
+ arch/arm/dts/imx8mm-ddr4-evk-u-boot.dtsi |  6 +++---
+ arch/arm/dts/imx8mm-evk-u-boot.dtsi      |  4 ++--
+ arch/arm/dts/imx8mm-evk.dts              |  2 +-
+ arch/arm/dts/imx8mm-evk.dtsi             | 12 ++++++------
+ board/freescale/imx8mm_evk/imx8mm_evk.c  |  6 +++---
+ include/configs/imx8mm_evk.h             |  2 +-
+ 6 files changed, 16 insertions(+), 16 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mm-ddr4-evk-u-boot.dtsi b/arch/arm/dts/imx8mm-ddr4-evk-u-boot.dtsi
+index e66bd5830d..8cd270b527 100644
+--- a/arch/arm/dts/imx8mm-ddr4-evk-u-boot.dtsi
++++ b/arch/arm/dts/imx8mm-ddr4-evk-u-boot.dtsi
+@@ -7,7 +7,7 @@
+ 
+ / {
+ 	chosen {
+-		bootargs = "console=ttymxc1,115200 earlycon=ec_imx6q,0x30890000,115200";
++		bootargs = "console=ttymxc2,115200 earlycon=ec_imx6q,0x30880000,115200";
+ 	};
+ 
+ 	wdt-reboot {
+@@ -52,7 +52,7 @@
+ 	u-boot,dm-spl;
+ };
+ 
+-&pinctrl_uart2 {
++&pinctrl_uart3 {
+ 	u-boot,dm-spl;
+ };
+ 
+@@ -84,7 +84,7 @@
+ 	u-boot,dm-spl;
+ };
+ 
+-&uart2 {
++&uart3 {
+ 	u-boot,dm-spl;
+ };
+ 
+diff --git a/arch/arm/dts/imx8mm-evk-u-boot.dtsi b/arch/arm/dts/imx8mm-evk-u-boot.dtsi
+index 7ff878b5f9..0d6c2ee8dd 100644
+--- a/arch/arm/dts/imx8mm-evk-u-boot.dtsi
++++ b/arch/arm/dts/imx8mm-evk-u-boot.dtsi
+@@ -48,7 +48,7 @@
+ 	u-boot,dm-spl;
+ };
+ 
+-&pinctrl_uart2 {
++&pinctrl_uart3 {
+ 	u-boot,dm-spl;
+ };
+ 
+@@ -84,7 +84,7 @@
+ 	u-boot,dm-spl;
+ };
+ 
+-&uart2 {
++&uart3 {
+ 	u-boot,dm-spl;
+ };
+ 
+diff --git a/arch/arm/dts/imx8mm-evk.dts b/arch/arm/dts/imx8mm-evk.dts
+index 809b3143b7..1253067cc2 100644
+--- a/arch/arm/dts/imx8mm-evk.dts
++++ b/arch/arm/dts/imx8mm-evk.dts
+@@ -13,7 +13,7 @@
+ 	compatible = "fsl,imx8mm-evk", "fsl,imx8mm";
+ 
+ 	chosen {
+-		bootargs = "console=ttymxc1,115200 earlycon=ec_imx6q,0x30890000,115200";
++		bootargs = "console=ttymxc2,115200 earlycon=ec_imx6q,0x30880000,115200";
+ 	};
+ 
+ 	aliases {
+diff --git a/arch/arm/dts/imx8mm-evk.dtsi b/arch/arm/dts/imx8mm-evk.dtsi
+index 994ac2f58c..ca5789976e 100644
+--- a/arch/arm/dts/imx8mm-evk.dtsi
++++ b/arch/arm/dts/imx8mm-evk.dtsi
+@@ -10,7 +10,7 @@
+ 
+ / {
+ 	chosen {
+-		stdout-path = &uart2;
++		stdout-path = &uart3;
+ 	};
+ 
+ 	memory@40000000 {
+@@ -373,9 +373,9 @@
+ 	status = "okay";
+ };
+ 
+-&uart2 { /* console */
++&uart3 { /* console */
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_uart2>;
++	pinctrl-0 = <&pinctrl_uart3>;
+ 	status = "okay";
+ };
+ 
+@@ -565,10 +565,10 @@
+ 		>;
+ 	};
+ 
+-	pinctrl_uart2: uart2grp {
++	pinctrl_uart3: uart3grp {
+ 		fsl,pins = <
+-			MX8MM_IOMUXC_UART2_RXD_UART2_DCE_RX	0x140
+-			MX8MM_IOMUXC_UART2_TXD_UART2_DCE_TX	0x140
++			MX8MM_IOMUXC_UART3_RXD_UART3_DCE_RX	0x140
++			MX8MM_IOMUXC_UART3_TXD_UART3_DCE_TX	0x140
+ 		>;
+ 	};
+ 
+diff --git a/board/freescale/imx8mm_evk/imx8mm_evk.c b/board/freescale/imx8mm_evk/imx8mm_evk.c
+index 39f6d6281c..eac5029921 100644
+--- a/board/freescale/imx8mm_evk/imx8mm_evk.c
++++ b/board/freescale/imx8mm_evk/imx8mm_evk.c
+@@ -29,8 +29,8 @@ DECLARE_GLOBAL_DATA_PTR;
+ #define WDOG_PAD_CTRL	(PAD_CTL_DSE6 | PAD_CTL_ODE | PAD_CTL_PUE | PAD_CTL_PE)
+ 
+ static iomux_v3_cfg_t const uart_pads[] = {
+-	IMX8MM_PAD_UART2_RXD_UART2_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
+-	IMX8MM_PAD_UART2_TXD_UART2_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
++	IMX8MM_PAD_UART3_RXD_UART3_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
++	IMX8MM_PAD_UART3_TXD_UART3_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
+ };
+ 
+ static iomux_v3_cfg_t const wdog_pads[] = {
+@@ -98,7 +98,7 @@ int board_early_init_f(void)
+ 
+ 	imx_iomux_v3_setup_multiple_pads(uart_pads, ARRAY_SIZE(uart_pads));
+ 
+-	init_uart_clk(1);
++	init_uart_clk(2);
+ 
+ #ifdef CONFIG_NAND_MXS
+ 	setup_gpmi_nand(); /* SPL will call the board_early_init_f */
+diff --git a/include/configs/imx8mm_evk.h b/include/configs/imx8mm_evk.h
+index 5aee2cff70..e4af9935ca 100644
+--- a/include/configs/imx8mm_evk.h
++++ b/include/configs/imx8mm_evk.h
+@@ -206,7 +206,7 @@
+ #define PHYS_SDRAM                      0x40000000
+ #define PHYS_SDRAM_SIZE			0x40000000 /* 2GB DDR */
+ 
+-#define CONFIG_MXC_UART_BASE		UART2_BASE_ADDR
++#define CONFIG_MXC_UART_BASE		UART3_BASE_ADDR
+ 
+ /* Monitor Command Prompt */
+ #define CONFIG_SYS_CBSIZE		2048
+-- 
+2.30.2
+
