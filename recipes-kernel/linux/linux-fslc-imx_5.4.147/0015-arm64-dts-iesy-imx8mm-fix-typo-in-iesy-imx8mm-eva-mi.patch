@@ -1,0 +1,26 @@
+From 1715a865c64b513ca5b97212bbc1f6798f9a5255 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 25 Apr 2023 11:43:03 +0200
+Subject: [PATCH 15/15] arm64: dts:iesy: imx8mm: fix typo in
+ iesy-imx8mm-eva-mi.dts
+
+---
+ arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index 622b4e46320e..bca6cc923ff8 100755
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -378,7 +378,7 @@
+ 			vcc_sd: LDO5 {
+ 				regulator-name = "vcc_sd";
+ 				regulator-min-microvolt = <1800000>;
+-				regulaotr-max-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
+ 			};
+ 		};
+ 	};
+-- 
+2.30.2
+

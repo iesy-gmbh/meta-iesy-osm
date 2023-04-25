@@ -16,6 +16,7 @@ SRC_URI += " \
     file://0012-arm64-dts-iesy-imx8mm-remove-sai5.patch \
     file://0013-arm64-dts-iesy-imx8mm-remove-unused-nodes.patch \
     file://0014-arm64-dts-iesy-imx8mm-add-ecspi1-spiB.patch \
+    file://0015-arm64-dts-iesy-imx8mm-fix-typo-in-iesy-imx8mm-eva-mi.patch \
 "
 
 
