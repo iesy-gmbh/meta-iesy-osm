@@ -1,0 +1,107 @@
+From a7718621b784389665053ef6d21d8201a44d2da5 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 25 Apr 2023 15:09:51 +0200
+Subject: [PATCH 3/3] arm64: dts:iesy: set pmic regulators always-on
+
+---
+ .../boot/dts/iesy/iesy-imx8mm-eva-mi.dts      | 24 +++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index 85aa4a3fbcd3..9d48ffc49e16 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -319,66 +319,90 @@ vdd_soc_0v8: BUCK1 {
+ 				regulator-name = "0v8_soc";
+ 				regulator-min-microvolt = <700000>;
+ 				regulator-max-microvolt = <1300000>;
++				regulator-boot-on;
++				regulator-always-on;
++				regulator-ramp-delay = <1250>;
+ 			};
+ 
+ 			vdd_arm_0v9: BUCK2 {
+ 				regulator-name = "0v9_arm";
+ 				regulator-min-microvolt = <700000>;
+ 				regulator-max-microvolt = <1300000>;
++				regulator-boot-on;
++				regulator-always-on;
++				regulator-ramp-delay = <1250>;
+ 			};
+ 
+ 			vdd_dram_0v9: BUCK3 {
+ 				regulator-name = "0v9_dram";
+ 				regulator-min-microvolt = <700000>;
+ 				regulator-max-microvolt = <1300000>;
++				regulator-boot-on;
++				regulator-always-on;
+ 			};
+ 
+ 			nvcc_3v3: BUCK4 {
+ 				regulator-name = "3v3_io";
+ 				regulator-min-microvolt = <3300000>;
+ 				regulator-max-microvolt = <3300000>;
++				regulator-boot-on;
++				regulator-always-on;
+ 			};
+ 
+ 			nvcc_1v8: BUCK5 {
+ 				regulator-name = "1v8_io";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
++				regulator-boot-on;
++				regulator-always-on;
+ 			};
+ 
+ 			nvcc_dram_1v1: BUCK6 {
+ 				regulator-name = "1v1_dram";
+ 				regulator-min-microvolt = <1100000>;
+ 				regulator-max-microvolt = <1100000>;
++				regulator-boot-on;
++				regulator-always-on;
+ 			};
+ 
+ 			nvcc_snvs_1v8: LDO1 {
+ 				regulator-name = "1v8_snvs";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
++				regulator-boot-on;
++				regulator-always-on;
+ 			};
+ 
+ 			vdd_snvs_0v8: LDO2 {
+ 				regulator-name = "0v8_snvs";
+ 				regulator-min-microvolt = <800000>;
+ 				regulator-max-microvolt = <900000>;
++				regulator-boot-on;
++				regulator-always-on;
+ 			};
+ 
+ 			vdda_1v8: LDO3 {
+ 				regulator-name = "1v8_vdda";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
++				regulator-boot-on;
++				regulator-always-on;
+ 			};
+ 
+ 			vdd_mipi_0v9: LDO4 {
+ 				regulator-name = "0v9_mipi";
+ 				regulator-min-microvolt = <900000>;
+ 				regulator-max-microvolt = <900000>;
++				regulator-boot-on;
++				regulator-always-on;
+ 			};
+ 
+ 			vcc_sd: LDO5 {
+ 				regulator-name = "vcc_sd";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
++				regulator-boot-on;
++				regulator-always-on;
+ 			};
+ 		};
+ 	};
+-- 
+2.30.2
+
