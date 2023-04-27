@@ -1,0 +1,42 @@
+From aac147fbec0bd5f6130fe7672769c8ac00b244a0 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 27 Apr 2023 12:10:11 +0200
+Subject: [PATCH 4/4] arm: dts: iesy: adapt eeprom compatible string to kernel
+ 5.15+
+
+---
+ arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index 9d48ffc49e16..ea2bdd823fa8 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -292,7 +292,7 @@ &ecspi1 {
+ 
+ 	spidev0: spi@0 {
+ 		reg = <0>;
+-		compatible = "linux,spidev";
++		compatible = "rohm,dh2228fv";
+ 		spi-max-frequency = <10000000>;
+ 	};
+ };
+@@ -413,13 +413,13 @@ sensor@4e {
+ 	};
+ 
+ 	eeprom@50 {
+-		compatible = "onsemi,24c32", "at,24c32";
++		compatible = "onsemi,24c32", "atmel,24c32";
+ 		reg = <0x50>;
+ 		pagesize = <32>;
+ 	};
+ 
+ 	eeprom@51 {
+-		compatible = "at,24c64";
++		compatible = "atmel,24c64";
+ 		reg = <0x51>;
+ 		pagesize = <64>;
+ 	};
+-- 
+2.30.2
+
