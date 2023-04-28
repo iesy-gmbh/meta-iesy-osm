@@ -6,6 +6,7 @@ SRC_URI += " \
     file://0002-arm64-dts-iesy-fix-typo-in-iesy-imx8mm-eva-mi.dts.patch \
     file://0003-arm64-dts-iesy-set-pmic-regulators-always-on.patch \
     file://0004-arm-dts-iesy-adapt-eeprom-compatible-string-to-kerne.patch \
+    file://0005-arm-dts-iesy-split-eval-kit-into-baseboard-and-som.patch \
 "
 
 
