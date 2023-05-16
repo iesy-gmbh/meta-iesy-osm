@@ -1,0 +1,179 @@
+From aa926e6a80775defdcfd3310a7bf761540643914 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 16 May 2023 13:11:34 +0200
+Subject: [PATCH] arch: arm: dts: imx8mm-evk: change PMIC
+
+---
+ arch/arm/dts/imx8mm-evk-u-boot.dtsi |  4 +-
+ arch/arm/dts/imx8mm-evk.dtsi        | 68 ++++++++++++-----------------
+ 2 files changed, 30 insertions(+), 42 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mm-evk-u-boot.dtsi b/arch/arm/dts/imx8mm-evk-u-boot.dtsi
+index d07b3dc117..b6712d94fc 100644
+--- a/arch/arm/dts/imx8mm-evk-u-boot.dtsi
++++ b/arch/arm/dts/imx8mm-evk-u-boot.dtsi
+@@ -113,11 +113,11 @@
+ 	u-boot,dm-spl;
+ };
+ 
+-&{/soc@0/bus@30800000/i2c@30a20000/pmic@4b} {
++&{/soc@0/bus@30800000/i2c@30a20000/pca9450@25} {
+ 	u-boot,dm-spl;
+ };
+ 
+-&{/soc@0/bus@30800000/i2c@30a20000/pmic@4b/regulators} {
++&{/soc@0/bus@30800000/i2c@30a20000/pca9450@25/regulators} {
+ 	u-boot,dm-spl;
+ };
+ 
+diff --git a/arch/arm/dts/imx8mm-evk.dtsi b/arch/arm/dts/imx8mm-evk.dtsi
+index b517cb2d93..5ea01bb9dc 100644
+--- a/arch/arm/dts/imx8mm-evk.dtsi
++++ b/arch/arm/dts/imx8mm-evk.dtsi
+@@ -159,22 +159,16 @@
+ 	pinctrl-0 = <&pinctrl_i2c1>;
+ 	status = "okay";
+ 
+-	pmic@4b {
+-		compatible = "rohm,bd71847";
+-		reg = <0x4b>;
+-		pinctrl-names = "default";
++	pca9450@25 {
++		compatible = "nxp,pca9450a";
++		reg = <0x25>;
+ 		pinctrl-0 = <&pinctrl_pmic>;
+ 		interrupt-parent = <&gpio1>;
+-		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
+-		rohm,reset-snvs-powered;
+-
+-		#clock-cells = <0>;
+-		clocks = <&osc_32k 0>;
+-		clock-output-names = "clk-32k-out";
++		interrupts = <3 GPIO_ACTIVE_LOW>;
+ 
+ 		regulators {
+ 			buck1_reg: BUCK1 {
+-				regulator-name = "buck1";
++				regulator-name = "0v8_soc";
+ 				regulator-min-microvolt = <700000>;
+ 				regulator-max-microvolt = <1300000>;
+ 				regulator-boot-on;
+@@ -183,62 +177,56 @@
+ 			};
+ 
+ 			buck2_reg: BUCK2 {
+-				regulator-name = "buck2";
++				regulator-name = "0v9_arm";
+ 				regulator-min-microvolt = <700000>;
+ 				regulator-max-microvolt = <1300000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 				regulator-ramp-delay = <1250>;
+-				rohm,dvs-run-voltage = <1000000>;
+-				rohm,dvs-idle-voltage = <900000>;
+ 			};
+ 
+ 			buck3_reg: BUCK3 {
+-				// BUCK5 in datasheet
+-				regulator-name = "buck3";
++				regulator-name = "0v9_dram";
+ 				regulator-min-microvolt = <700000>;
+-				regulator-max-microvolt = <1350000>;
++				regulator-max-microvolt = <1300000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+ 			buck4_reg: BUCK4 {
+-				// BUCK6 in datasheet
+-				regulator-name = "buck4";
+-				regulator-min-microvolt = <3000000>;
++				regulator-name = "3v3_io";
++				regulator-min-microvolt = <3300000>;
+ 				regulator-max-microvolt = <3300000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+ 			buck5_reg: BUCK5 {
+-				// BUCK7 in datasheet
+-				regulator-name = "buck5";
+-				regulator-min-microvolt = <1605000>;
+-				regulator-max-microvolt = <1995000>;
++				regulator-name = "1v8_io";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+ 			buck6_reg: BUCK6 {
+-				// BUCK8 in datasheet
+-				regulator-name = "buck6";
+-				regulator-min-microvolt = <800000>;
+-				regulator-max-microvolt = <1400000>;
++				regulator-name = "1v1_dram";
++				regulator-min-microvolt = <1100000>;
++				regulator-max-microvolt = <1100000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+ 			ldo1_reg: LDO1 {
+-				regulator-name = "ldo1";
+-				regulator-min-microvolt = <1600000>;
+-				regulator-max-microvolt = <3300000>;
++				regulator-name = "1v8_snvs";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+ 			ldo2_reg: LDO2 {
+-				regulator-name = "ldo2";
++				regulator-name = "0v8_snvs";
+ 				regulator-min-microvolt = <800000>;
+ 				regulator-max-microvolt = <900000>;
+ 				regulator-boot-on;
+@@ -246,24 +234,24 @@
+ 			};
+ 
+ 			ldo3_reg: LDO3 {
+-				regulator-name = "ldo3";
++				regulator-name = "1v8_vdda";
+ 				regulator-min-microvolt = <1800000>;
+-				regulator-max-microvolt = <3300000>;
++				regulator-max-microvolt = <1800000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+ 			ldo4_reg: LDO4 {
+-				regulator-name = "ldo4";
++				regulator-name = "0v9_mipi";
+ 				regulator-min-microvolt = <900000>;
+-				regulator-max-microvolt = <1800000>;
++				regulator-max-microvolt = <900000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+-			ldo6_reg: LDO6 {
+-				regulator-name = "ldo6";
+-				regulator-min-microvolt = <900000>;
++			ldo5_reg: LDO5 {
++				regulator-name = "vcc_sd";
++				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+@@ -396,7 +384,7 @@
+ 	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
+ 	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
+ 	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
+-	cd-gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
++	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
+ 	bus-width = <4>;
+ 	vmmc-supply = <&reg_usdhc2_vmmc>;
+ 	status = "okay";

@@ -1,0 +1,22 @@
+From 6827d50d164160781682931259f1ca9970b44241 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 16 May 2023 13:12:38 +0200
+Subject: [PATCH] include: configs: imx8mm-evk: change RAM size
+
+---
+ include/configs/imx8mm_evk.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/imx8mm_evk.h b/include/configs/imx8mm_evk.h
+index dac642ed07..c85a126166 100644
+--- a/include/configs/imx8mm_evk.h
++++ b/include/configs/imx8mm_evk.h
+@@ -60,7 +60,7 @@
+ 
+ #define CONFIG_SYS_SDRAM_BASE           0x40000000
+ #define PHYS_SDRAM                      0x40000000
+-#define PHYS_SDRAM_SIZE			0x80000000 /* 2GB DDR */
++#define PHYS_SDRAM_SIZE			0x40000000 /* 1GB DDR */
+ 
+ #define CONFIG_FEC_MXC_PHYADDR          0
+ 

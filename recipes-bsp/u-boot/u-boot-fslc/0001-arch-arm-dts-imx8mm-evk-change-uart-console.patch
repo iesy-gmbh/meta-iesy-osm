@@ -1,0 +1,100 @@
+From d02ea9204b1fce5a44818f65fae7488cb3d10cad Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 16 May 2023 13:10:33 +0200
+Subject: [PATCH] arch: arm: dts: imx8mm-evk: change uart console
+
+---
+ arch/arm/dts/imx8mm-evk-u-boot.dtsi |  8 ++++++++
+ arch/arm/dts/imx8mm-evk.dtsi        | 19 ++++++++++++++++---
+ board/freescale/imx8mm_evk/spl.c    |  1 +
+ 3 files changed, 25 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mm-evk-u-boot.dtsi b/arch/arm/dts/imx8mm-evk-u-boot.dtsi
+index 36fbf56bc5..d07b3dc117 100644
+--- a/arch/arm/dts/imx8mm-evk-u-boot.dtsi
++++ b/arch/arm/dts/imx8mm-evk-u-boot.dtsi
+@@ -32,6 +32,10 @@
+ 	u-boot,dm-spl;
+ };
+ 
++&pinctrl_uart3 {
++	u-boot,dm-spl;
++};
++
+ &pinctrl_usdhc2_gpio {
+ 	u-boot,dm-spl;
+ };
+@@ -68,6 +72,10 @@
+ 	u-boot,dm-spl;
+ };
+ 
++&uart3 {
++	u-boot,dm-spl;
++};
++
+ &crypto {
+ 	u-boot,dm-spl;
+ };
+diff --git a/arch/arm/dts/imx8mm-evk.dtsi b/arch/arm/dts/imx8mm-evk.dtsi
+index c42b966f7a..b517cb2d93 100644
+--- a/arch/arm/dts/imx8mm-evk.dtsi
++++ b/arch/arm/dts/imx8mm-evk.dtsi
+@@ -11,7 +11,7 @@
+ 
+ / {
+ 	chosen {
+-		stdout-path = &uart2;
++		stdout-path = &uart3;
+ 	};
+ 
+ 	memory@40000000 {
+@@ -359,12 +359,18 @@
+ 	status = "okay";
+ };
+ 
+-&uart2 { /* console */
++&uart2 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart2>;
+ 	status = "okay";
+ };
+ 
++&uart3 { /* console */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart3>;
++	status = "okay";
++};
++
+ &usbotg1 {
+ 	dr_mode = "otg";
+ 	hnp-disable;
+@@ -516,9 +522,16 @@
+ 		>;
+ 	};
+ 
++	pinctrl_uart3: uart3grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_UART3_RXD_UART3_DCE_RX	0x140
++			MX8MM_IOMUXC_UART3_TXD_UART3_DCE_TX	0x140
++		>;
++	};
++
+ 	pinctrl_usdhc2_gpio: usdhc2grpgpiogrp {
+ 		fsl,pins = <
+-			MX8MM_IOMUXC_GPIO1_IO15_GPIO1_IO15	0x1c4
++			MX8MM_IOMUXC_SD2_CD_B_USDHC2_CD_B	0x1c4
+ 		>;
+ 	};
+ 
+diff --git a/board/freescale/imx8mm_evk/spl.c b/board/freescale/imx8mm_evk/spl.c
+index e2eb1426c8..c27d8b30c1 100644
+--- a/board/freescale/imx8mm_evk/spl.c
++++ b/board/freescale/imx8mm_evk/spl.c
+@@ -119,6 +119,7 @@ void board_init_f(ulong dummy)
+ 	arch_cpu_init();
+ 
+ 	init_uart_clk(1);
++	init_uart_clk(2);
+ 
+ 	timer_init();
+ 
