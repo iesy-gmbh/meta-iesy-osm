@@ -8,6 +8,3 @@ SRC_URI += " \
     file://0004-arm-dts-iesy-adapt-eeprom-compatible-string-to-kerne.patch \
     file://0005-arm-dts-iesy-split-eval-kit-into-baseboard-and-som.patch \
 "
-
-
-unset KBUILD_DEFCONFIG
