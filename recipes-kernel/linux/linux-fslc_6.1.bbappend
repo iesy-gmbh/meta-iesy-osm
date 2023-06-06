@@ -7,4 +7,10 @@ SRC_URI += " \
     file://0003-arm64-dts-iesy-set-pmic-regulators-always-on.patch \
     file://0004-arm-dts-iesy-adapt-eeprom-compatible-string-to-kerne.patch \
     file://0005-arm-dts-iesy-split-eval-kit-into-baseboard-and-som.patch \
+    file://0006-arm64-dts-iesy-add-qspi-and-acc-sensor-change-eeprom.patch \
+    file://0007-drivers-spi-spidev-add-mc3630-m95m04-to-generic-driv.patch \
+    file://0008-arm64-dts-iesy-change-audio-codec-to-max9867.patch \
+    file://0009-arm64-dts-iesy-change-i2c-eeprom-addr.patch \
+    file://0010-arm64-dts-iesy-add-rtc-pcf85263.patch \
+    file://0011-arm64-dts-iesy-add-hdmi-bridge-dsi.patch \
 "
