@@ -1,0 +1,35 @@
+From 1ed2a4d812eab046e37a2fda99de7c1551b6ce07 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 2 Jun 2023 12:21:45 +0200
+Subject: [PATCH 7/7] drivers: spi: spidev: add mc3630, m95m04 to generic
+ driver
+
+---
+ drivers/spi/spidev.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/spi/spidev.c b/drivers/spi/spidev.c
+index 71c3db60e968..a8b1469db3a2 100644
+--- a/drivers/spi/spidev.c
++++ b/drivers/spi/spidev.c
+@@ -700,6 +700,8 @@ static const struct spi_device_id spidev_spi_ids[] = {
+ 	{ .name = "m53cpld" },
+ 	{ .name = "spi-petra" },
+ 	{ .name = "spi-authenta" },
++	{ .name = "m95m04" },
++	{ .name = "mc3630" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(spi, spidev_spi_ids);
+@@ -726,6 +728,8 @@ static const struct of_device_id spidev_dt_ids[] = {
+ 	{ .compatible = "menlo,m53cpld", .data = &spidev_of_check },
+ 	{ .compatible = "cisco,spi-petra", .data = &spidev_of_check },
+ 	{ .compatible = "micron,spi-authenta", .data = &spidev_of_check },
++	{ .compatible = "st,m95m04", .data = &spidev_of_check },
++	{ .compatible = "memsic,mc3630", .data = &spidev_of_check },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, spidev_dt_ids);
+-- 
+2.30.2
+
