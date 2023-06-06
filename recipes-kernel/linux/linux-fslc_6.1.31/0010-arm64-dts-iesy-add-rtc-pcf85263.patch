@@ -1,0 +1,25 @@
+From 70741cf08fd2427710c0ea1187f4173132c77d0f Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 5 Jun 2023 09:36:20 +0200
+Subject: [PATCH] arm64: dts: iesy: add rtc pcf85263
+
+---
+ arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index ee64804b8d3c..15824e2590d2 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -164,6 +164,11 @@ sensor@4e {
+         vs-supply = <&reg_3v3_carrier>;
+ 	};
+ 
++	rtc@51 {
++		compatible = "nxp,pcf85263";
++		reg = <0x51>;
++	};
++
+ 	eeprom@53 {
+ 		compatible = "atmel,24c64";
+ 		reg = <0x53>;
