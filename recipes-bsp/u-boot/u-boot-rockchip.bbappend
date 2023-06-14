@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot-rockchip:"
 
 SRC_URI += " \
 	file://0007-ram-rockchip-px30-add-config-based-LPDDR3-selection.patch \
