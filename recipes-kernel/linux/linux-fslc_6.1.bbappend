@@ -12,5 +12,7 @@ SRC_URI += " \
     file://0008-arm64-dts-iesy-change-audio-codec-to-max9867.patch \
     file://0009-arm64-dts-iesy-change-i2c-eeprom-addr.patch \
     file://0010-arm64-dts-iesy-add-rtc-pcf85263.patch \
-    file://0011-arm64-dts-iesy-add-hdmi-bridge-dsi.patch \
+    file://0012-arm64-dts-iesy-change-button-pinconfig.patch \
+    file://0013-arm64-dts-iesy-add-vsc8541.patch \
+    file://0014-drivers-net-phy-config-eth-phy-led-behavior.patch \
 "
