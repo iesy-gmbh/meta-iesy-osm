@@ -15,4 +15,5 @@ SRC_URI += " \
     file://0012-arm64-dts-iesy-change-button-pinconfig.patch \
     file://0013-arm64-dts-iesy-add-vsc8541.patch \
     file://0014-drivers-net-phy-config-eth-phy-led-behavior.patch \
+    file://0015-arm64-dts-iesy-add-pcie-nodes.patch \
 "
