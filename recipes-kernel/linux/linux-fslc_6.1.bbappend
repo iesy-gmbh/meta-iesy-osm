@@ -16,4 +16,5 @@ SRC_URI += " \
     file://0013-arm64-dts-iesy-add-vsc8541.patch \
     file://0014-drivers-net-phy-config-eth-phy-led-behavior.patch \
     file://0015-arm64-dts-iesy-add-pcie-nodes.patch \
+    file://0016-arm64-dts-iesy-add-audio-codec-soundcard-and-sai5.patch \
 "
