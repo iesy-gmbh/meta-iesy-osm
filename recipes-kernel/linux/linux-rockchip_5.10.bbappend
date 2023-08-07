@@ -13,6 +13,9 @@ SRC_URI += " \
 	file://0010-arm64-dts-iesy-limit-ethernet-phy-to-100-mbit.patch \
 	file://0011-drivers-net-phy-mscc-implement-documented-bb138-ethernet-led-behavior.patch \
 	file://0012-drivers-gpu-drm-bridge-add-support-for-lt8912-dsi-to-hdmi-bridge.patch \
+	file://0013-arm64-dts-iesy-add-iesy-rpx30-eva-mi-v2.dts.patch \
+	file://0014-arm64-dts-iesy-adapt-to-bb138-v2-gpio-and-pwm-changes.patch \
+	file://0099-drivers-gpu-drm-add-debug-messages.patch \
 "
 
 python () {
