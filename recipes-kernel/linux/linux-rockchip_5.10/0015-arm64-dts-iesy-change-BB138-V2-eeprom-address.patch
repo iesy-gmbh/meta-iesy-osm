@@ -1,0 +1,29 @@
+From d3bd1df1e9cb107db0188646930699b6c3c358ac Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Tue, 8 Aug 2023 12:23:08 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: change BB138 V2 i2c eeprom address
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+index 974657ac319d..81661d818757 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+@@ -581,10 +581,10 @@ eeprom@50 {
+ 	};
+ 
+ 	/* EEPROM on BB138 */
+-	eeprom@51 {
++	eeprom@53 {
+ 		status = "okay";
+ 		compatible = "atmel,24c64";
+-		reg = <0x51>;
++		reg = <0x53>;
+ 		pagesize = <32>;
+ 	};
+ };
+-- 
+2.30.2
+
