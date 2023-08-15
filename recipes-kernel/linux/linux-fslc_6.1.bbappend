@@ -17,4 +17,5 @@ SRC_URI += " \
     file://0014-drivers-net-phy-config-eth-phy-led-behavior.patch \
     file://0015-arm64-dts-iesy-add-pcie-nodes.patch \
     file://0016-arm64-dts-iesy-add-audio-codec-soundcard-and-sai5.patch \
+    file://0017-arm64-dts-iesy-move-SPI-interfaces-to-SoM-keep-onboa.patch \
 "
