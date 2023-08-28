@@ -17,6 +17,7 @@ SRC_URI += " \
 	file://0014-arm64-dts-iesy-adapt-to-bb138-v2-gpio-and-pwm-changes.patch \
 	file://0015-arm64-dts-iesy-change-BB138-V2-eeprom-address.patch \
 	file://0016-arm64-dts-iesy-add-rtc-PCF85263-on-BB138-V2.patch \
+	file://0017-arm64-dts-iesy-add-max9867-sound-codec.patch \
 "
 
 python () {
