@@ -18,6 +18,8 @@ SRC_URI += " \
 	file://0015-arm64-dts-iesy-change-BB138-V2-eeprom-address.patch \
 	file://0016-arm64-dts-iesy-add-rtc-PCF85263-on-BB138-V2.patch \
 	file://0017-arm64-dts-iesy-add-max9867-sound-codec.patch \
+	file://0018-arm64-dts-iesy-add-spi-bus-for-acceleration-sensor.patch \
+	file://0019-arm64-dts-iesy-enable-internal-pullups-on-cs-clk-and-mosi-of-spi-bus-0.patch \
 "
 
 python () {
