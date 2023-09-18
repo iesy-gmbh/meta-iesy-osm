@@ -1,0 +1,43 @@
+From 186ac38ff1a74dd6cf480bf6b9ad78f423a9fe8f Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 19 Jun 2023 08:21:13 +0200
+Subject: [PATCH 12/12] arm64: dts: iesy: change button pinconfig
+
+---
+ arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index 4435835d32ed..420d89716fb9 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -42,13 +42,13 @@ user-buttons {
+ 
+ 		user-button-1 {
+ 			label = "User Button 1";
+-			gpios = <&gpio1 8 GPIO_ACTIVE_LOW>;
++			gpios = <&gpio4 20 GPIO_ACTIVE_LOW>;
+ 			linux,code = <KEY_X>;
+ 		};
+ 
+ 		user-button-2 {
+ 			label = "User Button 2";
+-			gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
++			gpios = <&gpio4 23 GPIO_ACTIVE_LOW>;
+ 			linux,code = <KEY_Y>;
+ 		};
+ 	};
+@@ -282,8 +282,8 @@ MX8MM_IOMUXC_SAI1_TXC_GPIO4_IO11	0x19
+ 
+ 	pinctrl_buttons: gpiobuttongrp {
+ 		fsl,pins = <
+-			MX8MM_IOMUXC_GPIO1_IO08_GPIO1_IO8	0x156
+-			MX8MM_IOMUXC_GPIO1_IO09_GPIO1_IO9	0x156
++			MX8MM_IOMUXC_SAI1_MCLK_GPIO4_IO20	0x156
++			MX8MM_IOMUXC_SAI2_RXD0_GPIO4_IO23	0x156
+ 		>;
+ 	};
+ 
+-- 
+2.30.2
+

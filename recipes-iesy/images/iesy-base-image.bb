@@ -49,4 +49,7 @@ CORE_IMAGE_BASE_INSTALL += "\
     gstreamer1.0-plugins-base \
     gstreamer1.0-plugins-bad \
     gstreamer1.0-plugins-good \
+    alsa-utils \
     "
+
+IMX_ALSA_EXTRA = "imx-alsa-plugins"
