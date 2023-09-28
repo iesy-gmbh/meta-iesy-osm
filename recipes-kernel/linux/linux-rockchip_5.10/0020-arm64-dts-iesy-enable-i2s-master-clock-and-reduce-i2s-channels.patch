@@ -1,0 +1,72 @@
+From ae06bdfa76d88d475ddb508a65d2d430425f23e7 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Thu, 28 Sep 2023 16:02:50 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: enable i2s master clock and reduce i2s
+ channels
+
+---
+ .../boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts    | 24 ++++++++++++-------
+ 1 file changed, 15 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+index 28ba16526e30..0cf0cedb5362 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+@@ -139,11 +139,9 @@ user-button-2 {
+         };
+ 	};
+ 
+-	sound-max9867 {
+-		status = "okay";
+-
++	max9867-sound {
+ 		compatible = "simple-audio-card";
+-		simple-audio-card,name = "MAX9867";
++		simple-audio-card,name = "rockchip,max9867-codec";
+ 		simple-audio-card,format = "i2s";
+ 
+ 		simple-audio-card,widgets =
+@@ -155,9 +153,11 @@ sound-max9867 {
+ 		simple-audio-card,frame-master = <&cpudai>;
+ 		simple-audio-card,bitclock-master = <&cpudai>;
+ 		
++		status = "okay";
++
+ 		cpudai: simple-audio-card,cpu {
+ 			sound-dai = <&i2s1_2ch>;
+-			dai-tdm-slot-num = <2>;
++			dai-tdm-slot-num = <1>;
+ 			dai-tdm-slot-width = <16>;
+ 		};
+ 
+@@ -347,6 +347,12 @@ &gpu {
+ 	status = "okay";
+ };
+ 
++&i2s1_2ch {
++	pinctrl-0 = <&i2s1_2ch_mclk &i2s1_2ch_sclk &i2s1_2ch_lrck
++			     &i2s1_2ch_sdi &i2s1_2ch_sdo>;
++	status = "okay";
++};
++
+ &i2c0 {
+ 	status = "okay";
+ 
+@@ -661,10 +667,10 @@ timing0: timing0 {
+     };
+ 
+ 	max9867: audio_codec@18 {
+-			#sound-dai-cells = <0>;
+-			compatible = "maxim,max9867";
+-			reg = <0x18>;
+-			status = "okay";
++		#sound-dai-cells = <0>;
++		compatible = "maxim,max9867";
++		reg = <0x18>;
++		status = "okay";
+ 	};
+ };
+ 
+-- 
+2.30.2
+
