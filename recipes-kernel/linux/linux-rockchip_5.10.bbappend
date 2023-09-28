@@ -20,6 +20,7 @@ SRC_URI += " \
 	file://0017-arm64-dts-iesy-add-max9867-sound-codec.patch \
 	file://0018-arm64-dts-iesy-add-spi-bus-for-acceleration-sensor.patch \
 	file://0019-arm64-dts-iesy-enable-internal-pullups-on-cs-clk-and-mosi-of-spi-bus-0.patch \
+	file://0020-arm64-dts-iesy-enable-i2s-master-clock-and-reduce-i2s-channels.patch \
 "
 
 python () {
