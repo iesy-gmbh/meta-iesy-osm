@@ -1,0 +1,56 @@
+From 699e3b0342b04b2b10fd57389996dea9e8564580 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 12 Oct 2023 15:49:10 +0200
+Subject: [PATCH 4/4] arm64: dts: iesy: iesy-imx8mm-eva-mi: config usdhc1 for
+ M.2 use
+
+---
+ arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts  | 5 +++++
+ arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi | 8 ++++----
+ 2 files changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index f0f2ef103c5c..32f93e693ee8 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -170,6 +170,11 @@ &pcie_phy {
+ 	status = "okay";
+ };
+ 
++&usdhc1 {
++	bus-width = <4>;
++	status = "okay";
++};
++
+ &snvs_pwrkey {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
+index 99fc7b3a57f2..4ef12b9f0cdf 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
+@@ -28,9 +28,9 @@ rpmsg_reserved: rpmsg@0xb8000000 {
+ 
+     reg_sd1_vmmc: sd1_regulator {
+ 		compatible = "regulator-fixed";
+-		regulator-name = "1V8_IO_reg";
+-		regulator-min-microvolt = <1800000>;
+-		regulator-max-microvolt = <1800000>;
++		regulator-name = "VCC_SDIO_B_reg";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
+ 		gpio = <&gpio2 10 GPIO_ACTIVE_HIGH>; /* NC */
+ 		off-on-delay-us = <20000>;
+ 		startup-delay-us = <100>;
+@@ -142,7 +142,7 @@ &usdhc1 { /* SDIO A */
+ 	pm-ignore-notify;
+ 	keep-power-in-suspend;
+ 	non-removable;
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &usdhc2 { /* SD-Card */
+-- 
+2.30.2
+
