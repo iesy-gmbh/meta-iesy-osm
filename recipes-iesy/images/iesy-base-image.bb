@@ -14,6 +14,7 @@ inherit core-image ${@'features_check-poky' if "meta-rockchip" in d.getVar('BBLA
 
 IMAGE_FEATURES += " \
     ssh-server-openssh \
+    ${@bb.utils.contains('DISTRO', 'iesy-wayland', 'weston', '', d)} \
     "
 
 # This would also be set by default in local.conf. debug-tweaks is useful for development purposes.
