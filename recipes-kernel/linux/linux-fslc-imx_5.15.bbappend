@@ -8,6 +8,7 @@ SRC_URI += " \
     file://0004-arm64-dts-iesy-iesy-imx8mm-eva-mi-config-usdhc1-for-.patch \
     file://0005-spi-add-m95m04-to-spidev.patch \
     file://0006-arm64-dts-iesy-iesy-imx8mm-eva-mi-add-SPI-B.patch \
+    file://0007-arm64-dts-iesy-iesy-imx8mm-eva-mi-fix-PCIe.patch \
 "
 
 
