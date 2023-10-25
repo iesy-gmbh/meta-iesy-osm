@@ -21,6 +21,7 @@ SRC_URI += " \
 	file://0018-arm64-dts-iesy-add-spi-bus-for-acceleration-sensor.patch \
 	file://0019-arm64-dts-iesy-enable-internal-pullups-on-cs-clk-and-mosi-of-spi-bus-0.patch \
 	file://0020-arm64-dts-iesy-enable-i2s-master-clock-and-reduce-i2s-channels.patch \
+	file://0021-arm64-dts-rockchip-add-uio-support-for-header-gpios.patch \
 "
 
 python () {
