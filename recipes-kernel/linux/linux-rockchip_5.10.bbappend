@@ -22,6 +22,7 @@ SRC_URI += " \
 	file://0019-arm64-dts-iesy-enable-internal-pullups-on-cs-clk-and-mosi-of-spi-bus-0.patch \
 	file://0020-arm64-dts-iesy-enable-i2s-master-clock-and-reduce-i2s-channels.patch \
 	file://0021-arm64-dts-rockchip-add-uio-support-for-header-gpios.patch \
+	file://0022-drivers-rtc-add-support-for-max31343-rtc.patch \
 "
 
 python () {
