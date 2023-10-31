@@ -23,6 +23,7 @@ SRC_URI += " \
 	file://0020-arm64-dts-iesy-enable-i2s-master-clock-and-reduce-i2s-channels.patch \
 	file://0021-arm64-dts-rockchip-add-uio-support-for-header-gpios.patch \
 	file://0022-drivers-rtc-add-support-for-max31343-rtc.patch \
+	file://0023-arm64-dts-rockchip-separate-device-tree-files-for-cm006-and-bb138a.patch \
 "
 
 python () {
