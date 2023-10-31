@@ -10,6 +10,7 @@ SRC_URI += " \
     file://0006-arm64-dts-iesy-iesy-imx8mm-eva-mi-add-SPI-B.patch \
     file://0007-arm64-dts-iesy-iesy-imx8mm-eva-mi-fix-PCIe.patch \
     file://0008-driver-net-phy-config-eth-phy-behavior.patch \
+    file://0009-arm64-dts-iesy-iesy-imx8mm-osm-sf-fix-UART-B.patch \
 "
 
 
