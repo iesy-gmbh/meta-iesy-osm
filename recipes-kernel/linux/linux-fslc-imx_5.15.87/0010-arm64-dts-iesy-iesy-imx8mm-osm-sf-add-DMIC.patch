@@ -1,0 +1,33 @@
+From 4a768400cdbe19a52c2a7b00a3d0a113635f8578 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 31 Oct 2023 15:15:13 +0100
+Subject: [PATCH 10/10] arm64: dts: iesy: iesy-imx8mm-osm-sf: add DMIC
+
+add digital mic on MAX9867
+---
+ arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+index e147de61c265..6768062bae28 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+@@ -60,10 +60,13 @@ sound-max9867 {
+ 		simple-audio-card,format = "i2s";
+ 
+ 		simple-audio-card,widgets =
+-			"Speaker", "Jack";
++			"Speaker", "Jack",
++			"Microphone", "Mic";
+ 		simple-audio-card,routing =
+             "Jack", "LOUT",
+-            "Jack", "ROUT";
++            "Jack", "ROUT",
++			"Mic", "DMICL",
++			"Mic", "DMICR";
+ 
+ 		simple-audio-card,frame-master = <&cpudai>;
+ 		simple-audio-card,bitclock-master = <&cpudai>;
+-- 
+2.30.2
+
