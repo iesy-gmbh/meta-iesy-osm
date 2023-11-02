@@ -1,0 +1,32 @@
+From ccea268fd5f635b36be259ce5942916e1bb84f9b Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Thu, 2 Nov 2023 12:21:13 +0100
+Subject: [PATCH 1/1] arm64: dts: rockchip: add digital mic on MAX9867
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+index ab222fe4d266..cfa5dc820e90 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+@@ -74,10 +74,13 @@ max9867-sound {
+ 		simple-audio-card,format = "i2s";
+ 
+ 		simple-audio-card,widgets =
+-			"Speaker", "Jack";
++			"Speaker", "Jack",
++			"Microphone", "Mic";
+ 		simple-audio-card,routing =
+             "Jack", "LOUT",
+-            "Jack", "ROUT";
++            "Jack", "ROUT",
++			"Mic", "DMICL",
++			"Mic", "DMICR";
+ 
+ 		simple-audio-card,frame-master = <&cpudai>;
+ 		simple-audio-card,bitclock-master = <&cpudai>;
+-- 
+2.30.2
+
