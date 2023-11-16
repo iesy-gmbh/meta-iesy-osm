@@ -25,6 +25,8 @@ SRC_URI += " \
 	file://0022-drivers-rtc-add-support-for-max31343-rtc.patch \
 	file://0023-arm64-dts-rockchip-separate-device-tree-files-for-cm006-and-bb138a.patch \
 	file://0024-arm64-dts-rockchip-add-digital-mic-on-MAX9867.patch \
+	file://0025-drivers-dsi-implement-workaround-for-rockchip-dsi-bug.patch \
+	file://0026-arm64-dts-rockchip-enable-drm.patch \
 "
 
 python () {
