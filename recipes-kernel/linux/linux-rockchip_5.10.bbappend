@@ -27,6 +27,7 @@ SRC_URI += " \
 	file://0024-arm64-dts-rockchip-add-digital-mic-on-MAX9867.patch \
 	file://0025-drivers-dsi-implement-workaround-for-rockchip-dsi-bug.patch \
 	file://0026-arm64-dts-rockchip-enable-drm.patch \
+	file://0027-arm64-dts-iesy-change-LT8912-reset-to-dummy.patch \
 "
 
 python () {
