@@ -1,0 +1,27 @@
+From cfc70342807185811fb04032f5d6c7e99f9dc164 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 24 Nov 2023 09:10:09 +0100
+Subject: [PATCH 27/27] arm64: dts: iesy: change LT8912 reset to dummy
+
+Change reset-gpio to unconnected gpio on cpu. Driver needs a gpio, LT8912 is connected to signal on board, not connected to cpu
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+index 25c332b1e831..5aa2042b05f4 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+@@ -489,7 +489,8 @@ lt8912@48 {
+         ddc-i2c-bus = <&i2c1>;
+ 		//hpd-gpios = <&gpio1 RK_PC5 GPIO_ACTIVE_HIGH>;
+ 		/* driver needs a valid reset gpio to function */
+-		reset-gpios = <&gpio1 RK_PC4 GPIO_ACTIVE_LOW>;
++		/* use not connected pin as dummy */
++		reset-gpios = <&gpio3 RK_PD3 GPIO_ACTIVE_LOW>; /* n.c. */
+ 		//pinctrl-names = "default";
+ 		//pinctrl-0 = <&pinctrl_lt8912>;
+ 		status = "okay";
+-- 
+2.30.2
+
