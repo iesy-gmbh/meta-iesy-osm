@@ -1,0 +1,74 @@
+From 93e4530951220ceb549efd046643c189d1e270b7 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Mon, 28 Aug 2023 15:18:14 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: add max9867 sound codec
+
+---
+ .../boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts    | 37 ++++++++++++++++++-
+ 1 file changed, 36 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+index 9de1bd936ad3..37342e393e96 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+@@ -138,6 +138,34 @@ user-button-2 {
+             linux,code = <KEY_Z>;
+         };
+ 	};
++
++	sound-max9867 {
++		status = "okay";
++
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "MAX9867";
++		simple-audio-card,format = "i2s";
++
++		simple-audio-card,widgets =
++			"Speaker", "Jack";
++		simple-audio-card,routing =
++            "Jack", "LOUT",
++            "Jack", "ROUT";
++
++		simple-audio-card,frame-master = <&cpudai>;
++		simple-audio-card,bitclock-master = <&cpudai>;
++		
++		cpudai: simple-audio-card,cpu {
++			sound-dai = <&i2s1_2ch>;
++			dai-tdm-slot-num = <2>;
++			dai-tdm-slot-width = <16>;
++		};
++
++		simple-audio-card,codec {
++			sound-dai = <&max9867>;
++			clocks = <&cru SCLK_I2S1_OUT>;
++		};
++	};
+ };
+ 
+ &cpu0 {
+@@ -151,7 +179,7 @@ &display_subsystem {
+ };
+ 
+ &dsi {
+-	status = "okay";
++	status = "disabled";
+ 	rockchip,lane-rate = <891>;
+ 
+ 	panel@0 {
+@@ -631,6 +659,13 @@ timing0: timing0 {
+ 		};
+ */
+     };
++
++	max9867: audio_codec@18 {
++			#sound-dai-cells = <0>;
++			compatible = "maxim,max9867";
++			reg = <0x18>;
++			status = "okay";
++	};
+ };
+ 
+ &i2c2 {
+-- 
+2.30.2
+

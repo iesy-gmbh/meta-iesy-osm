@@ -1,0 +1,30 @@
+From 59e6b378023aabd38485297912a7553ea7450243 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Tue, 8 Aug 2023 15:31:31 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: add rtc PCF85263 on BB38 V2
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+index 81661d818757..9de1bd936ad3 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+@@ -572,6 +572,13 @@ sensor@4e {
+ 		reg = <0x4e>;
+ 	};
+ 
++	/* RTC on BB138 */
++	rtc@51 {
++		status = "okay";
++		compatible = "nxp,pcf85263";
++		reg = <0x51>;
++	};
++
+ 	/* EEPROM on CM006 */
+ 	eeprom@50 {
+ 		status = "okay";
+-- 
+2.30.2
+
