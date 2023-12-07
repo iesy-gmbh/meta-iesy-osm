@@ -1,0 +1,10 @@
+# Copyright (c) 2023, iesy GmbH
+# Released under the MIT license (see COPYING.MIT for the terms)
+#
+# long-description: Creates a GPT disk image for iesy Rockchip modules
+
+# 0~32K: gpt
+bootloader --ptable gpt
+part --source rawcopy --sourceparams="file=u-boot-rockchip.bin" --align 32 --no-table
+part --source bootimg-partition --fstype vfat --sourceparams="file=boot.img" --part-name boot
+part / --source rootfs --fstype ${RK_ROOTFS_TYPE} --part-name rootfs --uuid ${RK_ROOTDEV_UUID} --align 8192
