@@ -1,0 +1,28 @@
+From dc1fd039f37436f42cee4e92b82a717fc8779e2c Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 18 Dec 2023 10:59:31 +0100
+Subject: [PATCH 2/3] phy: rockchip-inno-usb2: add USB2 PHY for PX30
+
+Reuse definitions from RK3328
+---
+ drivers/phy/rockchip/phy-rockchip-inno-usb2.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/phy/rockchip/phy-rockchip-inno-usb2.c b/drivers/phy/rockchip/phy-rockchip-inno-usb2.c
+index 70e61eccb7..207a36230a 100644
+--- a/drivers/phy/rockchip/phy-rockchip-inno-usb2.c
++++ b/drivers/phy/rockchip/phy-rockchip-inno-usb2.c
+@@ -528,6 +528,10 @@ static const struct rockchip_usb2phy_cfg rk3588_phy_cfgs[] = {
+ };
+ 
+ static const struct udevice_id rockchip_usb2phy_ids[] = {
++	{
++		.compatible = "rockchip,px30-usb2phy",
++		.data = (ulong)&rk3328_usb2phy_cfgs,
++	},
+ 	{
+ 		.compatible = "rockchip,rk3328-usb2phy",
+ 		.data = (ulong)&rk3328_usb2phy_cfgs,
+-- 
+2.30.2
+
