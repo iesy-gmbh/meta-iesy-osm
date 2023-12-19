@@ -1,0 +1,64 @@
+From 8853cd5008fbaf1f0986c5fa4e4666d8e6acf2c8 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 19 Dec 2023 15:29:27 +0100
+Subject: [PATCH 4/4] board: iesy: rpx30-eva-mi: select rootfs from bootdev
+
+---
+ .../iesy_rpx30_eva_mi/iesy_rpx30_eva_mi.c     | 20 +++++++++++++++++++
+ include/configs/iesy_rpx30_eva_mi.h           |  8 ++++++--
+ 2 files changed, 26 insertions(+), 2 deletions(-)
+
+diff --git a/board/iesy/iesy_rpx30_eva_mi/iesy_rpx30_eva_mi.c b/board/iesy/iesy_rpx30_eva_mi/iesy_rpx30_eva_mi.c
+index 20122e4403..00764ac32e 100644
+--- a/board/iesy/iesy_rpx30_eva_mi/iesy_rpx30_eva_mi.c
++++ b/board/iesy/iesy_rpx30_eva_mi/iesy_rpx30_eva_mi.c
+@@ -72,4 +72,24 @@ int rockchip_dnl_key_pressed(void)
+     }
+ 
+     return false;
++}
++
++int misc_init_r(void)
++{
++	const char *boot_device =
++		ofnode_read_chosen_string("u-boot,spl-boot-device");
++	if(!boot_device){
++		printf("boot device not set\n");
++		return 0;
++	}
++
++	if (!strcmp(boot_device, "/mmc@ff370000")){
++		env_set("mmcdev", "0");
++		env_set("rootfs", "/dev/mmcblk0p2");
++	} else {
++		env_set("mmcdev", "1");
++		env_set("rootfs", "/dev/mmcblk1p2");
++	}
++	
++	return 0;
+ }
+\ No newline at end of file
+diff --git a/include/configs/iesy_rpx30_eva_mi.h b/include/configs/iesy_rpx30_eva_mi.h
+index 7366471757..084edc509f 100644
+--- a/include/configs/iesy_rpx30_eva_mi.h
++++ b/include/configs/iesy_rpx30_eva_mi.h
+@@ -29,10 +29,14 @@
+ 	ENV_MEM_LAYOUT_SETTINGS \
+ 	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
+ 	"partitions=" PARTS_DEFAULT \
+-	"boot_targets=" BOOT_TARGETS "\0" \
+ 	"mmcdev=1\0" \
+ 	"bootcmd=fatload mmc ${mmcdev} ${kernel_addr_r} Image; " \
+ 		"fatload mmc ${mmcdev} ${fdt_addr_r} ${fdtfile}; " \
+-		"booti ${kernel_addr_r} - ${fdt_addr_r}\0"
++		"run setbootargs; " \
++		"booti ${kernel_addr_r} - ${fdt_addr_r}\0" \
++	"earlycon=uart8250,mmio32,0xff160000\0" \
++	"console=ttyFIQ0\0" \
++	"setbootargs=setenv bootargs ${console} ${optargs} " \
++		"root=${rootfs} rootwait rw earlycon=${earlycon}\0"
+ 
+ #endif
+-- 
+2.30.2
+

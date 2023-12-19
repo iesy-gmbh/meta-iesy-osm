@@ -20,6 +20,7 @@ SRC_URI += " \
         file://0001-rockchip-px30-add-support-for-iesy-rpx30-eva-mi.patch \
         file://0002-phy-rockchip-inno-usb2-add-USB2-PHY-for-PX30.patch \
         file://0003-board-iesy-rpx30-eva-mi-add-support-for-fastboot.patch \
+        file://0004-board-iesy-rpx30-eva-mi-select-rootfs-from-bootdev.patch \
     "
 
 SRCREV_FORMAT = "default_rkbin"
