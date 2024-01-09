@@ -10,7 +10,7 @@ PROVIDES = "virtual/bootloader"
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
 
 SRCREV = "4459ed60cb1e0562bc5b40405e2b4b9bbf766d57"
-SRCREV_rkbin = "${AUTOREV}"
+SRCREV_rkbin = "b4558da0860ca48bf1a571dd33ccba580b9abe23"
 
 PV = "2023.10"
 
