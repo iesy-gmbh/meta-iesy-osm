@@ -1,6 +1,6 @@
 # Copyright (C) 2023 iesy GmbH
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot-mainline:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot-mainline_${PV}:"
 
 require recipes-bsp/u-boot/u-boot-common.inc
 require recipes-bsp/u-boot/u-boot.inc
@@ -11,7 +11,8 @@ LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
 
 SRCREV = "4459ed60cb1e0562bc5b40405e2b4b9bbf766d57"
 SRCREV_rkbin = "${AUTOREV}"
-# SRCREV = "${AUTOREV}"
+
+PV = "2023.10"
 
 DEPENDS += "rockchip-atf bc-native dtc-native python3-pyelftools-native"
 
