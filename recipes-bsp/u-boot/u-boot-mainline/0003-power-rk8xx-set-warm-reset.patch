@@ -1,0 +1,25 @@
+From 94a6cb70e7dd5a80eecb77e8ac01bfc46eaa5619 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 4 Jan 2024 10:16:35 +0100
+Subject: [PATCH 3/3] power: rk8xx: set warm reset
+
+---
+ drivers/power/pmic/rk8xx.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/power/pmic/rk8xx.c b/drivers/power/pmic/rk8xx.c
+index 4e3a17337e..d1090383b4 100644
+--- a/drivers/power/pmic/rk8xx.c
++++ b/drivers/power/pmic/rk8xx.c
+@@ -88,6 +88,8 @@ static struct reg_data rk817_init_reg[] = {
+  * the under-voltage protection will shutdown the LDO3 and reset the PMIC
+  */
+ 	{ RK817_BUCK4_CMIN, 0x60, 0x60},
++	/* Do not restart PMU, only reset DCDC and LDO */
++	{ RK817_PMIC_SYS_CFG3, 0x40, 0xc0 },
+ };
+ 
+ static const struct pmic_child_info pmic_children_info[] = {
+-- 
+2.30.2
+
