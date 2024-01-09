@@ -1,4 +1,4 @@
-From 27b545fe806986f077cc0a1c570261e8ec2d960c Mon Sep 17 00:00:00 2001
+From dc1fd039f37436f42cee4e92b82a717fc8779e2c Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
 Date: Mon, 18 Dec 2023 10:59:31 +0100
 Subject: [PATCH 2/3] phy: rockchip-inno-usb2: add USB2 PHY for PX30
