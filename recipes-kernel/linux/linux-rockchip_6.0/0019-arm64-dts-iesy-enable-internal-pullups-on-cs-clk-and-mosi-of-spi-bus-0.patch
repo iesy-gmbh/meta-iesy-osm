@@ -1,0 +1,38 @@
+From bd59acdfcb3628f5a75370c94c33af62d70ae28e Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Thu, 14 Sep 2023 11:44:24 +0200
+Subject: [PATCH 1/1] Arm64: dts: iesy: enable internal pullups on cs, clk and
+ mosi of spi bus 0
+
+---
+ arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+index 47048f291057..28ba16526e30 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+@@ -1275,17 +1275,17 @@ pwm3_pin: pwm3-pin {
+ 	spi0 {
+ 		spi0_clk: spi0-clk {
+ 			rockchip,pins =
+-				<1 RK_PB7 3 &pcfg_pull_none>;
++				<1 RK_PB7 3 &pcfg_pull_up_4ma>;
+ 		};
+ 
+ 		spi0_csn: spi0-csn {
+ 			rockchip,pins =
+-				<1 RK_PB6 3 &pcfg_pull_none>;
++				<1 RK_PB6 3 &pcfg_pull_up_4ma>;
+ 		};
+ 
+ 		spi0_mosi: spi0-mosi {
+ 			rockchip,pins =
+-				<1 RK_PB4 3 &pcfg_pull_none>;
++				<1 RK_PB4 3 &pcfg_pull_up_4ma>;
+ 		};
+ 	};
+ 
+-- 
+2.30.2
+

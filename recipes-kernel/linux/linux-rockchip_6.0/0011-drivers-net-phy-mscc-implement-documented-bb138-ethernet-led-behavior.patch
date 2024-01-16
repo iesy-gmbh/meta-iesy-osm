@@ -1,0 +1,43 @@
+From b3f94d294582ee47b697f409dd5e4e25d23f6649 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Wed, 24 May 2023 13:01:35 +0200
+Subject: [PATCH 1/1] drivers: net: phy: mscc: implement documented bb138
+ ethernet led behavior
+
+---
+ drivers/net/phy/mscc/mscc.h      | 1 +
+ drivers/net/phy/mscc/mscc_main.c | 6 ++++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/drivers/net/phy/mscc/mscc.h b/drivers/net/phy/mscc/mscc.h
+index c2023f93c0b2..8b6f6756715c 100644
+--- a/drivers/net/phy/mscc/mscc.h
++++ b/drivers/net/phy/mscc/mscc.h
+@@ -81,6 +81,7 @@ enum rgmii_clock_delay {
+ #define HP_AUTO_MDIX_X_OVER_IND_MASK	  0x2000
+ 
+ #define MSCC_PHY_LED_MODE_SEL		  29
++#define MSCC_PHY_LED_MODE_BEH		  30
+ #define LED_MODE_SEL_POS(x)		  ((x) * 4)
+ #define LED_MODE_SEL_MASK(x)		  (GENMASK(3, 0) << LED_MODE_SEL_POS(x))
+ #define LED_MODE_SEL(x, mode)		  (((mode) << LED_MODE_SEL_POS(x)) & LED_MODE_SEL_MASK(x))
+diff --git a/drivers/net/phy/mscc/mscc_main.c b/drivers/net/phy/mscc/mscc_main.c
+index e14fa72791b0..5c27f35b8013 100644
+--- a/drivers/net/phy/mscc/mscc_main.c
++++ b/drivers/net/phy/mscc/mscc_main.c
+@@ -181,6 +181,12 @@ static int vsc85xx_led_cntl_set(struct phy_device *phydev,
+ 	reg_val &= ~LED_MODE_SEL_MASK(led_num);
+ 	reg_val |= LED_MODE_SEL(led_num, (u16)mode);
+ 	rc = phy_write(phydev, MSCC_PHY_LED_MODE_SEL, reg_val);
++
++	reg_val = phy_read(phydev, MSCC_PHY_LED_MODE_BEH);
++	if (led_num) {
++		reg_val |= 0x0002;
++	}
++	rc = phy_write(phydev, MSCC_PHY_LED_MODE_BEH, reg_val);
+ 	mutex_unlock(&phydev->lock);
+ 
+ 	return rc;
+-- 
+2.30.2
+

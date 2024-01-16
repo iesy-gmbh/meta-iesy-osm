@@ -1,0 +1,63 @@
+From be5687f9afcac4a7f3031e58cd51394227ad0989 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Thu, 31 Aug 2023 15:21:06 +0200
+Subject: [PATCH 1/1] arm64: dts: iesy: add spi bus for acceleration sensor
+
+---
+ .../boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts    | 33 +++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+index 37342e393e96..5ab72800bc69 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+@@ -1052,6 +1052,22 @@ &vopl_mmu {
+ //	status = "okay";
+ //};
+ 
++&spi0 {
++	status = "okay";
++
++    spidev@0 {
++       compatible = "linux,spidev";
++       spi-max-frequency = <10000000>;
++	   reg = <0>;
++	};
++
++    spidev@1 {
++       compatible = "linux,spidev";
++       spi-max-frequency = <10000000>;
++	   reg = <1>;
++	};
++};
++
+ &spi1 {
+ 	status = "okay";
+ 	cs-gpios = <&gpio3 RK_PB0 GPIO_ACTIVE_LOW>;
+@@ -1256,6 +1272,23 @@ pwm3_pin: pwm3-pin {
+ 		};
+ 	};
+ 
++	spi0 {
++		spi0_clk: spi0-clk {
++			rockchip,pins =
++				<1 RK_PB7 3 &pcfg_pull_none>;
++		};
++
++		spi0_csn: spi0-csn {
++			rockchip,pins =
++				<1 RK_PB6 3 &pcfg_pull_none>;
++		};
++
++		spi0_mosi: spi0-mosi {
++			rockchip,pins =
++				<1 RK_PB4 3 &pcfg_pull_none>;
++		};
++	};
++
+ 	spi1 {
+ 		/* spi1.sdo */
+ 		spi1_mosi: spi1-mosi {
+-- 
+2.30.2
+

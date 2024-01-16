@@ -1,0 +1,108 @@
+From 02ec078932df1d13486c212b88a19782cf9bfb93 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Thu, 16 Nov 2023 08:16:51 +0100
+Subject: [PATCH 1/1] drivers: dsi: implement workaround for rockchip dsi bug
+
+---
+ .../gpu/drm/rockchip/dw-mipi-dsi-rockchip.c   | 57 ++++++++++++++-----
+ 1 file changed, 42 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c b/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c
+index a052e6228f84..18a23439eb9e 100644
+--- a/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c
+@@ -998,10 +998,13 @@ static int dw_mipi_dsi_rockchip_bind(struct device *dev,
+ 		return ret;
+ 	}
+ 
+-	ret = dw_mipi_dsi_bind(dsi->dmd, &dsi->encoder);
+-	if (ret) {
+-		DRM_DEV_ERROR(dev, "Failed to bind: %d\n", ret);
+-		return ret;
++	/* do not rely on the validity of rockchip pointers */
++	if (dsi->dmd) {
++		ret = dw_mipi_dsi_bind(dsi->dmd, &dsi->encoder);
++		if (ret) {
++			DRM_DEV_ERROR(dev, "Failed to bind: %d\n", ret);
++			return ret;
++		}
+ 	}
+ 
+ 	ret = drm_of_find_panel_or_bridge(dsi->dev->of_node, 1, 0,
+@@ -1011,7 +1014,13 @@ static int dw_mipi_dsi_rockchip_bind(struct device *dev,
+ 
+ 	dw_mipi_dsi_get_dsc_info_from_sink(dsi, dsi->panel, NULL);
+ 
+-	dsi->sub_dev.connector = dw_mipi_dsi_get_connector(dsi->dmd);
++	/* do not rely on the validity of rockchip pointers */
++	if (dsi->dmd != NULL) {
++		dsi->sub_dev.connector = dw_mipi_dsi_get_connector(dsi->dmd);
++	} else {
++		dsi->sub_dev.connector = NULL;
++	}
++	
+ 	if (dsi->sub_dev.connector) {
+ 		dsi->sub_dev.of_node = dev->of_node;
+ 		dsi->sub_dev.loader_protect = dw_mipi_dsi_rockchip_encoder_loader_protect;
+@@ -1205,6 +1214,19 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 	platform_set_drvdata(pdev, dsi);
+ 
+ 	dsi->dmd = dw_mipi_dsi_probe(pdev, &dsi->pdata);
++
++	/* Workaround of Rockchip bug:
++	 * Some initializations called during the probe routine had to be skipped
++	 * due to a not yet valid pointer. These are now being made up for.
++	 */
++	if (dsi->dmd) {
++		struct mipi_dsi_host *dsi_host = of_find_mipi_dsi_host_by_node(dsi->dev->of_node);
++		if (dsi_host) {
++			mipi_dsi_host_unregister(dsi_host);
++			mipi_dsi_host_register(dsi_host);
++		}
++	}
++
+ 	if (IS_ERR(dsi->dmd)) {
+ 		ret = PTR_ERR(dsi->dmd);
+ 		if (ret != -EPROBE_DEFER)
+@@ -1236,11 +1258,14 @@ static __maybe_unused int dw_mipi_dsi_runtime_suspend(struct device *dev)
+ {
+ 	struct dw_mipi_dsi_rockchip *dsi = dev_get_drvdata(dev);
+ 
+-	clk_disable_unprepare(dsi->grf_clk);
+-	clk_disable_unprepare(dsi->pclk);
+-	clk_disable_unprepare(dsi->hclk);
+-	clk_disable_unprepare(dsi->phy_cfg_clk);
+-
++	/* do not rely on the validity of rockchip pointers */
++	if (dsi) {
++		clk_disable_unprepare(dsi->grf_clk);
++		clk_disable_unprepare(dsi->pclk);
++		clk_disable_unprepare(dsi->hclk);
++		clk_disable_unprepare(dsi->phy_cfg_clk);
++	}
++	
+ 	return 0;
+ }
+ 
+@@ -1248,11 +1273,13 @@ static __maybe_unused int dw_mipi_dsi_runtime_resume(struct device *dev)
+ {
+ 	struct dw_mipi_dsi_rockchip *dsi = dev_get_drvdata(dev);
+ 
+-	clk_prepare_enable(dsi->phy_cfg_clk);
+-	clk_prepare_enable(dsi->hclk);
+-	clk_prepare_enable(dsi->pclk);
+-	clk_prepare_enable(dsi->grf_clk);
+-
++	/* do not rely on the validity of rockchip pointers */
++	if (dsi) {
++		clk_prepare_enable(dsi->phy_cfg_clk);
++		clk_prepare_enable(dsi->hclk);
++		clk_prepare_enable(dsi->pclk);
++		clk_prepare_enable(dsi->grf_clk);
++	}
+ 	return 0;
+ }
+ 
+-- 
+2.30.2
+

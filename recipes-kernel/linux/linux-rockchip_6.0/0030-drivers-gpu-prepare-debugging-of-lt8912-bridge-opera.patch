@@ -1,0 +1,1576 @@
+From a0a81bd16293d425b3e9faac3cfe424e3bb65407 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Tue, 16 Jan 2024 13:59:30 +0100
+Subject: [PATCH 1/1] drivers: gpu: prepare debugging of lt8912 bridge
+ operation
+
+---
+ .../boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts    | 153 +++++++++++++-----
+ .../boot/dts/iesy/iesy-rpx30-osm-sf.dtsi      |  25 +--
+ drivers/gpu/drm/bridge/display-connector.c    |  38 ++++-
+ drivers/gpu/drm/bridge/lontium-lt8912b.c      | 124 ++++++++++++--
+ drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi.c |  13 ++
+ drivers/gpu/drm/drm_bridge.c                  |  76 ++++++++-
+ drivers/gpu/drm/drm_edid.c                    |   3 +
+ drivers/gpu/drm/drm_encoder.c                 |  35 +++-
+ drivers/gpu/drm/drm_mipi_dsi.c                |   9 ++
+ .../gpu/drm/rockchip/dw-mipi-dsi-rockchip.c   |  49 +++++-
+ drivers/phy/phy-core.c                        |   4 +
+ include/dt-bindings/display/drm_mipi_dsi.h    |  53 ++++++
+ 12 files changed, 496 insertions(+), 86 deletions(-)
+ create mode 100644 include/dt-bindings/display/drm_mipi_dsi.h
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+index cfa5dc820e90..3441e9a34f76 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-eva-mi-v2.dts
+@@ -143,6 +143,21 @@ user-button-2 {
+             linux,code = <KEY_Z>;
+         };
+ 	};
++
++    hdmi-connector {
++        compatible = "hdmi-connector";
++        ddc-i2c-bus = <&i2c1>;
++        label = "hdmi";
++        type = "a";
++        status = "okay";
++
++        port {
++            hdmi_in: endpoint {
++                remote-endpoint = <&lt8912b_out>;
++            };
++        };
++    };
++
+ };
+ 
+ &gmac {
+@@ -237,11 +252,11 @@ &vopb_mmu {
+ 
+ /* Little Video Output Processor (VOPL) */
+ &vopl {
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+ &vopl_mmu {
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+ /* Video Decoder Processing Unit (VDPU) */
+@@ -270,9 +285,16 @@ &vopl_mmu {
+ 
+ /* Display Serial Interface */
+ &dsi {
+-	status = "disabled";
++	clocks = <&cru PCLK_MIPI_DSI>, <&lt8912b_clk>;
++	clock-names = "pclk", "ref";
++
++	status = "okay";
+ 	rockchip,lane-rate = <891>;
++    #address-cells = <1>;
++    #size-cells = <0>;
++	dphy = <&lt8912b_bridge>;
+ 
++	/*
+ 	panel@0 {
+ 		compatible = "simple-panel-dsi";
+ 		reg = <0>;
+@@ -339,14 +361,10 @@ panel_in_dsi: endpoint {
+ 				};
+ 			};
+ 		};
+-
+-		/* should be defined to avoid kernel log errors */
+-		/* vsp-supply is positive voltage supply, vsn-supply is negative voltage supply */
+-		/* will not be critical: is not even used in simple-panel devicetree example */
+-		/* vsp-supply = <???>; */
+-		/* vsn-supply = <???>; */
+ 	};
++	*/
+ 
++	/*
+ 	ports {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+@@ -358,6 +376,45 @@ dsi_out_panel: endpoint {
+ 			};
+ 		};
+ 	};
++	*/
++
++	/delete-node/ ports;
++    ports {
++        #address-cells = <1>;
++        #size-cells = <0>;
++
++        port@0 {
++            reg = <0>;
++            #address-cells = <1>;
++            #size-cells = <0>;
++
++            dsi_in_vopb: endpoint@0 {
++                reg = <0>;
++                remote-endpoint = <&vopb_out_dsi>;
++            };
++
++            dsi_in_vopl: endpoint@1 {
++                reg = <1>;
++                remote-endpoint = <&vopl_out_dsi>;
++            };
++        };
++
++        port@1 {
++            reg = <1>;
++            #address-cells = <1>;
++            #size-cells = <0>;
++
++            dsi_out: endpoint@1 {
++                reg = <0>;
++                remote-endpoint = <&lt8912b_in>;
++                attach-bridge;
++            };
++        };
++    };
++};
++
++&dsi_dphy {
++	status = "okay";
+ };
+ 
+ &dsi_in_vopb {
+@@ -365,15 +422,15 @@ &dsi_in_vopb {
+ };
+ 
+ &dsi_in_vopl {
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+-&video_phy {
++//&video_phy {
+ 	/* should be defined to avoid kernel log error */
+ 	/* no further info about video phy supply available */
+ 	/* phy-supply = "???"; */
+-	status = "okay";
+-};
++//	status = "okay";
++//};
+ 
+ /* HEVC video decoder */
+ //&hevc {
+@@ -394,6 +451,10 @@ &uart1 {
+ 	status = "okay";
+ };
+ 
++&uart2 {
++	status = "disabled";
++};
++
+ /* BB138a: PWM outputs on Pin Header */
+ &pwm0 {
+ 	status = "okay";
+@@ -482,38 +543,44 @@ eeprom@53 {
+ &i2c1 {
+ 	status = "okay";
+ 
+-	/* BB138a: HDMI to MIPI converter */
+-	lt8912@48 {
+-        compatible = "lontium,lt8912";
++    lt8912b_bridge: lt8912b-bridge@48 {
++        compatible = "lontium,lt8912b";
+         reg = <0x48>;
+-        ddc-i2c-bus = <&i2c1>;
+-		//hpd-gpios = <&gpio1 RK_PC5 GPIO_ACTIVE_HIGH>;
+-		//reset-gpios = <&gpio1 RK_PC4 GPIO_ACTIVE_LOW>;
+-		//pinctrl-names = "default";
+-		//pinctrl-0 = <&pinctrl_lt8912>;
+-		status = "okay";
+-		//swap-mipi-pn = <1>;	/* needs to be unset to NOT swap MIPI P/N lines */
++        /* driver needs a valid reset gpio to function */
++        //reset-gpios = <&gpio1 RK_PC4 GPIO_ACTIVE_LOW>;
++        status = "okay";
++        //interrupt-parent = <&gpio3 RK_PA4 GPIO_ACTIVE_HIGH>;
++        //interrupts = <GIC_SPI 103 IRQ_TYPE_LEVEL_HIGH>;
++
++	lt8912b_clk: lt8912b-clk {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <25000000>;
++	};
+ 
+-/*
+-		display-timings {
+-			native-mode = <&timing0>;
+-			timing0: timing0 {
+-				clock-frequency = <74250000>;
+-				hactive = <1280>;
+-				vactive = <720>;
+-				hfront-porch = <110>;
+-				hsync-len = <40>;
+-				hback-porch = <220>;
+-				vfront-porch = <5>;
+-				vsync-len = <5>;
+-				vback-porch = <20>;
+-				hsync-active = <0>;
+-				vsync-active = <0>;
+-				de-active = <0>;
+-				pixelclk-active = <0>;
+-			};
+-		};
+-*/
++
++        ports {
++            #address-cells = <1>;
++            #size-cells = <0>;
++
++            port@0 {
++                reg = <0>;
++
++                lt8912b_in: endpoint {
++                    data-lanes = <0 1 2 3>;
++                    remote-endpoint = <&dsi_out>;
++                    attach-bridge;
++                };
++            };
++
++            port@1 {
++                reg = <1>;
++
++                lt8912b_out: endpoint {
++                    remote-endpoint = <&hdmi_in>;
++                };
++            };
++        };
+     };
+ 
+ 	/* BB138a: MAX9867ETJ+ audio codec */
+diff --git a/arch/arm64/boot/dts/iesy/iesy-rpx30-osm-sf.dtsi b/arch/arm64/boot/dts/iesy/iesy-rpx30-osm-sf.dtsi
+index 1d0de6bbc834..fde0d80ee381 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-rpx30-osm-sf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-rpx30-osm-sf.dtsi
+@@ -18,7 +18,8 @@ aliases {
+ 	};
+ 
+ 	chosen {
+-		bootargs = "earlycon=uart8250,mmio32,0xff160000 console=ttyFIQ0 rw root=PARTUUID=614e0000-0000 rootwait uio_pdrv_genirq.of_id=generic-uio";
++		//bootargs = "earlycon=uart8250,mmio32,0xff160000 console=ttyFIQ0 rw root=PARTUUID=614e0000-0000 rootwait uio_pdrv_genirq.of_id=generic-uio";
++		bootargs = "earlycon=uart8250,mmio32,0xff160000 console=ttyFIQ0 rw root=PARTUUID=614e0000-0000 rootwait uio_pdrv_genirq.of_id=generic-uio video=1920x1080@30";
+ 	};
+ 
+ 	fiq-debugger {
+@@ -75,9 +76,9 @@ &cpu0_opp_table {
+ //};
+ 
+ /* DDR PHY Interface - used for DDR monitoring */
+-&dfi {
+-	status = "okay";
+-};
++//&dfi {
++//	status = "okay";
++//};
+ 
+ /* Rockchip General Register File (GRF) */
+ &grf {
+@@ -89,15 +90,15 @@ io_domains: io-domains {
+ };
+ 
+ /* Dynamic Memory Controller */
+-&dmc {
+-	center-supply = <&vdd_logic>;
+-	auto-freq-en = <0>;
+-	status = "okay";
+-};
++//&dmc {
++//	center-supply = <&vdd_logic>;
++//	auto-freq-en = <0>;
++//	status = "okay";
++//};
+ 
+-&rng {
+-	status = "okay";
+-};
++//&rng {
++//	status = "okay";
++//};
+ 
+ /* eMMC on CM006 */
+ &emmc {
+diff --git a/drivers/gpu/drm/bridge/display-connector.c b/drivers/gpu/drm/bridge/display-connector.c
+index 9a12449ad7b8..aac1cc558880 100644
+--- a/drivers/gpu/drm/bridge/display-connector.c
++++ b/drivers/gpu/drm/bridge/display-connector.c
+@@ -31,12 +31,16 @@ struct display_connector {
+ static inline struct display_connector *
+ to_display_connector(struct drm_bridge *bridge)
+ {
++	pr_warn("%s(): called\n", __func__);
++	
+ 	return container_of(bridge, struct display_connector, bridge);
+ }
+ 
+ static int display_connector_attach(struct drm_bridge *bridge,
+ 				    enum drm_bridge_attach_flags flags)
+ {
++	pr_warn("%s(%s): called\n", __func__, bridge->of_node->name);
++	
+ 	return flags & DRM_BRIDGE_ATTACH_NO_CONNECTOR ? 0 : -EINVAL;
+ }
+ 
+@@ -45,15 +49,22 @@ display_connector_detect(struct drm_bridge *bridge)
+ {
+ 	struct display_connector *conn = to_display_connector(bridge);
+ 
++	pr_warn("%s(%s): called\n", __func__, bridge->of_node->name);
++	
+ 	if (conn->hpd_gpio) {
+-		if (gpiod_get_value_cansleep(conn->hpd_gpio))
++		if (gpiod_get_value_cansleep(conn->hpd_gpio)) {
++			pr_warn("%s(): connector_status_connected\n", __func__);
+ 			return connector_status_connected;
+-		else
++		} else {
++			pr_warn("%s(): connector_status_disconnected 1\n", __func__);
+ 			return connector_status_disconnected;
++		}
+ 	}
+ 
+-	if (conn->bridge.ddc && drm_probe_ddc(conn->bridge.ddc))
++	if (conn->bridge.ddc && drm_probe_ddc(conn->bridge.ddc)) {
++		pr_warn("%s(): connector_status_connected with DDC\n", __func__);
+ 		return connector_status_connected;
++	}
+ 
+ 	switch (conn->bridge.type) {
+ 	case DRM_MODE_CONNECTOR_DVIA:
+@@ -65,6 +76,7 @@ display_connector_detect(struct drm_bridge *bridge)
+ 		 * For DVI and HDMI connectors a DDC probe failure indicates
+ 		 * that no cable is connected.
+ 		 */
++		pr_warn("%s(): connector_status_disconnected 2\n", __func__);
+ 		return connector_status_disconnected;
+ 
+ 	case DRM_MODE_CONNECTOR_Composite:
+@@ -78,6 +90,7 @@ display_connector_detect(struct drm_bridge *bridge)
+ 		 * if drm_probe_ddc fails, as some cables don't wire the DDC
+ 		 * pins.
+ 		 */
++  		pr_warn("%s(): connector_status_unknown\n", __func__);
+ 		return connector_status_unknown;
+ 	}
+ }
+@@ -87,6 +100,8 @@ static struct edid *display_connector_get_edid(struct drm_bridge *bridge,
+ {
+ 	struct display_connector *conn = to_display_connector(bridge);
+ 
++	pr_warn("%s(%s): called\n", __func__, bridge->of_node->name);
++	
+ 	return drm_get_edid(connector, conn->bridge.ddc);
+ }
+ 
+@@ -106,6 +121,8 @@ static u32 *display_connector_get_output_bus_fmts(struct drm_bridge *bridge,
+ 	struct drm_bridge *prev_bridge = drm_bridge_get_prev_bridge(bridge);
+ 	struct drm_bridge_state *prev_bridge_state;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!prev_bridge || !prev_bridge->funcs->atomic_get_output_bus_fmts) {
+ 		struct drm_connector *conn = conn_state->connector;
+ 		u32 *out_bus_fmts;
+@@ -149,6 +166,8 @@ static u32 *display_connector_get_input_bus_fmts(struct drm_bridge *bridge,
+ 	struct drm_bridge *prev_bridge = drm_bridge_get_prev_bridge(bridge);
+ 	struct drm_bridge_state *prev_bridge_state;
+ 
++	pr_warn("%s(): called\n", __func__);
++
+ 	if (!prev_bridge || !prev_bridge->funcs->atomic_get_input_bus_fmts) {
+ 		u32 *in_bus_fmts;
+ 
+@@ -198,6 +217,8 @@ static int display_connector_probe(struct platform_device *pdev)
+ 	const char *label = NULL;
+ 	int ret;
+ 
++	pr_warn("%s(): called\n", __func__);
++
+ 	conn = devm_kzalloc(&pdev->dev, sizeof(*conn), GFP_KERNEL);
+ 	if (!conn)
+ 		return -ENOMEM;
+@@ -214,10 +235,13 @@ static int display_connector_probe(struct platform_device *pdev)
+ 		analog = of_property_read_bool(pdev->dev.of_node, "analog");
+ 		digital = of_property_read_bool(pdev->dev.of_node, "digital");
+ 		if (analog && !digital) {
++			pr_warn("%s(): DVI = analog\n", __func__);
+ 			conn->bridge.type = DRM_MODE_CONNECTOR_DVIA;
+ 		} else if (!analog && digital) {
++			pr_warn("%s(): DVI = digital\n", __func__);
+ 			conn->bridge.type = DRM_MODE_CONNECTOR_DVID;
+ 		} else if (analog && digital) {
++			pr_warn("%s(): DVI = analog and digital\n", __func__);
+ 			conn->bridge.type = DRM_MODE_CONNECTOR_DVII;
+ 		} else {
+ 			dev_err(&pdev->dev, "DVI connector with no type\n");
+@@ -238,8 +262,10 @@ static int display_connector_probe(struct platform_device *pdev)
+ 
+ 		if (!strcmp(hdmi_type, "a") || !strcmp(hdmi_type, "c") ||
+ 		    !strcmp(hdmi_type, "d") || !strcmp(hdmi_type, "e")) {
++			pr_warn("%s(): HDMI = a, c, d or e\n", __func__);
+ 			conn->bridge.type = DRM_MODE_CONNECTOR_HDMIA;
+ 		} else if (!strcmp(hdmi_type, "b")) {
++			pr_warn("%s(): HDMI = b\n", __func__);
+ 			conn->bridge.type = DRM_MODE_CONNECTOR_HDMIB;
+ 		} else {
+ 			dev_err(&pdev->dev,
+@@ -307,8 +333,10 @@ static int display_connector_probe(struct platform_device *pdev)
+ 		if (phandle) {
+ 			conn->bridge.ddc = of_get_i2c_adapter_by_node(phandle);
+ 			of_node_put(phandle);
+-			if (!conn->bridge.ddc)
++			if (!conn->bridge.ddc) {
++				pr_warn("%s(): PROBE_DEFER - DDC I2C bus not found\n", __func__);
+ 				return -EPROBE_DEFER;
++			}
+ 		} else {
+ 			dev_dbg(&pdev->dev,
+ 				"No I2C bus specified, disabling EDID readout\n");
+@@ -330,6 +358,7 @@ static int display_connector_probe(struct platform_device *pdev)
+ 				break;
+ 
+ 			case -EPROBE_DEFER:
++				pr_warn("%s(): PROBE_DEFER - DP PWR regulator not found\n", __func__);
+ 				return -EPROBE_DEFER;
+ 
+ 			default:
+@@ -379,6 +408,7 @@ static int display_connector_probe(struct platform_device *pdev)
+ 
+ 	drm_bridge_add(&conn->bridge);
+ 
++	pr_warn("%s(): done\n", __func__);
+ 	return 0;
+ }
+ 
+diff --git a/drivers/gpu/drm/bridge/lontium-lt8912b.c b/drivers/gpu/drm/bridge/lontium-lt8912b.c
+index 5968f4af190b..c05a8f707a06 100644
+--- a/drivers/gpu/drm/bridge/lontium-lt8912b.c
++++ b/drivers/gpu/drm/bridge/lontium-lt8912b.c
+@@ -62,7 +62,7 @@ static int lt8912_write_init_config(struct lt8912 *lt)
+ 		/*Tx Analog*/
+ 		{0x31, 0xb1},
+ 		{0x32, 0xb1},
+-		{0x33, 0x0e},
++		{0x33, 0x03}, // i2c:0x03 bridge:0x0e
+ 		{0x37, 0x00},
+ 		{0x38, 0x22},
+ 		{0x60, 0x82},
+@@ -79,12 +79,14 @@ static int lt8912_write_init_config(struct lt8912 *lt)
+ 		{0x5a, 0x02},
+ 
+ 		/*MIPI Analog*/
+-		{0x3e, 0xd6},
++		{0x3e, 0xce}, // i2c:0xce bridge:0xd6
+ 		{0x3f, 0xd4},
+ 		{0x41, 0x3c},
+ 		{0xB2, 0x00},
+ 	};
+ 
++	pr_warn("%s(): called\n", __func__);
++
+ 	return regmap_multi_reg_write(lt->regmap[I2C_MAIN], seq, ARRAY_SIZE(seq));
+ }
+ 
+@@ -98,16 +100,19 @@ static int lt8912_write_mipi_basic_config(struct lt8912 *lt)
+ 		{0x1b, 0x03},
+ 	};
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	return regmap_multi_reg_write(lt->regmap[I2C_CEC_DSI], seq, ARRAY_SIZE(seq));
+ };
+ 
+ static int lt8912_write_dds_config(struct lt8912 *lt)
+ {
+ 	const struct reg_sequence seq[] = {
+-		{0x4e, 0xff},
+-		{0x4f, 0x56},
+-		{0x50, 0x69},
++		{0x4e, 0x6a}, // i2c:0x6a bridge:0xff
++		{0x4f, 0xad}, // i2c:0xad bridge:0x56
++		{0x50, 0xf3}, // i2c:0xf3 bridge:0x69
+ 		{0x51, 0x80},
++
+ 		{0x1f, 0x5e},
+ 		{0x20, 0x01},
+ 		{0x21, 0x2c},
+@@ -151,6 +156,8 @@ static int lt8912_write_dds_config(struct lt8912 *lt)
+ 		{0x51, 0x00},
+ 	};
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	return regmap_multi_reg_write(lt->regmap[I2C_CEC_DSI], seq, ARRAY_SIZE(seq));
+ }
+ 
+@@ -158,6 +165,8 @@ static int lt8912_write_rxlogicres_config(struct lt8912 *lt)
+ {
+ 	int ret;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	ret = regmap_write(lt->regmap[I2C_MAIN], 0x03, 0x7f);
+ 	usleep_range(10000, 20000);
+ 	ret |= regmap_write(lt->regmap[I2C_MAIN], 0x03, 0xff);
+@@ -188,6 +197,8 @@ static int lt8912_write_lvds_config(struct lt8912 *lt)
+ 		{0x03, 0xff},
+ 	};
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	return regmap_multi_reg_write(lt->regmap[I2C_MAIN], seq, ARRAY_SIZE(seq));
+ };
+ 
+@@ -219,6 +230,8 @@ static int lt8912_init_i2c(struct lt8912 *lt, struct i2c_client *client)
+ 		{ I2C_BOARD_INFO("lt8912p1", I2C_ADDR_CEC_DSI), },
+ 	};
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!lt)
+ 		return -ENODEV;
+ 
+@@ -235,6 +248,7 @@ static int lt8912_init_i2c(struct lt8912 *lt, struct i2c_client *client)
+ 		if (IS_ERR(lt->regmap[i]))
+ 			return PTR_ERR(lt->regmap[i]);
+ 	}
++	pr_warn("%s(): done\n", __func__);
+ 	return 0;
+ }
+ 
+@@ -250,6 +264,8 @@ static int lt8912_free_i2c(struct lt8912 *lt)
+ 
+ static int lt8912_hard_power_on(struct lt8912 *lt)
+ {
++	pr_warn("%s(): called\n", __func__);
++	
+ 	gpiod_set_value_cansleep(lt->gp_reset, 0);
+ 	msleep(20);
+ 
+@@ -258,6 +274,8 @@ static int lt8912_hard_power_on(struct lt8912 *lt)
+ 
+ static void lt8912_hard_power_off(struct lt8912 *lt)
+ {
++	pr_warn("%s(): called\n", __func__);
++	
+ 	gpiod_set_value_cansleep(lt->gp_reset, 1);
+ 	msleep(20);
+ 	lt->is_power_on = false;
+@@ -270,6 +288,8 @@ static int lt8912_video_setup(struct lt8912 *lt)
+ 	u8 settle = 0x08;
+ 	int ret, hsync_activehigh, vsync_activehigh;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!lt)
+ 		return -EINVAL;
+ 
+@@ -292,6 +312,11 @@ static int lt8912_video_setup(struct lt8912 *lt)
+ 	else if (vactive == 1080)
+ 		settle = 0x0a;
+ 
++	pr_warn("%s(): hactive=%d hfp=%d hpw=%d hbp=%d h_total=%d\n", __func__, hactive, hfp, hpw, hbp, h_total);
++	pr_warn("%s(): vactive=%d vfp=%d vpw=%d vbp=%d v_total=%d\n", __func__, vactive, vfp, vpw, vbp, v_total);
++	pr_warn("%s(): hsync_activehigh=%d vsync_activehigh=%d\n", __func__, hsync_activehigh, vsync_activehigh);
++	pr_warn("%s(): is_hdmi=%d\n", __func__, lt->connector.display_info.is_hdmi);
++
+ 	ret = regmap_write(lt->regmap[I2C_CEC_DSI], 0x10, 0x01);
+ 	ret |= regmap_write(lt->regmap[I2C_CEC_DSI], 0x11, settle);
+ 	ret |= regmap_write(lt->regmap[I2C_CEC_DSI], 0x18, hpw);
+@@ -326,14 +351,20 @@ static int lt8912_video_setup(struct lt8912 *lt)
+ 	ret |= regmap_update_bits(lt->regmap[I2C_MAIN], 0xb2, BIT(0),
+ 				  lt->connector.display_info.is_hdmi ? BIT(0) : 0);
+ 
++	pr_warn("%s(): done, ret=%d\n", __func__, ret);
++
+ 	return ret;
+ }
+ 
+ static int lt8912_soft_power_on(struct lt8912 *lt)
+ {
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!lt->is_power_on) {
+ 		u32 lanes = lt->data_lanes;
+ 
++		pr_warn("%s(): lanes=%d\n", __func__, lanes);
++
+ 		lt8912_write_init_config(lt);
+ 		regmap_write(lt->regmap[I2C_CEC_DSI], 0x13, lanes & 3);
+ 
+@@ -342,6 +373,7 @@ static int lt8912_soft_power_on(struct lt8912 *lt)
+ 		lt->is_power_on = true;
+ 	}
+ 
++	pr_warn("%s(): done\n", __func__);
+ 	return 0;
+ }
+ 
+@@ -349,6 +381,8 @@ static int lt8912_video_on(struct lt8912 *lt)
+ {
+ 	int ret;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	ret = lt8912_video_setup(lt);
+ 	if (ret < 0)
+ 		goto end;
+@@ -361,11 +395,12 @@ static int lt8912_video_on(struct lt8912 *lt)
+ 	if (ret < 0)
+ 		goto end;
+ 
+-	ret = lt8912_write_lvds_config(lt);
+-	if (ret < 0)
+-		goto end;
++//	ret = lt8912_write_lvds_config(lt);
++//	if (ret < 0)
++//		goto end;
+ 
+ end:
++	pr_warn("%s(): done, ret=%d\n", __func__, ret);
+ 	return ret;
+ }
+ 
+@@ -374,6 +409,8 @@ static enum drm_connector_status lt8912_check_cable_status(struct lt8912 *lt)
+ 	int ret;
+ 	unsigned int reg_val;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	ret = regmap_read(lt->regmap[I2C_MAIN], 0xC1, &reg_val);
+ 	if (ret)
+ 		return connector_status_unknown;
+@@ -389,8 +426,27 @@ lt8912_connector_detect(struct drm_connector *connector, bool force)
+ {
+ 	struct lt8912 *lt = connector_to_lt8912(connector);
+ 
+-	if (lt->hdmi_port->ops & DRM_BRIDGE_OP_DETECT)
++	int ret;
++	unsigned int reg_val[4];
++
++	pr_warn("%s(): called\n", __func__);
++
++	ret = regmap_read(lt->regmap[I2C_MAIN], 0x9c, &reg_val[0]);
++	ret = regmap_read(lt->regmap[I2C_MAIN], 0x9d, &reg_val[1]);
++	ret = regmap_read(lt->regmap[I2C_MAIN], 0x9e, &reg_val[2]);
++	ret = regmap_read(lt->regmap[I2C_MAIN], 0x9f, &reg_val[3]);
++	pr_warn("%s(): content of video check regs 0x9c..0x9f: 0x%02x, 0x%02x, 0x%02x, 0x%02x\n", __func__, reg_val[0], reg_val[1], reg_val[2], reg_val[3]);
++
++	ret = regmap_read(lt->regmap[I2C_CEC_DSI], 0x0c, &reg_val[0]);
++	ret = regmap_read(lt->regmap[I2C_CEC_DSI], 0x0d, &reg_val[1]);
++	ret = regmap_read(lt->regmap[I2C_CEC_DSI], 0x0e, &reg_val[2]);
++	ret = regmap_read(lt->regmap[I2C_CEC_DSI], 0x0f, &reg_val[3]);
++	pr_warn("%s(): content of pixel clock regs 0x0c..0x0f: 0x%02x, 0x%02x, 0x%02x, 0x%02x\n", __func__, reg_val[0], reg_val[1], reg_val[2], reg_val[3]);
++
++	if (lt->hdmi_port->ops & DRM_BRIDGE_OP_DETECT) {
++		pr_warn("%s(): hdmi port supports detect\n", __func__);
+ 		return drm_bridge_detect(lt->hdmi_port);
++	}
+ 
+ 	return lt8912_check_cable_status(lt);
+ }
+@@ -408,6 +464,8 @@ static enum drm_mode_status
+ lt8912_connector_mode_valid(struct drm_connector *connector,
+ 			    struct drm_display_mode *mode)
+ {
++	pr_warn("%s(): called, hdisplay=%d vdisplay=%d\n", __func__, mode->hdisplay, mode->vdisplay);
++
+ 	if (mode->clock > 150000)
+ 		return MODE_CLOCK_HIGH;
+ 
+@@ -428,11 +486,14 @@ static int lt8912_connector_get_modes(struct drm_connector *connector)
+ 	struct lt8912 *lt = connector_to_lt8912(connector);
+ 	u32 bus_format = MEDIA_BUS_FMT_RGB888_1X24;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	edid = drm_bridge_get_edid(lt->hdmi_port, connector);
+ 	if (edid) {
+ 		drm_connector_update_edid_property(connector, edid);
+ 		num = drm_add_edid_modes(connector, edid);
+ 	} else {
++		pr_warn("%s(): no edid\n", __func__);
+ 		return ret;
+ 	}
+ 
+@@ -456,6 +517,8 @@ static void lt8912_bridge_mode_set(struct drm_bridge *bridge,
+ {
+ 	struct lt8912 *lt = bridge_to_lt8912(bridge);
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	drm_display_mode_to_videomode(adj, &lt->mode);
+ }
+ 
+@@ -463,6 +526,8 @@ static void lt8912_bridge_enable(struct drm_bridge *bridge)
+ {
+ 	struct lt8912 *lt = bridge_to_lt8912(bridge);
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	lt8912_video_on(lt);
+ }
+ 
+@@ -477,6 +542,8 @@ static int lt8912_attach_dsi(struct lt8912 *lt)
+ 						   .node = NULL,
+ 						 };
+ 
++	pr_warn("%s(): called\n", __func__);
++
+ 	host = of_find_mipi_dsi_host_by_node(lt->host_node);
+ 	if (!host) {
+ 		dev_err(dev, "failed to find dsi host\n");
+@@ -506,6 +573,7 @@ static int lt8912_attach_dsi(struct lt8912 *lt)
+ 		return ret;
+ 	}
+ 
++	pr_warn("%s(): done\n", __func__);
+ 	return 0;
+ }
+ 
+@@ -515,6 +583,8 @@ static int lt8912_bridge_connector_init(struct drm_bridge *bridge)
+ 	struct lt8912 *lt = bridge_to_lt8912(bridge);
+ 	struct drm_connector *connector = &lt->connector;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	connector->polled = DRM_CONNECTOR_POLL_CONNECT |
+ 			    DRM_CONNECTOR_POLL_DISCONNECT;
+ 
+@@ -539,6 +609,8 @@ static int lt8912_bridge_attach(struct drm_bridge *bridge,
+ 	struct lt8912 *lt = bridge_to_lt8912(bridge);
+ 	int ret;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!(flags & DRM_BRIDGE_ATTACH_NO_CONNECTOR)) {
+ 		ret = lt8912_bridge_connector_init(bridge);
+ 		if (ret) {
+@@ -568,6 +640,8 @@ static void lt8912_bridge_detach(struct drm_bridge *bridge)
+ {
+ 	struct lt8912 *lt = bridge_to_lt8912(bridge);
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (lt->is_attached) {
+ 		lt8912_hard_power_off(lt);
+ 		drm_connector_unregister(&lt->connector);
+@@ -580,6 +654,8 @@ lt8912_bridge_detect(struct drm_bridge *bridge)
+ {
+ 	struct lt8912 *lt = bridge_to_lt8912(bridge);
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (lt->hdmi_port->ops & DRM_BRIDGE_OP_DETECT)
+ 		return drm_bridge_detect(lt->hdmi_port);
+ 
+@@ -591,6 +667,8 @@ static struct edid *lt8912_bridge_get_edid(struct drm_bridge *bridge,
+ {
+ 	struct lt8912 *lt = bridge_to_lt8912(bridge);
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	/*
+ 	 * edid must be read through the ddc bus but it must be
+ 	 * given to the hdmi connector node.
+@@ -602,6 +680,15 @@ static struct edid *lt8912_bridge_get_edid(struct drm_bridge *bridge,
+ 	return NULL;
+ }
+ 
++static enum drm_mode_status lt8912_bridge_mode_valid (struct drm_bridge *bridge,
++										const struct drm_display_info *info,
++										const struct drm_display_mode *mode)
++{
++	pr_warn("%s(): hdisplay=%d vdisplay=%d pixel clock=%d\n", __func__, mode->hdisplay, mode->vdisplay, mode->clock);
++
++	return MODE_OK;
++}
++
+ static const struct drm_bridge_funcs lt8912_bridge_funcs = {
+ 	.attach = lt8912_bridge_attach,
+ 	.detach = lt8912_bridge_detach,
+@@ -609,6 +696,7 @@ static const struct drm_bridge_funcs lt8912_bridge_funcs = {
+ 	.enable = lt8912_bridge_enable,
+ 	.detect = lt8912_bridge_detect,
+ 	.get_edid = lt8912_bridge_get_edid,
++	.mode_valid = lt8912_bridge_mode_valid,
+ };
+ 
+ static int lt8912_parse_dt(struct lt8912 *lt)
+@@ -619,6 +707,8 @@ static int lt8912_parse_dt(struct lt8912 *lt)
+ 	int data_lanes;
+ 	struct device_node *port_node;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	gp_reset = devm_gpiod_get_optional(dev, "reset", GPIOD_OUT_HIGH);
+ 	if (IS_ERR(gp_reset)) {
+ 		ret = PTR_ERR(gp_reset);
+@@ -628,11 +718,14 @@ static int lt8912_parse_dt(struct lt8912 *lt)
+ 	}
+ 	lt->gp_reset = gp_reset;
+ 
++	pr_warn("%s(): gp_reset: %px\n", __func__, gp_reset);
++
+ 	data_lanes = drm_of_get_data_lanes_count_ep(dev->of_node, 0, -1, 1, 4);
+ 	if (data_lanes < 0) {
+ 		dev_err(lt->dev, "%s: Bad data-lanes property\n", __func__);
+ 		return data_lanes;
+ 	}
++	pr_warn("%s(): data_lanes: %d\n", __func__, data_lanes);
+ 
+ 	lt->data_lanes = data_lanes;
+ 
+@@ -641,6 +734,7 @@ static int lt8912_parse_dt(struct lt8912 *lt)
+ 		dev_err(lt->dev, "%s: Failed to get remote port\n", __func__);
+ 		return -ENODEV;
+ 	}
++	pr_warn("%s(): host = %s\n", __func__, lt->host_node->name);
+ 
+ 	port_node = of_graph_get_remote_node(dev->of_node, 1, -1);
+ 	if (!port_node) {
+@@ -648,13 +742,15 @@ static int lt8912_parse_dt(struct lt8912 *lt)
+ 		ret = -ENODEV;
+ 		goto err_free_host_node;
+ 	}
++	pr_warn("%s(): connector port = %s\n", __func__, port_node->name);
+ 
+ 	lt->hdmi_port = of_drm_find_bridge(port_node);
+ 	if (!lt->hdmi_port) {
+ 		dev_err(lt->dev, "%s: Failed to get hdmi port\n", __func__);
+-		ret = -ENODEV;
++		ret = -EPROBE_DEFER;
+ 		goto err_free_host_node;
+ 	}
++	pr_warn("%s(): hdmi port = %s\n", __func__, lt->hdmi_port->of_node->name);
+ 
+ 	if (!of_device_is_compatible(port_node, "hdmi-connector")) {
+ 		dev_err(lt->dev, "%s: Failed to get hdmi port\n", __func__);
+@@ -663,6 +759,8 @@ static int lt8912_parse_dt(struct lt8912 *lt)
+ 	}
+ 
+ 	of_node_put(port_node);
++
++	pr_warn("%s(): done\n", __func__);
+ 	return 0;
+ 
+ err_free_host_node:
+@@ -684,6 +782,8 @@ static int lt8912_probe(struct i2c_client *client,
+ 	int ret = 0;
+ 	struct device *dev = &client->dev;
+ 
++	pr_warn("%s(): called\n", __func__);
++
+ 	lt = devm_kzalloc(dev, sizeof(struct lt8912), GFP_KERNEL);
+ 	if (!lt)
+ 		return -ENOMEM;
+@@ -712,6 +812,9 @@ static int lt8912_probe(struct i2c_client *client,
+ 	if (ret)
+ 		goto err_attach;
+ 
++//lt8912_bridge_enable(&lt->bridge);
++
++	pr_warn("%s(): done\n", __func__);
+ 	return 0;
+ 
+ err_attach:
+@@ -720,6 +823,7 @@ static int lt8912_probe(struct i2c_client *client,
+ err_i2c:
+ 	lt8912_put_dt(lt);
+ err_dt_parse:
++	pr_warn("%s(): failed\n", __func__);
+ 	return ret;
+ }
+ 
+diff --git a/drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi.c b/drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi.c
+index b2efecf7d160..30e15127e75a 100644
+--- a/drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi.c
++++ b/drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi.c
+@@ -958,6 +958,8 @@ static void dw_mipi_dsi_bridge_atomic_enable(struct drm_bridge *bridge,
+ {
+ 	struct dw_mipi_dsi *dsi = bridge_to_dsi(bridge);
+ 
++	pr_warn("%s(): called\n", __func__);
++
+ 	/* Switch to video mode for panel-bridge enable & panel enable */
+ 	dw_mipi_dsi_set_mode(dsi, MIPI_DSI_MODE_VIDEO);
+ 	if (dsi->slave)
+@@ -1106,6 +1108,8 @@ __dw_mipi_dsi_probe(struct platform_device *pdev,
+ 	struct dw_mipi_dsi *dsi;
+ 	int ret;
+ 
++	pr_warn("%s: dev=%s\n", __func__, dev_name(dev));
++
+ 	dsi = devm_kzalloc(dev, sizeof(*dsi), GFP_KERNEL);
+ 	if (!dsi)
+ 		return ERR_PTR(-ENOMEM);
+@@ -1128,6 +1132,8 @@ __dw_mipi_dsi_probe(struct platform_device *pdev,
+ 		dsi->base = plat_data->base;
+ 	}
+ 
++	pr_warn("%s(): before clk_get\n", __func__);
++
+ 	dsi->pclk = devm_clk_get(dev, "pclk");
+ 	if (IS_ERR(dsi->pclk)) {
+ 		ret = PTR_ERR(dsi->pclk);
+@@ -1139,6 +1145,9 @@ __dw_mipi_dsi_probe(struct platform_device *pdev,
+ 	 * Note that the reset was not defined in the initial device tree, so
+ 	 * we have to be prepared for it not being found.
+ 	 */
++
++	pr_warn("%s(): before reset_control_get_optional_exclusive\n", __func__);
++
+ 	apb_rst = devm_reset_control_get_optional_exclusive(dev, "apb");
+ 	if (IS_ERR(apb_rst)) {
+ 		ret = PTR_ERR(apb_rst);
+@@ -1168,6 +1177,9 @@ __dw_mipi_dsi_probe(struct platform_device *pdev,
+ 
+ 	dsi->dsi_host.ops = &dw_mipi_dsi_host_ops;
+ 	dsi->dsi_host.dev = dev;
++
++	pr_warn("%s(): before mipi_dsi_host_register\n", __func__);
++
+ 	ret = mipi_dsi_host_register(&dsi->dsi_host);
+ 	if (ret) {
+ 		dev_err(dev, "Failed to register MIPI host: %d\n", ret);
+@@ -1182,6 +1194,7 @@ __dw_mipi_dsi_probe(struct platform_device *pdev,
+ 	dsi->bridge.of_node = pdev->dev.of_node;
+ #endif
+ 
++	pr_warn("%s: done\n", __func__);
+ 	return dsi;
+ }
+ 
+diff --git a/drivers/gpu/drm/drm_bridge.c b/drivers/gpu/drm/drm_bridge.c
+index 6abf7a2407e9..464710869b96 100644
+--- a/drivers/gpu/drm/drm_bridge.c
++++ b/drivers/gpu/drm/drm_bridge.c
+@@ -25,6 +25,7 @@
+ #include <linux/media-bus-format.h>
+ #include <linux/module.h>
+ #include <linux/mutex.h>
++#include <linux/of.h>
+ 
+ #include <drm/drm_atomic_state_helper.h>
+ #include <drm/drm_bridge.h>
+@@ -168,6 +169,12 @@ void drm_bridge_add(struct drm_bridge *bridge)
+ 	mutex_lock(&bridge_lock);
+ 	list_add_tail(&bridge->list, &bridge_list);
+ 	mutex_unlock(&bridge_lock);
++
++	pr_warn("%s(): content of bridge_list:\n", __func__);
++
++	list_for_each_entry(bridge, &bridge_list, list) {
++		pr_warn("%s(): bridge name = %s\n", __func__, bridge->of_node->name);
++	}
+ }
+ EXPORT_SYMBOL(drm_bridge_add);
+ 
+@@ -263,24 +270,36 @@ int drm_bridge_attach(struct drm_encoder *encoder, struct drm_bridge *bridge,
+ {
+ 	int ret;
+ 
+-	if (!encoder || !bridge)
++	pr_warn("%s(): called\n", __func__);
++
++	if (!encoder || !bridge) {
++		pr_warn("%s(): invalid encoder or bridge\n", __func__);
+ 		return -EINVAL;
++	}
+ 
+-	if (previous && (!previous->dev || previous->encoder != encoder))
++	if (previous && (!previous->dev || previous->encoder != encoder)) {
++		pr_warn("%s(): invalid previous bridge\n", __func__);
+ 		return -EINVAL;
++	}
+ 
+-	if (bridge->dev)
++	if (bridge->dev) {
++		pr_warn("%s(): bridge already attached to %s\n", __func__, bridge->of_node->name);
+ 		return -EBUSY;
++	}
+ 
+ 	bridge->dev = encoder->dev;
+ 	bridge->encoder = encoder;
+ 
++	pr_warn("%s(): before list_add\n", __func__);
++
+ 	if (previous)
+ 		list_add(&bridge->chain_node, &previous->chain_node);
+ 	else
+ 		list_add(&bridge->chain_node, &encoder->bridge_chain);
+ 
++
+ 	if (bridge->funcs->attach) {
++		pr_warn("%s(): before calling attach func\n", __func__);
+ 		ret = bridge->funcs->attach(bridge, flags);
+ 		if (ret < 0)
+ 			goto err_reset_bridge;
+@@ -289,6 +308,7 @@ int drm_bridge_attach(struct drm_encoder *encoder, struct drm_bridge *bridge,
+ 	if (bridge->funcs->atomic_reset) {
+ 		struct drm_bridge_state *state;
+ 
++		pr_warn("%s(): before calling atomic_reset func\n", __func__);
+ 		state = bridge->funcs->atomic_reset(bridge);
+ 		if (IS_ERR(state)) {
+ 			ret = PTR_ERR(state);
+@@ -300,6 +320,7 @@ int drm_bridge_attach(struct drm_encoder *encoder, struct drm_bridge *bridge,
+ 					    &drm_bridge_priv_state_funcs);
+ 	}
+ 
++	pr_warn("%s(): normal exit\n", __func__);
+ 	return 0;
+ 
+ err_detach_bridge:
+@@ -319,6 +340,7 @@ int drm_bridge_attach(struct drm_encoder *encoder, struct drm_bridge *bridge,
+ 		  encoder->name, ret);
+ #endif
+ 
++	pr_warn("%s(): error exit\n", __func__);
+ 	return ret;
+ }
+ EXPORT_SYMBOL(drm_bridge_attach);
+@@ -451,6 +473,8 @@ bool drm_bridge_chain_mode_fixup(struct drm_bridge *bridge,
+ {
+ 	struct drm_encoder *encoder;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!bridge)
+ 		return true;
+ 
+@@ -490,21 +514,35 @@ drm_bridge_chain_mode_valid(struct drm_bridge *bridge,
+ {
+ 	struct drm_encoder *encoder;
+ 
+-	if (!bridge)
++	pr_warn("%s(): called\n", __func__);
++	
++	if (!bridge) {
++		pr_warn("%s(): invalid bridge\n", __func__);
+ 		return MODE_OK;
++	}
+ 
+ 	encoder = bridge->encoder;
+ 	list_for_each_entry_from(bridge, &encoder->bridge_chain, chain_node) {
+ 		enum drm_mode_status ret;
+ 
+-		if (!bridge->funcs->mode_valid)
++		if (!bridge->funcs->mode_valid) {
++			pr_warn("%s(): bridge %s does not support mode_valid\n",
++				__func__, bridge->of_node->name);
+ 			continue;
++		} else {
++			pr_warn("%s(): bridge %s supports mode_valid\n",
++				__func__, bridge->of_node->name);
++		}
+ 
+ 		ret = bridge->funcs->mode_valid(bridge, info, mode);
+-		if (ret != MODE_OK)
++		if (ret != MODE_OK) {
++			pr_warn("%s(): bridge %s does not support mode %dx%d\n",
++				__func__, bridge->of_node->name, mode->hdisplay, mode->vdisplay);
+ 			return ret;
++		}
+ 	}
+ 
++	pr_warn("%s(): normal exit\n", __func__);
+ 	return MODE_OK;
+ }
+ EXPORT_SYMBOL(drm_bridge_chain_mode_valid);
+@@ -524,6 +562,8 @@ void drm_bridge_chain_disable(struct drm_bridge *bridge)
+ 	struct drm_encoder *encoder;
+ 	struct drm_bridge *iter;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!bridge)
+ 		return;
+ 
+@@ -553,6 +593,8 @@ void drm_bridge_chain_post_disable(struct drm_bridge *bridge)
+ {
+ 	struct drm_encoder *encoder;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!bridge)
+ 		return;
+ 
+@@ -582,6 +624,8 @@ void drm_bridge_chain_mode_set(struct drm_bridge *bridge,
+ {
+ 	struct drm_encoder *encoder;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!bridge)
+ 		return;
+ 
+@@ -609,6 +653,8 @@ void drm_bridge_chain_pre_enable(struct drm_bridge *bridge)
+ 	struct drm_encoder *encoder;
+ 	struct drm_bridge *iter;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!bridge)
+ 		return;
+ 
+@@ -637,6 +683,8 @@ void drm_bridge_chain_enable(struct drm_bridge *bridge)
+ {
+ 	struct drm_encoder *encoder;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!bridge)
+ 		return;
+ 
+@@ -666,6 +714,8 @@ void drm_atomic_bridge_chain_disable(struct drm_bridge *bridge,
+ 	struct drm_encoder *encoder;
+ 	struct drm_bridge *iter;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!bridge)
+ 		return;
+ 
+@@ -709,6 +759,8 @@ void drm_atomic_bridge_chain_post_disable(struct drm_bridge *bridge,
+ {
+ 	struct drm_encoder *encoder;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!bridge)
+ 		return;
+ 
+@@ -751,6 +803,8 @@ void drm_atomic_bridge_chain_pre_enable(struct drm_bridge *bridge,
+ 	struct drm_encoder *encoder;
+ 	struct drm_bridge *iter;
+ 
++	pr_warn("%s(): called\n", __func__);
++	
+ 	if (!bridge)
+ 		return;
+ 
+@@ -793,6 +847,8 @@ void drm_atomic_bridge_chain_enable(struct drm_bridge *bridge,
+ {
+ 	struct drm_encoder *encoder;
+ 
++	pr_warn("%s(): called\n", __func__);
++
+ 	if (!bridge)
+ 		return;
+ 
+@@ -1147,9 +1203,15 @@ EXPORT_SYMBOL(drm_atomic_bridge_chain_check);
+  */
+ enum drm_connector_status drm_bridge_detect(struct drm_bridge *bridge)
+ {
+-	if (!(bridge->ops & DRM_BRIDGE_OP_DETECT))
++	pr_warn("%s(): enter\n", __func__);
++
++	if (!(bridge->ops & DRM_BRIDGE_OP_DETECT)) {
++		pr_warn("%s(): bridge has no detect op\n", __func__);
+ 		return connector_status_unknown;
++	}
+ 
++	pr_warn("%s(): calling bridge->funcs->detect\n", __func__);
++	
+ 	return bridge->funcs->detect(bridge);
+ }
+ EXPORT_SYMBOL_GPL(drm_bridge_detect);
+diff --git a/drivers/gpu/drm/drm_edid.c b/drivers/gpu/drm/drm_edid.c
+index eaa819381281..e7d27ebbd6cf 100644
+--- a/drivers/gpu/drm/drm_edid.c
++++ b/drivers/gpu/drm/drm_edid.c
+@@ -6303,6 +6303,8 @@ static int _drm_edid_connector_update(struct drm_connector *connector,
+ 	int num_modes = 0;
+ 	u32 quirks;
+ 
++	pr_warn("%s(): called, connector=%s\n", __func__, connector->name);
++
+ 	if (!drm_edid) {
+ 		drm_reset_display_info(connector);
+ 		clear_eld(connector);
+@@ -6358,6 +6360,7 @@ static int _drm_edid_connector_update(struct drm_connector *connector,
+ 	if (quirks & EDID_QUIRK_FORCE_12BPC)
+ 		connector->display_info.bpc = 12;
+ 
++	pr_warn("%s(): done, num_modes=%d\n", __func__, num_modes);
+ 	return num_modes;
+ }
+ 
+diff --git a/drivers/gpu/drm/drm_encoder.c b/drivers/gpu/drm/drm_encoder.c
+index a940024c8087..87c945f9c979 100644
+--- a/drivers/gpu/drm/drm_encoder.c
++++ b/drivers/gpu/drm/drm_encoder.c
+@@ -72,9 +72,13 @@ int drm_encoder_register_all(struct drm_device *dev)
+ 	struct drm_encoder *encoder;
+ 	int ret = 0;
+ 
++	pr_warn("%s() called, dev=%s\n", __func__, dev->unique);
++
+ 	drm_for_each_encoder(encoder, dev) {
+-		if (encoder->funcs && encoder->funcs->late_register)
++		if (encoder->funcs && encoder->funcs->late_register) {
++			pr_warn("%s() encoder->funcs->late_register called, encoder=%s\n", __func__, encoder->name);
+ 			ret = encoder->funcs->late_register(encoder);
++		}
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -86,6 +90,8 @@ void drm_encoder_unregister_all(struct drm_device *dev)
+ {
+ 	struct drm_encoder *encoder;
+ 
++	pr_warn("%s() called, dev=%s\n", __func__, dev->unique);
++
+ 	drm_for_each_encoder(encoder, dev) {
+ 		if (encoder->funcs && encoder->funcs->early_unregister)
+ 			encoder->funcs->early_unregister(encoder);
+@@ -100,25 +106,34 @@ static int __drm_encoder_init(struct drm_device *dev,
+ {
+ 	int ret;
+ 
++	pr_warn("%s() called, dev=%s name=%s type=%s\n", __func__, dev->unique, name, drm_encoder_enum_list[encoder_type].name);
++
+ 	/* encoder index is used with 32bit bitmasks */
+-	if (WARN_ON(dev->mode_config.num_encoder >= 32))
++	if (WARN_ON(dev->mode_config.num_encoder >= 32)) {
++		pr_warn("%s(): num_encoder >= 32\n", __func__);
+ 		return -EINVAL;
++	}
+ 
+ 	ret = drm_mode_object_add(dev, &encoder->base, DRM_MODE_OBJECT_ENCODER);
+-	if (ret)
++	if (ret) {
++		pr_warn("%s(): drm_mode_object_add failed\n", __func__);
+ 		return ret;
++	}
+ 
+ 	encoder->dev = dev;
+ 	encoder->encoder_type = encoder_type;
+ 	encoder->funcs = funcs;
+ 	if (name) {
++		pr_warn("%s(): use specified name\n", __func__);
+ 		encoder->name = kvasprintf(GFP_KERNEL, name, ap);
+ 	} else {
++		pr_warn("%s(): use default name\n", __func__);
+ 		encoder->name = kasprintf(GFP_KERNEL, "%s-%d",
+ 					  drm_encoder_enum_list[encoder_type].name,
+ 					  encoder->base.id);
+ 	}
+ 	if (!encoder->name) {
++		pr_warn("%s(): could not set name\n", __func__);
+ 		ret = -ENOMEM;
+ 		goto out_put;
+ 	}
+@@ -128,8 +143,12 @@ static int __drm_encoder_init(struct drm_device *dev,
+ 	encoder->index = dev->mode_config.num_encoder++;
+ 
+ out_put:
+-	if (ret)
++	if (ret) {
++		pr_warn("%s(): could not add to list\n", __func__);
+ 		drm_mode_object_unregister(dev, &encoder->base);
++	}
++
++	pr_warn("%s() done, dev=%s encoder=%s type=%s ret=%d\n", __func__, encoder->name, drm_encoder_enum_list[encoder->encoder_type].name, ret);
+ 
+ 	return ret;
+ }
+@@ -169,6 +188,8 @@ int drm_encoder_init(struct drm_device *dev,
+ 	ret = __drm_encoder_init(dev, encoder, funcs, encoder_type, name, ap);
+ 	va_end(ap);
+ 
++	pr_warn("%s(): dev=%s encoder=%s type=%s ret=%d\n", __func__, dev->unique, encoder->name, drm_encoder_enum_list[encoder_type].name, ret);	
++
+ 	return ret;
+ }
+ EXPORT_SYMBOL(drm_encoder_init);
+@@ -221,6 +242,8 @@ void *__drmm_encoder_alloc(struct drm_device *dev, size_t size, size_t offset,
+ 	va_list ap;
+ 	int ret;
+ 
++	pr_warn("%s() called, dev=%s type=%s name=%s\n", __func__, dev->unique, drm_encoder_enum_list[encoder_type].name, name);
++
+ 	if (WARN_ON(funcs && funcs->destroy))
+ 		return ERR_PTR(-EINVAL);
+ 
+@@ -251,6 +274,8 @@ static struct drm_crtc *drm_encoder_get_crtc(struct drm_encoder *encoder)
+ 	bool uses_atomic = false;
+ 	struct drm_connector_list_iter conn_iter;
+ 
++	pr_warn("%s() called, dev=%s\n", __func__, dev->unique);
++	
+ 	/* For atomic drivers only state objects are synchronously updated and
+ 	 * protected by modeset locks, so check those first. */
+ 	drm_connector_list_iter_begin(dev, &conn_iter);
+@@ -282,6 +307,8 @@ int drm_mode_getencoder(struct drm_device *dev, void *data,
+ 	struct drm_encoder *encoder;
+ 	struct drm_crtc *crtc;
+ 
++	pr_warn("%s() called, dev=%s\n", __func__, dev->unique);
++
+ 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
+ 		return -EOPNOTSUPP;
+ 
+diff --git a/drivers/gpu/drm/drm_mipi_dsi.c b/drivers/gpu/drm/drm_mipi_dsi.c
+index c40bde96cfdf..58df674717b3 100644
+--- a/drivers/gpu/drm/drm_mipi_dsi.c
++++ b/drivers/gpu/drm/drm_mipi_dsi.c
+@@ -327,7 +327,10 @@ int mipi_dsi_host_register(struct mipi_dsi_host *host)
+ {
+ 	struct device_node *node;
+ 
++	pr_warn("%s(): host=%s\n", __func__, host->dev->of_node->name);
++
+ 	for_each_available_child_of_node(host->dev->of_node, node) {
++		pr_warn("%s(): akt node=%s\n", __func__, node->name);
+ 		/* skip nodes without reg property */
+ 		if (!of_find_property(node, "reg", NULL))
+ 			continue;
+@@ -338,6 +341,12 @@ int mipi_dsi_host_register(struct mipi_dsi_host *host)
+ 	list_add_tail(&host->list, &host_list);
+ 	mutex_unlock(&host_lock);
+ 
++	pr_warn("%s(): content of host_list:\n", __func__);
++
++	list_for_each_entry(host, &host_list, list) {
++		pr_warn("%s(): host name = %s\n", __func__, host->dev->of_node->name);
++	}
++
+ 	return 0;
+ }
+ EXPORT_SYMBOL(mipi_dsi_host_register);
+diff --git a/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c b/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c
+index 110e83aad9bb..a382beaa67a8 100644
+--- a/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c
+@@ -1319,6 +1319,8 @@ static const struct dev_pm_ops dw_mipi_dsi_rockchip_pm_ops = {
+ 	SET_LATE_SYSTEM_SLEEP_PM_OPS(NULL, dw_mipi_dsi_rockchip_resume)
+ };
+ 
++extern const char *__clk_get_name(const struct clk *clk);
++
+ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+@@ -1330,6 +1332,8 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 				of_device_get_match_data(dev);
+ 	int ret, i;
+ 
++	pr_warn("%s() called, dev=%s\n", __func__, np->name);
++
+ 	dsi = devm_kzalloc(dev, sizeof(*dsi), GFP_KERNEL);
+ 	if (!dsi)
+ 		return -ENOMEM;
+@@ -1357,18 +1361,21 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	/* try to get a possible external dphy */
+-	dsi->phy = devm_phy_optional_get(dev, "dphy");
+-	if (IS_ERR(dsi->phy)) {
+-		ret = PTR_ERR(dsi->phy);
+-		DRM_DEV_ERROR(dev, "failed to get mipi dphy: %d\n", ret);
+-		return ret;
+-	}
++	//dsi->phy = devm_phy_optional_get(dev, "dphy");
++	//if (IS_ERR(dsi->phy)) {
++	//	ret = PTR_ERR(dsi->phy);
++	//	DRM_DEV_ERROR(dev, "failed to get mipi dphy: %d\n", ret);
++	//	return ret;
++	//}
++	dsi->phy = NULL;
+ 
+ 	dsi->pclk = devm_clk_get(dev, "pclk");
+ 	if (IS_ERR(dsi->pclk)) {
+ 		ret = PTR_ERR(dsi->pclk);
+ 		DRM_DEV_ERROR(dev, "Unable to get pclk: %d\n", ret);
+ 		return ret;
++	} else {
++		pr_warn("%s(): pclk=%s\n", __func__, __clk_get_name(dsi->pclk));
+ 	}
+ 
+ 	dsi->pllref_clk = devm_clk_get(dev, "ref");
+@@ -1379,6 +1386,7 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 			 * generated there.
+ 			 */
+ 			dsi->pllref_clk = NULL;
++			pr_warn("%s(): no pllref_clk, but phy is present\n", __func__);
+ 		} else {
+ 			ret = PTR_ERR(dsi->pllref_clk);
+ 			DRM_DEV_ERROR(dev,
+@@ -1386,6 +1394,8 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 				      ret);
+ 			return ret;
+ 		}
++	} else {
++		pr_warn("%s(): pllref_clk=%s\n", __func__, __clk_get_name(dsi->pllref_clk));
+ 	}
+ 
+ 	if (dsi->cdata->flags & DW_MIPI_NEEDS_PHY_CFG_CLK) {
+@@ -1395,7 +1405,11 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 			DRM_DEV_ERROR(dev,
+ 				      "Unable to get phy_cfg_clk: %d\n", ret);
+ 			return ret;
++		} else {
++			pr_warn("%s(): phy_cfg_clk=%s\n", __func__, __clk_get_name(dsi->phy_cfg_clk));
+ 		}
++	} else {
++		pr_warn("%s(): no phy_cfg_clk needed\n", __func__);
+ 	}
+ 
+ 	if (dsi->cdata->flags & DW_MIPI_NEEDS_GRF_CLK) {
+@@ -1404,7 +1418,11 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 			ret = PTR_ERR(dsi->grf_clk);
+ 			DRM_DEV_ERROR(dev, "Unable to get grf_clk: %d\n", ret);
+ 			return ret;
++		} else {
++			pr_warn("%s(): grf_clk=%s\n", __func__, __clk_get_name(dsi->grf_clk));
+ 		}
++	} else {
++		pr_warn("%s(): no grf_clk needed\n", __func__);
+ 	}
+ 
+ 	dsi->grf_regmap = syscon_regmap_lookup_by_phandle(np, "rockchip,grf");
+@@ -1413,6 +1431,8 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 		return PTR_ERR(dsi->grf_regmap);
+ 	}
+ 
++	pr_warn("%s(): before phy_set_drvdata\n", __func__);
++
+ 	dsi->dev = dev;
+ 	dsi->pdata.base = dsi->base;
+ 	dsi->pdata.max_data_lanes = dsi->cdata->max_data_lanes;
+@@ -1423,17 +1443,23 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 
+ 	mutex_init(&dsi->usage_mutex);
+ 
++	pr_warn("%s(): before phy_create\n", __func__);
++
+ 	dsi->dphy = devm_phy_create(dev, NULL, &dw_mipi_dsi_dphy_ops);
+ 	if (IS_ERR(dsi->dphy)) {
+ 		DRM_DEV_ERROR(&pdev->dev, "failed to create PHY\n");
+ 		return PTR_ERR(dsi->dphy);
+ 	}
+ 
++	pr_warn("%s(): before phy_set_drvdata\n", __func__);
++
+ 	phy_set_drvdata(dsi->dphy, dsi);
+ 	phy_provider = devm_of_phy_provider_register(dev, of_phy_simple_xlate);
+ 	if (IS_ERR(phy_provider))
+ 		return PTR_ERR(phy_provider);
+ 
++	pr_warn("%s(): before dw_mipi_dsi_probe\n", __func__);
++
+ 	dsi->dmd = dw_mipi_dsi_probe(pdev, &dsi->pdata);
+ 	if (IS_ERR(dsi->dmd)) {
+ 		ret = PTR_ERR(dsi->dmd);
+@@ -1443,6 +1469,17 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
+ 		return ret;
+ 	}
+ 
++	{
++		//dw_mipi_dsi_rockchip_host_attach(dsi, NULL);
++
++		//struct mipi_dsi_host *dsi_host = of_find_mipi_dsi_host_by_node(dsi->dev->of_node);
++		//if (dsi_host) {
++		//	mipi_dsi_host_unregister(dsi_host);
++		//	mipi_dsi_host_register(dsi_host);
++		//}
++	}
++
++	pr_warn("%s() done\n", __func__);
+ 	return 0;
+ }
+ 
+diff --git a/drivers/phy/phy-core.c b/drivers/phy/phy-core.c
+index d93ddf1262c5..c062aa77ad68 100644
+--- a/drivers/phy/phy-core.c
++++ b/drivers/phy/phy-core.c
+@@ -1015,6 +1015,8 @@ struct phy *devm_phy_create(struct device *dev, struct device_node *node,
+ {
+ 	struct phy **ptr, *phy;
+ 
++	pr_warn("%s(): dev=%s, node=%pOF, ops=%px\n", __func__, dev_name(dev), node, ops);
++
+ 	ptr = devres_alloc(devm_phy_consume, sizeof(*ptr), GFP_KERNEL);
+ 	if (!ptr)
+ 		return ERR_PTR(-ENOMEM);
+@@ -1027,6 +1029,8 @@ struct phy *devm_phy_create(struct device *dev, struct device_node *node,
+ 		devres_free(ptr);
+ 	}
+ 
++	pr_warn("%s(): normal exit, phy=%px\n", __func__, phy);
++
+ 	return phy;
+ }
+ EXPORT_SYMBOL_GPL(devm_phy_create);
+diff --git a/include/dt-bindings/display/drm_mipi_dsi.h b/include/dt-bindings/display/drm_mipi_dsi.h
+new file mode 100644
+index 000000000000..bc24ce4ddd08
+--- /dev/null
++++ b/include/dt-bindings/display/drm_mipi_dsi.h
+@@ -0,0 +1,53 @@
++/*
++ * MIPI DSI Bus
++ *
++ * Copyright (c) Fuzhou Rockchip Electronics Co.Ltd
++ * Authors:
++ *       Mark Yao <yzq@rock-chips.com>
++ *
++ * based on include/drm/drm_mipi_dsi.h
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#ifndef _DRM_MIPI_DSI_H__
++#define _DRM_MIPI_DSI_H__
++
++/* DSI mode flags */
++
++/* video mode */
++#define MIPI_DSI_MODE_VIDEO		(1 << 0)
++/* video burst mode */
++#define MIPI_DSI_MODE_VIDEO_BURST	(1 << 1)
++/* video pulse mode */
++#define MIPI_DSI_MODE_VIDEO_SYNC_PULSE	(1 << 2)
++/* enable auto vertical count mode */
++#define MIPI_DSI_MODE_VIDEO_AUTO_VERT	(1 << 3)
++/* enable hsync-end packets in vsync-pulse and v-porch area */
++#define MIPI_DSI_MODE_VIDEO_HSE		(1 << 4)
++/* disable hfront-porch area */
++#define MIPI_DSI_MODE_VIDEO_HFP		(1 << 5)
++/* disable hback-porch area */
++#define MIPI_DSI_MODE_VIDEO_HBP		(1 << 6)
++/* disable hsync-active area */
++#define MIPI_DSI_MODE_VIDEO_HSA		(1 << 7)
++/* flush display FIFO on vsync pulse */
++#define MIPI_DSI_MODE_VSYNC_FLUSH	(1 << 8)
++/* disable EoT packets in HS mode */
++#define MIPI_DSI_MODE_EOT_PACKET	(1 << 9)
++/* device supports non-continuous clock behavior (DSI spec 5.6.1) */
++#define MIPI_DSI_CLOCK_NON_CONTINUOUS	(1 << 10)
++/* transmit data in low power */
++#define MIPI_DSI_MODE_LPM		(1 << 11)
++
++#define MIPI_DSI_FMT_RGB888		0
++#define MIPI_DSI_FMT_RGB666		1
++#define MIPI_DSI_FMT_RGB666_PACKED	2
++#define MIPI_DSI_FMT_RGB565		3
++
++#define MIPI_CSI_FMT_RAW8		0x10
++#define MIPI_CSI_FMT_RAW10		0x11
++
++#endif /* __DRM_MIPI_DSI__ */
+-- 
+2.30.2
+
