@@ -30,6 +30,7 @@ SRC_URI += " \
 	file://0027-arm64-dts-iesy-change-LT8912-reset-to-dummy.patch \
 	file://0028-arm64-dts-iesy-assign-clock-rate-for-audio-codec.patch \
 	file://0029-arm64-dts-iesy-iesy-rpx30-osm-sf-disable-unused-regu.patch \
+	file://0031-arm64-dts-iesy-set-HW-revision-for-rpx30-evalution-kits.patch \
 "
 
 python () {
