@@ -1,0 +1,26 @@
+From d65bf9ef0289b988bd3e7def46613a3f636f4ce3 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 5 Feb 2024 12:19:53 +0100
+Subject: [PATCH 31/31] drivers: drm: bridge: fix gpio initialization
+
+The reset gpio nets to be initialized as an output to properly toggle the hardware reset
+---
+ drivers/gpu/drm/bridge/lt8912-i2c.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/bridge/lt8912-i2c.c b/drivers/gpu/drm/bridge/lt8912-i2c.c
+index 8bafc8f78189..d35d0d0f27c8 100644
+--- a/drivers/gpu/drm/bridge/lt8912-i2c.c
++++ b/drivers/gpu/drm/bridge/lt8912-i2c.c
+@@ -572,7 +572,7 @@ static int lt8912_probe(struct i2c_client *client, const struct i2c_device_id *i
+ 	dev_set_drvdata(dev, lt8912);
+ 
+ 	
+-	lt8912->reset_n = devm_gpiod_get(dev, "reset", GPIOD_ASIS);
++	lt8912->reset_n = devm_gpiod_get(dev, "reset", GPIOD_OUT_HIGH);
+ 	if (IS_ERR(lt8912->reset_n)) {
+ 		ret = PTR_ERR(lt8912->reset_n);
+         printk("ADLINK :%s failed to request reset GPIO \n",__func__);
+-- 
+2.30.2
+
