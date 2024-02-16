@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. sources/poky/oe-init-build-env
+
+if [ -n "$MACHINE" ]; then
+    sed -i 's/\(MACHINE ??= \)\(.*\)/\1"'$MACHINE'"/' conf/local.conf
+    echo "MACHINE set to $MACHINE"
+else
+    echo "MACHINE not set, using default from conf/local.conf"
+fi
+
+if [ -n "$DISTRO" ]; then
+    sed -i 's/\(DISTRO ?= \)\(.*\)/\1"'$DISTRO'"/' conf/local.conf
+    echo "DISTRO set to $DISTRO"
+else
+    echo "DISTRO not set, using default from conf/local.conf"
+fi
