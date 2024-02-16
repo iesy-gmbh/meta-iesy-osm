@@ -1,0 +1,19 @@
+# POKY_BBLAYERS_CONF_VERSION is increased each time build/conf/bblayers.conf
+# changes incompatibly
+POKY_BBLAYERS_CONF_VERSION = "1"
+
+BBPATH = "${TOPDIR}"
+BBFILES ?= ""
+
+BBLAYERS ?= " \
+  ${TOPDIR}/../sources/meta-openembedded/meta-networking \
+	${TOPDIR}/../sources/meta-openembedded/meta-python \
+	${TOPDIR}/../sources/meta-openembedded/meta-oe \
+	${TOPDIR}/../sources/meta-ti/meta-ti-extras \
+	${TOPDIR}/../sources/meta-ti/meta-ti-bsp \
+	${TOPDIR}/../sources/meta-arm/meta-arm \
+	${TOPDIR}/../sources/meta-arm/meta-arm-toolchain \
+	${TOPDIR}/../sources/oe-core/meta \
+	${TOPDIR}/../sources/meta-iesy-osm \
+	${TOPDIR}/../sources/poky/meta-poky \
+"
