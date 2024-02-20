@@ -1,0 +1,29 @@
+From 7405905f377fea6a5564c73112b53cd351428e58 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 20 Feb 2024 11:34:39 +0100
+Subject: [PATCH 2/2] include: configs: iesy-imx8mm-eva-mi: disable critical
+ trip points
+
+Due to a hardware error the internal temperature sensor of the i.MX8MM is not working correctly on the module. Disable the trip points for now
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ include/configs/iesy_imx8mm_eva_mi.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/iesy_imx8mm_eva_mi.h b/include/configs/iesy_imx8mm_eva_mi.h
+index 7b598f76e7..bc54f460d6 100644
+--- a/include/configs/iesy_imx8mm_eva_mi.h
++++ b/include/configs/iesy_imx8mm_eva_mi.h
+@@ -140,7 +140,7 @@
+ 	"mmcpart=1\0" \
+ 	"mmcroot=" CONFIG_MMCROOT " rootwait rw\0" \
+ 	"mmcautodetect=yes\0" \
+-	"mmcargs=setenv bootargs ${jh_clk} ${mcore_clk} console=${console} root=${mmcroot}\0 " \
++	"mmcargs=setenv bootargs ${jh_clk} ${mcore_clk} console=${console} root=${mmcroot} thermal.crt=-1\0 " \
+ 	"loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${bsp_script};\0" \
+ 	"bootscript=echo Running bootscript from mmc ...; " \
+ 		"source\0" \
+-- 
+2.30.2
+
