@@ -1,0 +1,5806 @@
+From 1174a12c7a15f3c847bfad3587fc423e80df2a70 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 21 Feb 2024 10:42:12 +0100
+Subject: [PATCH] arm: dts: add support for iesy-am62xx-eva-mi
+
+---
+ arch/arm/dts/Makefile                       |   5 +-
+ arch/arm/dts/iesy-am62xx-eva-mi-binman.dtsi | 599 ++++++++++++
+ arch/arm/dts/iesy-am62xx-eva-mi-r5.dts      |  22 +
+ arch/arm/dts/iesy-am62xx-eva-mi-u-boot.dtsi |  48 +
+ arch/arm/dts/iesy-am62xx-eva-mi.dts         | 605 ++++++++++++
+ arch/arm/mach-k3/Kconfig                    |   1 +
+ board/iesy/am62xx_eva_mi/Kconfig            |  58 ++
+ board/iesy/am62xx_eva_mi/MAINTAINERS        |   7 +
+ board/iesy/am62xx_eva_mi/Makefile           |   8 +
+ board/iesy/am62xx_eva_mi/am62xx_eva_mi.env  |  45 +
+ board/iesy/am62xx_eva_mi/board-cfg.yaml     |  36 +
+ board/iesy/am62xx_eva_mi/board.c            | 398 ++++++++
+ board/iesy/am62xx_eva_mi/pm-cfg.yaml        |  12 +
+ board/iesy/am62xx_eva_mi/rm-cfg.yaml        | 981 ++++++++++++++++++++
+ board/iesy/am62xx_eva_mi/sec-cfg.yaml       | 379 ++++++++
+ board/iesy/common/Makefile                  |   4 +
+ board/iesy/common/board_detect.c            | 826 ++++++++++++++++
+ board/iesy/common/board_detect.h            | 471 ++++++++++
+ board/iesy/common/k3-ddr-init.c             |  86 ++
+ board/iesy/common/k3-ddr-init.h             |  15 +
+ board/iesy/common/schema.yaml               | 436 +++++++++
+ board/iesy/keys/custMpk.crt                 |  33 +
+ board/iesy/keys/custMpk.key                 |  51 +
+ board/iesy/keys/custMpk.pem                 |  51 +
+ board/iesy/keys/ti-degenerate-key.pem       |  10 +
+ configs/iesy_am62xx_eva_mi_a53_defconfig    | 204 ++++
+ configs/iesy_am62xx_eva_mi_r5_defconfig     | 131 +++
+ include/configs/iesy_am62xx_eva_mi.h        |  41 +
+ 28 files changed, 5562 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/dts/iesy-am62xx-eva-mi-binman.dtsi
+ create mode 100644 arch/arm/dts/iesy-am62xx-eva-mi-r5.dts
+ create mode 100644 arch/arm/dts/iesy-am62xx-eva-mi-u-boot.dtsi
+ create mode 100644 arch/arm/dts/iesy-am62xx-eva-mi.dts
+ create mode 100644 board/iesy/am62xx_eva_mi/Kconfig
+ create mode 100644 board/iesy/am62xx_eva_mi/MAINTAINERS
+ create mode 100644 board/iesy/am62xx_eva_mi/Makefile
+ create mode 100644 board/iesy/am62xx_eva_mi/am62xx_eva_mi.env
+ create mode 100644 board/iesy/am62xx_eva_mi/board-cfg.yaml
+ create mode 100644 board/iesy/am62xx_eva_mi/board.c
+ create mode 100644 board/iesy/am62xx_eva_mi/pm-cfg.yaml
+ create mode 100644 board/iesy/am62xx_eva_mi/rm-cfg.yaml
+ create mode 100644 board/iesy/am62xx_eva_mi/sec-cfg.yaml
+ create mode 100644 board/iesy/common/Makefile
+ create mode 100644 board/iesy/common/board_detect.c
+ create mode 100644 board/iesy/common/board_detect.h
+ create mode 100644 board/iesy/common/k3-ddr-init.c
+ create mode 100644 board/iesy/common/k3-ddr-init.h
+ create mode 100644 board/iesy/common/schema.yaml
+ create mode 100644 board/iesy/keys/custMpk.crt
+ create mode 100644 board/iesy/keys/custMpk.key
+ create mode 100644 board/iesy/keys/custMpk.pem
+ create mode 100644 board/iesy/keys/ti-degenerate-key.pem
+ create mode 100644 configs/iesy_am62xx_eva_mi_a53_defconfig
+ create mode 100644 configs/iesy_am62xx_eva_mi_r5_defconfig
+ create mode 100644 include/configs/iesy_am62xx_eva_mi.h
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 4beef8cdb3..a9d3fbad31 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -1289,7 +1289,10 @@ dtb-$(CONFIG_SOC_K3_AM642) += k3-am642-evm.dtb \
+ 			      k3-am642-r5-sk.dtb \
+ 			      k3-am642-evm-nand.dtbo
+ 
+-dtb-$(CONFIG_SOC_K3_AM625) += k3-am625-sk.dtb \
++dtb-$(CONFIG_SOC_K3_AM625) += \
++                  iesy-am62xx-eva-mi.dtb \
++				  iesy-am62xx-eva-mi-r5.dtb \
++                  k3-am625-sk.dtb \
+ 			      k3-am625-r5-sk.dtb \
+ 			      k3-am62-lp-sk.dtb \
+ 			      k3-am62-r5-lp-sk.dtb \
+diff --git a/arch/arm/dts/iesy-am62xx-eva-mi-binman.dtsi b/arch/arm/dts/iesy-am62xx-eva-mi-binman.dtsi
+new file mode 100644
+index 0000000000..c1b26c0544
+--- /dev/null
++++ b/arch/arm/dts/iesy-am62xx-eva-mi-binman.dtsi
+@@ -0,0 +1,599 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2024 iesy GmbH
++ */
++
++#include "k3-binman.dtsi"
++
++#ifdef CONFIG_TARGET_IESY_AM62XX_EVA_MI_R5
++
++&binman {
++	tiboot3-am62x-hs-evm.bin {
++		filename = "tiboot3-am62x-hs-evm.bin";
++		ti-secure-rom {
++			content = <&u_boot_spl>, <&ti_fs_enc>, <&combined_tifs_cfg>,
++				<&combined_dm_cfg>, <&sysfw_inner_cert>;
++			combined;
++			dm-data;
++			sysfw-inner-cert;
++			keyfile = "custMpk.pem";
++			sw-rev = <1>;
++			content-sbl = <&u_boot_spl>;
++			content-sysfw = <&ti_fs_enc>;
++			content-sysfw-data = <&combined_tifs_cfg>;
++			content-sysfw-inner-cert = <&sysfw_inner_cert>;
++			content-dm-data = <&combined_dm_cfg>;
++			load = <0x43c00000>;
++			load-sysfw = <0x40000>;
++			load-sysfw-data = <0x67000>;
++			load-dm-data = <0x43c3a800>;
++		};
++		u_boot_spl: u-boot-spl {
++			no-expanded;
++		};
++		ti_fs_enc: ti-fs-enc.bin {
++			filename = "ti-sysfw/ti-fs-firmware-am62x-hs-enc.bin";
++			type = "blob-ext";
++			optional;
++		};
++		combined_tifs_cfg: combined-tifs-cfg.bin {
++			filename = "combined-tifs-cfg.bin";
++			type = "blob-ext";
++		};
++		sysfw_inner_cert: sysfw-inner-cert {
++			filename = "ti-sysfw/ti-fs-firmware-am62x-hs-cert.bin";
++			type = "blob-ext";
++			optional;
++		};
++		combined_dm_cfg: combined-dm-cfg.bin {
++			filename = "combined-dm-cfg.bin";
++			type = "blob-ext";
++		};
++	};
++};
++
++&binman {
++	tiboot3-am62x-hs-fs-evm.bin {
++		filename = "tiboot3-am62x-hs-fs-evm.bin";
++		symlink = "tiboot3.bin";
++		ti-secure-rom {
++			content = <&u_boot_spl_fs>, <&ti_fs_enc_fs>, <&combined_tifs_cfg_fs>,
++				<&combined_dm_cfg_fs>, <&sysfw_inner_cert_fs>;
++			combined;
++			dm-data;
++			sysfw-inner-cert;
++			keyfile = "custMpk.pem";
++			sw-rev = <1>;
++			content-sbl = <&u_boot_spl_fs>;
++			content-sysfw = <&ti_fs_enc_fs>;
++			content-sysfw-data = <&combined_tifs_cfg_fs>;
++			content-sysfw-inner-cert = <&sysfw_inner_cert_fs>;
++			content-dm-data = <&combined_dm_cfg_fs>;
++			load = <0x43c00000>;
++			load-sysfw = <0x40000>;
++			load-sysfw-data = <0x67000>;
++			load-dm-data = <0x43c3a800>;
++		};
++		u_boot_spl_fs: u-boot-spl {
++			no-expanded;
++		};
++		ti_fs_enc_fs: ti-fs-enc.bin {
++			filename = "ti-sysfw/ti-fs-firmware-am62x-hs-fs-enc.bin";
++			type = "blob-ext";
++			optional;
++		};
++		combined_tifs_cfg_fs: combined-tifs-cfg.bin {
++			filename = "combined-tifs-cfg.bin";
++			type = "blob-ext";
++		};
++		sysfw_inner_cert_fs: sysfw-inner-cert {
++			filename = "ti-sysfw/ti-fs-firmware-am62x-hs-fs-cert.bin";
++			type = "blob-ext";
++			optional;
++		};
++		combined_dm_cfg_fs: combined-dm-cfg.bin {
++			filename = "combined-dm-cfg.bin";
++			type = "blob-ext";
++		};
++	};
++};
++
++&binman {
++	tiboot3-am62x-gp-evm.bin {
++		filename = "tiboot3-am62x-gp-evm.bin";
++		ti-secure-rom {
++			content = <&u_boot_spl_unsigned>, <&ti_fs_gp>,
++				<&combined_tifs_cfg_gp>, <&combined_dm_cfg_gp>;
++			combined;
++			dm-data;
++			content-sbl = <&u_boot_spl_unsigned>;
++			load = <0x43c00000>;
++			content-sysfw = <&ti_fs_gp>;
++			load-sysfw = <0x40000>;
++			content-sysfw-data = <&combined_tifs_cfg_gp>;
++			load-sysfw-data = <0x67000>;
++			content-dm-data = <&combined_dm_cfg_gp>;
++			load-dm-data = <0x43c3a800>;
++			sw-rev = <1>;
++			keyfile = "ti-degenerate-key.pem";
++		};
++		u_boot_spl_unsigned: u-boot-spl {
++			no-expanded;
++		};
++		ti_fs_gp: ti-fs-gp.bin {
++			filename = "ti-sysfw/ti-fs-firmware-am62x-gp.bin";
++			type = "blob-ext";
++			optional;
++		};
++		combined_tifs_cfg_gp: combined-tifs-cfg-gp.bin {
++			filename = "combined-tifs-cfg.bin";
++			type = "blob-ext";
++		};
++		combined_dm_cfg_gp: combined-dm-cfg-gp.bin {
++			filename = "combined-dm-cfg.bin";
++			type = "blob-ext";
++		};
++
++	};
++};
++
++#endif
++
++#ifdef CONFIG_TARGET_IESY_AM62XX_EVA_MI_A53
++
++#define SPL_NODTB "spl/u-boot-spl-nodtb.bin"
++#define SPL_AM625_SK_DTB "spl/dts/iesy-am62xx-eva-mi.dtb"
++
++#define UBOOT_NODTB "u-boot-nodtb.bin"
++#define AM625_SK_DTB "u-boot.dtb"
++
++&binman {
++	ti-dm {
++		filename = "ti-dm.bin";
++		blob-ext {
++			filename = "ti-dm/am62xx/ipc_echo_testb_mcu1_0_release_strip.xer5f";
++		};
++	};
++
++	tifsstub-hs {
++		filename = "tifsstub.bin_hs";
++		ti-secure-rom {
++			content = <&tifsstub_hs_cert>;
++			core = "secure";
++			load = <0x40000>;
++			sw-rev = <CONFIG_K3_X509_SWRV>;
++			keyfile = "custMpk.pem";
++			countersign;
++			tifsstub;
++		};
++		tifsstub_hs_cert: tifsstub-hs-cert.bin {
++			filename = "ti-sysfw/ti-fs-stub-firmware-am62x-hs-cert.bin";
++			type = "blob-ext";
++			optional;
++		};
++		tifsstub_hs_enc: tifsstub-hs-enc.bin {
++			filename = "ti-sysfw/ti-fs-stub-firmware-am62x-hs-enc.bin";
++			type = "blob-ext";
++			optional;
++		};
++	};
++
++	tifsstub-fs {
++		filename = "tifsstub.bin_fs";
++		tifsstub_fs_cert: tifsstub-fs-cert.bin {
++			filename = "ti-sysfw/ti-fs-stub-firmware-am62x-hs-cert.bin";
++			type = "blob-ext";
++			optional;
++		};
++		tifsstub_fs_enc: tifsstub-fs-enc.bin {
++			filename = "ti-sysfw/ti-fs-stub-firmware-am62x-hs-enc.bin";
++			type = "blob-ext";
++			optional;
++		};
++
++	};
++
++	tifsstub-gp {
++		filename = "tifsstub.bin_gp";
++		ti-secure-rom {
++			content = <&tifsstub_gp>;
++			core = "secure";
++			load = <0x60000>;
++			sw-rev = <CONFIG_K3_X509_SWRV>;
++			keyfile = "ti-degenerate-key.pem";
++			tifsstub;
++		};
++		tifsstub_gp: tifsstub-gp.bin {
++			filename = "ti-sysfw/ti-fs-stub-firmware-am62x-gp.bin";
++			type = "blob-ext";
++			optional;
++		};
++	};
++
++	ti-spl {
++		filename = "tispl.bin";
++		pad-byte = <0xff>;
++
++		fit {
++			description = "Configuration to load ATF and SPL";
++			#address-cells = <1>;
++
++			images {
++
++				atf {
++					description = "ARM Trusted Firmware";
++					type = "firmware";
++					arch = "arm64";
++					compression = "none";
++					os = "arm-trusted-firmware";
++					load = <CONFIG_K3_ATF_LOAD_ADDR>;
++					entry = <CONFIG_K3_ATF_LOAD_ADDR>;
++					ti-secure {
++						content = <&atf>;
++						keyfile = "custMpk.pem";
++					};
++					atf: atf-bl31 {
++					};
++				};
++
++				tee {
++					description = "OPTEE";
++					type = "tee";
++					arch = "arm64";
++					compression = "none";
++					os = "tee";
++					load = <0x9e800000>;
++					entry = <0x9e800000>;
++					ti-secure {
++						content = <&tee>;
++						keyfile = "custMpk.pem";
++					};
++					tee: tee-os {
++					};
++				};
++
++				tifsstub-hs {
++					description = "TIFSSTUB";
++					type = "firmware";
++					arch = "arm32";
++					compression = "none";
++					os = "tifsstub-hs";
++					load = <0x9dc00000>;
++					entry = <0x9dc00000>;
++					blob-ext {
++						filename = "tifsstub.bin_hs";
++					};
++				};
++
++				tifsstub-fs {
++					description = "TIFSSTUB";
++					type = "firmware";
++					arch = "arm32";
++					compression = "none";
++					os = "tifsstub-fs";
++					load = <0x9dc00000>;
++					entry = <0x9dc00000>;
++					blob-ext {
++						filename = "tifsstub.bin_fs";
++					};
++				};
++
++				tifsstub-gp {
++					description = "TIFSSTUB";
++					type = "firmware";
++					arch = "arm32";
++					compression = "none";
++					os = "tifsstub-gp";
++					load = <0x9dc00000>;
++					entry = <0x9dc00000>;
++					blob-ext {
++						filename = "tifsstub.bin_gp";
++					};
++				};
++
++				dm {
++					description = "DM binary";
++					type = "firmware";
++					arch = "arm32";
++					compression = "none";
++					os = "DM";
++					load = <0x89000000>;
++					entry = <0x89000000>;
++					ti-secure {
++						content = <&dm>;
++						keyfile = "custMpk.pem";
++					};
++					dm: ti-dm {
++						filename = "ti-dm.bin";
++					};
++				};
++
++				spl {
++					description = "SPL (64-bit)";
++					type = "standalone";
++					os = "U-Boot";
++					arch = "arm64";
++					compression = "none";
++					load = <CONFIG_SPL_TEXT_BASE>;
++					entry = <CONFIG_SPL_TEXT_BASE>;
++					ti-secure {
++						content = <&u_boot_spl_nodtb>;
++						keyfile = "custMpk.pem";
++					};
++					u_boot_spl_nodtb: blob-ext {
++						filename = SPL_NODTB;
++					};
++				};
++
++				fdt-0 {
++					description = "k3-am625-sk";
++					type = "flat_dt";
++					arch = "arm";
++					compression = "none";
++					ti-secure {
++						content = <&spl_am625_sk_dtb>;
++						keyfile = "custMpk.pem";
++					};
++					spl_am625_sk_dtb: blob-ext {
++						filename = SPL_AM625_SK_DTB;
++					};
++
++				};
++
++			};
++
++			configurations {
++				default = "conf-0";
++
++				conf-0 {
++					description = "k3-am625-sk";
++					firmware = "atf";
++					loadables = "tee", "tifsstub-hs", "tifsstub-fs",
++						  "tifsstub-gp", "dm", "spl";
++					fdt = "fdt-0";
++				};
++			};
++		};
++	};
++};
++
++&binman {
++	u-boot {
++		filename = "u-boot.img";
++		pad-byte = <0xff>;
++
++		fit {
++			description = "FIT image with multiple configurations";
++
++			images {
++				uboot {
++					description = "U-Boot for AM625 board";
++					type = "firmware";
++					os = "u-boot";
++					arch = "arm";
++					compression = "none";
++					load = <CONFIG_TEXT_BASE>;
++					ti-secure {
++						content = <&u_boot_nodtb>;
++						keyfile = "custMpk.pem";
++					};
++					u_boot_nodtb: u-boot-nodtb {
++					};
++					hash {
++						algo = "crc32";
++					};
++				};
++
++				fdt-0 {
++					description = "k3-am625-sk";
++					type = "flat_dt";
++					arch = "arm";
++					compression = "none";
++					ti-secure {
++						content = <&am625_sk_dtb>;
++						keyfile = "custMpk.pem";
++					};
++					am625_sk_dtb: blob-ext {
++						filename = AM625_SK_DTB;
++					};
++					hash {
++						algo = "crc32";
++					};
++				};
++			};
++
++			configurations {
++				default = "conf-0";
++
++				conf-0 {
++					description = "k3-am625-sk";
++					firmware = "uboot";
++					loadables = "uboot";
++					fdt = "fdt-0";
++				};
++
++			};
++		};
++	};
++};
++
++&binman {
++	ti-spl_unsigned {
++		filename = "tispl.bin_unsigned";
++		pad-byte = <0xff>;
++
++		fit {
++			description = "Configuration to load ATF and SPL";
++			#address-cells = <1>;
++
++			images {
++
++				atf {
++					description = "ARM Trusted Firmware";
++					type = "firmware";
++					arch = "arm64";
++					compression = "none";
++					os = "arm-trusted-firmware";
++					load = <CONFIG_K3_ATF_LOAD_ADDR>;
++					entry = <CONFIG_K3_ATF_LOAD_ADDR>;
++					atf-bl31 {
++						filename = "bl31.bin";
++					};
++				};
++
++				tee {
++					description = "OPTEE";
++					type = "tee";
++					arch = "arm64";
++					compression = "none";
++					os = "tee";
++					load = <0x9e800000>;
++					entry = <0x9e800000>;
++					tee-os {
++						filename = "tee-pager_v2.bin";
++					};
++				};
++
++				tifsstub-hs {
++					description = "TIFSSTUB";
++					type = "firmware";
++					arch = "arm32";
++					compression = "none";
++					os = "tifsstub-hs";
++					load = <0x9dc00000>;
++					entry = <0x9dc00000>;
++					blob-ext {
++						filename = "tifsstub.bin_hs";
++					};
++				};
++
++				tifsstub-fs {
++					description = "TIFSSTUB";
++					type = "firmware";
++					arch = "arm32";
++					compression = "none";
++					os = "tifsstub-fs";
++					load = <0x9dc00000>;
++					entry = <0x9dc00000>;
++					blob-ext {
++						filename = "tifsstub.bin_fs";
++					};
++				};
++
++				tifsstub-gp {
++					description = "TIFSSTUB";
++					type = "firmware";
++					arch = "arm32";
++					compression = "none";
++					os = "tifsstub-gp";
++					load = <0x9dc00000>;
++					entry = <0x9dc00000>;
++					blob-ext {
++						filename = "tifsstub.bin_gp";
++					};
++				};
++
++				dm {
++					description = "DM binary";
++					type = "firmware";
++					arch = "arm32";
++					compression = "none";
++					os = "DM";
++					load = <0x89000000>;
++					entry = <0x89000000>;
++					ti-dm {
++						filename = "ti-dm.bin";
++					};
++				};
++
++				spl {
++					description = "SPL (64-bit)";
++					type = "standalone";
++					os = "U-Boot";
++					arch = "arm64";
++					compression = "none";
++					load = <CONFIG_SPL_TEXT_BASE>;
++					entry = <CONFIG_SPL_TEXT_BASE>;
++					blob {
++						filename = "spl/u-boot-spl-nodtb.bin";
++					};
++				};
++
++				fdt-0 {
++					description = "k3-am625-sk";
++					type = "flat_dt";
++					arch = "arm";
++					compression = "none";
++					spl_am625_sk_dtb_unsigned: blob {
++						filename = SPL_AM625_SK_DTB;
++					};
++				};
++			};
++
++			configurations {
++				default = "conf-0";
++
++				conf-0 {
++					description = "k3-am625-sk";
++					firmware = "atf";
++					loadables = "tee", "tifsstub-hs", "tifsstub-fs",
++						  "tifsstub-gp", "dm", "spl";
++					fdt = "fdt-0";
++				};
++			};
++		};
++	};
++};
++
++&binman {
++	u-boot_unsigned {
++		filename = "u-boot.img_unsigned";
++		pad-byte = <0xff>;
++
++		fit {
++			description = "FIT image with multiple configurations";
++
++			images {
++				uboot {
++					description = "U-Boot for AM625 board";
++					type = "firmware";
++					os = "u-boot";
++					arch = "arm";
++					compression = "none";
++					load = <CONFIG_TEXT_BASE>;
++					blob {
++						filename = UBOOT_NODTB;
++					};
++					hash {
++						algo = "crc32";
++					};
++				};
++
++				fdt-0 {
++					description = "k3-am625-sk";
++					type = "flat_dt";
++					arch = "arm";
++					compression = "none";
++					am625_sk_dtb_unsigned: blob {
++						filename = AM625_SK_DTB;
++					};
++					hash {
++						algo = "crc32";
++					};
++				};
++			};
++
++			configurations {
++				default = "conf-0";
++
++				conf-0 {
++					description = "k3-am625-sk";
++					firmware = "uboot";
++					loadables = "uboot";
++					fdt = "fdt-0";
++				};
++			};
++		};
++	};
++};
++#endif
+diff --git a/arch/arm/dts/iesy-am62xx-eva-mi-r5.dts b/arch/arm/dts/iesy-am62xx-eva-mi-r5.dts
+new file mode 100644
+index 0000000000..68f65b3d23
+--- /dev/null
++++ b/arch/arm/dts/iesy-am62xx-eva-mi-r5.dts
+@@ -0,0 +1,22 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * dts file for R5 SPL
++ * Copyright (C) 2024 iesy GmbH
++ */
++
++#include "iesy-am62xx-eva-mi.dts"
++#include "k3-am62x-sk-ddr4-1600MTs.dtsi"
++#include "k3-am62-ddr.dtsi"
++
++#include "iesy-am62xx-eva-mi-u-boot.dtsi"
++#include "k3-am62x-r5-sk-common.dtsi"
++#include "iesy-am62xx-eva-mi-binman.dtsi"
++
++/ {
++	memory@80000000 {
++		device_type = "memory";
++		/* 2G RAM */
++		reg = <0x00000000 0x80000000 0x00000000 0x80000000>;
++		bootph-pre-ram;
++	};
++};
+diff --git a/arch/arm/dts/iesy-am62xx-eva-mi-u-boot.dtsi b/arch/arm/dts/iesy-am62xx-eva-mi-u-boot.dtsi
+new file mode 100644
+index 0000000000..e6fccc92be
+--- /dev/null
++++ b/arch/arm/dts/iesy-am62xx-eva-mi-u-boot.dtsi
+@@ -0,0 +1,48 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * dts file for SPL
++ * Copyright (C) 2024 iesy GmbH
++ */
++
++#include "k3-am62x-sk-common-u-boot.dtsi"
++#include "iesy-am62xx-eva-mi-binman.dtsi"
++
++&ospi0_pins_default {
++	bootph-pre-ram;
++};
++
++&ospi0 {
++	bootph-pre-ram;
++
++	flash@0 {
++		bootph-pre-ram;
++
++		partitions {
++			bootph-pre-ram;
++
++			partition@3fc0000 {
++				bootph-pre-ram;
++			};
++		};
++	};
++};
++
++&vmain_pd {
++	bootph-pre-ram;
++};
++
++&vcc_5v0 {
++	bootph-pre-ram;
++};
++
++&vcc_3v3_sys {
++	bootph-pre-ram;
++};
++
++&vdd_sd_dv {
++	bootph-pre-ram;
++};
++
++&vdd_sd_dv_pins_default {
++	bootph-pre-ram;
++};
+diff --git a/arch/arm/dts/iesy-am62xx-eva-mi.dts b/arch/arm/dts/iesy-am62xx-eva-mi.dts
+new file mode 100644
+index 0000000000..1f26511997
+--- /dev/null
++++ b/arch/arm/dts/iesy-am62xx-eva-mi.dts
+@@ -0,0 +1,605 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2024 iesy GmbH
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/leds/common.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/net/ti-dp83867.h>
++#include "k3-am625.dtsi"
++
++/ {
++	compatible = "ti,am625-sk", "ti,am625";
++	model = "iesy AM62XX EVA MI";
++
++	aliases {
++		serial2 = &main_uart0;
++		mmc0 = &sdhci0;
++		mmc1 = &sdhci1;
++		mmc2 = &sdhci2;
++		spi0 = &ospi0;
++		ethernet0 = &cpsw_port1;
++		ethernet1 = &cpsw_port2;
++		usb0 = &usb0;
++		usb1 = &usb1;
++	};
++
++	chosen {
++		stdout-path = "serial2:115200n8";
++		bootargs = "console=ttyS2,115200n8 earlycon=ns16550a,mmio32,0x02800000";
++	};
++
++	opp-table {
++		/* Add 1.4GHz OPP for am625-sk board. Requires VDD_CORE to be at 0.85V */
++		opp-1400000000 {
++			opp-hz = /bits/ 64 <1400000000>;
++			opp-supported-hw = <0x01 0x0004>;
++			clock-latency-ns = <6000000>;
++		};
++	};
++
++	memory@80000000 {
++		device_type = "memory";
++		/* 2G RAM */
++		reg = <0x00000000 0x80000000 0x00000000 0x80000000>;
++
++	};
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		ramoops@9ca00000 {
++			compatible = "ramoops";
++			reg = <0x00 0x9ca00000 0x00 0x00100000>;
++			record-size = <0x8000>;
++			console-size = <0x8000>;
++			ftrace-size = <0x00>;
++			pmsg-size = <0x8000>;
++		};
++
++		secure_tfa_ddr: tfa@9e780000 {
++			reg = <0x00 0x9e780000 0x00 0x80000>;
++			alignment = <0x1000>;
++			no-map;
++		};
++
++		secure_ddr: optee@9e800000 {
++			reg = <0x00 0x9e800000 0x00 0x01800000>; /* for OP-TEE */
++			alignment = <0x1000>;
++			no-map;
++		};
++
++		mcu_m4fss_dma_memory_region: m4f-dma-memory@9cb00000 {
++			compatible = "shared-dma-pool";
++			reg = <0x00 0x9cb00000 0x00 0x100000>;
++			no-map;
++		};
++
++		mcu_m4fss_memory_region: m4f-memory@9cc00000 {
++			compatible = "shared-dma-pool";
++			reg = <0x00 0x9cc00000 0x00 0xe00000>;
++			no-map;
++		};
++
++		wkup_r5fss0_core0_dma_memory_region: r5f-dma-memory@9da00000 {
++			compatible = "shared-dma-pool";
++			reg = <0x00 0x9da00000 0x00 0x00100000>;
++			no-map;
++		};
++
++		wkup_r5fss0_core0_memory_region: r5f-memory@9db00000 {
++			compatible = "shared-dma-pool";
++			reg = <0x00 0x9db00000 0x00 0x00c00000>;
++			no-map;
++		};
++	};
++
++	vmain_pd: regulator-0 {
++		/* TPS65988 PD CONTROLLER OUTPUT */
++		compatible = "regulator-fixed";
++		regulator-name = "vmain_pd";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vcc_5v0: regulator-1 {
++		/* Output of LM34936 */
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_5v0";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		vin-supply = <&vmain_pd>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vcc_3v3_sys: regulator-2 {
++		/* output of LM61460-Q1 */
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_3v3_sys";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		vin-supply = <&vmain_pd>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vdd_mmc1: regulator-3 {
++		/* TPS22918DBVR */
++		compatible = "regulator-fixed";
++		regulator-name = "vdd_mmc1";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-boot-on;
++		enable-active-high;
++		vin-supply = <&vcc_3v3_sys>;
++		gpio = <&exp1 3 GPIO_ACTIVE_HIGH>;
++	};
++
++	vdd_sd_dv: regulator-4 {
++		/* Output of TLV71033 */
++		compatible = "regulator-gpio";
++		regulator-name = "tlv71033";
++		pinctrl-names = "default";
++		pinctrl-0 = <&vdd_sd_dv_pins_default>;
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-boot-on;
++		vin-supply = <&vcc_5v0>;
++		gpios = <&main_gpio0 31 GPIO_ACTIVE_HIGH>;
++		states = <1800000 0x0>,
++			 <3300000 0x1>;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++		pinctrl-names = "default";
++		pinctrl-0 = <&usr_led_pins_default>;
++
++		led-0 {
++			label = "am62-sk:green:heartbeat";
++			gpios = <&main_gpio1 49 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "heartbeat";
++			function = LED_FUNCTION_HEARTBEAT;
++			default-state = "off";
++		};
++	};
++
++	panel_lvds: panel-lvds {
++		bootph-pre-ram;
++		compatible = "simple-panel";
++		status= "okay";
++		width-mm = <217>;
++		height-mm = <136>;
++		data-mapping = "vesa-24";
++		panel-timings {
++				bootph-pre-ram;
++				clock-frequency = <150274>;
++				hactive = <1920>;
++				vactive = <1200>;
++				hback-porch = <32>;
++				hfront-porch = <52>;
++				vback-porch = <24>;
++				vfront-porch = <8>;
++				hsync-len = <24>;
++				vsync-len = <3>;
++				de-active = <1>;
++		};
++		port@0 {
++			dual-lvds-odd-pixels;
++			lcd_in0: endpoint {
++				remote-endpoint = <&oldi_out0>;
++			};
++		};
++
++		port@1 {
++			dual-lvds-even-pixels;
++			lcd_in1: endpoint {
++				remote-endpoint = <&oldi_out1>;
++			};
++		};
++	};
++};
++
++&main_pmx0 {
++	main_uart0_pins_default: main-uart0-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x1c8, PIN_INPUT, 0) /* (D14) UART0_RXD */
++			AM62X_IOPAD(0x1cc, PIN_OUTPUT, 0) /* (E14) UART0_TXD */
++		>;
++	};
++
++	main_i2c0_pins_default: main-i2c0-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x1e0, PIN_INPUT_PULLUP, 0) /* (B16) I2C0_SCL */
++			AM62X_IOPAD(0x1e4, PIN_INPUT_PULLUP, 0) /* (A16) I2C0_SDA */
++		>;
++	};
++
++	main_i2c1_pins_default: main-i2c1-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x1e8, PIN_INPUT_PULLUP, 0) /* (B17) I2C1_SCL */
++			AM62X_IOPAD(0x1ec, PIN_INPUT_PULLUP, 0) /* (A17) I2C1_SDA */
++		>;
++	};
++
++	main_i2c2_pins_default: main-i2c2-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x0b0, PIN_INPUT_PULLUP, 1) /* (K22) GPMC0_CSn2.I2C2_SCL */
++			AM62X_IOPAD(0x0b4, PIN_INPUT_PULLUP, 1) /* (K24) GPMC0_CSn3.I2C2_SDA */
++		>;
++	};
++
++	main_mmc0_pins_default: main-mmc0-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x220, PIN_INPUT, 0) /* (Y3) MMC0_CMD */
++			AM62X_IOPAD(0x218, PIN_INPUT, 0) /* (AB1) MMC0_CLK */
++			AM62X_IOPAD(0x214, PIN_INPUT, 0) /* (AA2) MMC0_DAT0 */
++			AM62X_IOPAD(0x210, PIN_INPUT, 0) /* (AA1) MMC0_DAT1 */
++			AM62X_IOPAD(0x20c, PIN_INPUT, 0) /* (AA3) MMC0_DAT2 */
++			AM62X_IOPAD(0x208, PIN_INPUT, 0) /* (Y4) MMC0_DAT3 */
++			AM62X_IOPAD(0x204, PIN_INPUT, 0) /* (AB2) MMC0_DAT4 */
++			AM62X_IOPAD(0x200, PIN_INPUT, 0) /* (AC1) MMC0_DAT5 */
++			AM62X_IOPAD(0x1fc, PIN_INPUT, 0) /* (AD2) MMC0_DAT6 */
++			AM62X_IOPAD(0x1f8, PIN_INPUT, 0) /* (AC2) MMC0_DAT7 */
++		>;
++	};
++
++	main_mmc1_pins_default: main-mmc1-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x23c, PIN_INPUT, 0) /* (A21) MMC1_CMD */
++			AM62X_IOPAD(0x234, PIN_INPUT, 0) /* (B22) MMC1_CLK */
++			AM62X_IOPAD(0x230, PIN_INPUT, 0) /* (A22) MMC1_DAT0 */
++			AM62X_IOPAD(0x22c, PIN_INPUT, 0) /* (B21) MMC1_DAT1 */
++			AM62X_IOPAD(0x228, PIN_INPUT, 0) /* (C21) MMC1_DAT2 */
++			AM62X_IOPAD(0x224, PIN_INPUT, 0) /* (D22) MMC1_DAT3 */
++			AM62X_IOPAD(0x240, PIN_INPUT, 0) /* (D17) MMC1_SDCD */
++		>;
++	};
++
++	usr_led_pins_default: usr-led-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x244, PIN_OUTPUT, 7) /* (C17) MMC1_SDWP.GPIO1_49 */
++		>;
++	};
++
++	main_mdio1_pins_default: main-mdio1-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x160, PIN_OUTPUT, 0) /* (AD24) MDIO0_MDC */
++			AM62X_IOPAD(0x15c, PIN_INPUT, 0) /* (AB22) MDIO0_MDIO */
++		>;
++	};
++
++	main_rgmii1_pins_default: main-rgmii1-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x14c, PIN_INPUT, 0) /* (AB17) RGMII1_RD0 */
++			AM62X_IOPAD(0x150, PIN_INPUT, 0) /* (AC17) RGMII1_RD1 */
++			AM62X_IOPAD(0x154, PIN_INPUT, 0) /* (AB16) RGMII1_RD2 */
++			AM62X_IOPAD(0x158, PIN_INPUT, 0) /* (AA15) RGMII1_RD3 */
++			AM62X_IOPAD(0x148, PIN_INPUT, 0) /* (AD17) RGMII1_RXC */
++			AM62X_IOPAD(0x144, PIN_INPUT, 0) /* (AE17) RGMII1_RX_CTL */
++			AM62X_IOPAD(0x134, PIN_OUTPUT, 0) /* (AE20) RGMII1_TD0 */
++			AM62X_IOPAD(0x138, PIN_OUTPUT, 0) /* (AD20) RGMII1_TD1 */
++			AM62X_IOPAD(0x13c, PIN_OUTPUT, 0) /* (AE18) RGMII1_TD2 */
++			AM62X_IOPAD(0x140, PIN_OUTPUT, 0) /* (AD18) RGMII1_TD3 */
++			AM62X_IOPAD(0x130, PIN_OUTPUT, 0) /* (AE19) RGMII1_TXC */
++			AM62X_IOPAD(0x12c, PIN_OUTPUT, 0) /* (AD19) RGMII1_TX_CTL */
++		>;
++	};
++
++	main_rgmii2_pins_default: main-rgmii2-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x184, PIN_INPUT, 0) /* (AE23) RGMII2_RD0 */
++			AM62X_IOPAD(0x188, PIN_INPUT, 0) /* (AB20) RGMII2_RD1 */
++			AM62X_IOPAD(0x18c, PIN_INPUT, 0) /* (AC21) RGMII2_RD2 */
++			AM62X_IOPAD(0x190, PIN_INPUT, 0) /* (AE22) RGMII2_RD3 */
++			AM62X_IOPAD(0x180, PIN_INPUT, 0) /* (AD23) RGMII2_RXC */
++			AM62X_IOPAD(0x17c, PIN_INPUT, 0) /* (AD22) RGMII2_RX_CTL */
++			AM62X_IOPAD(0x16c, PIN_OUTPUT, 0) /* (Y18) RGMII2_TD0 */
++			AM62X_IOPAD(0x170, PIN_OUTPUT, 0) /* (AA18) RGMII2_TD1 */
++			AM62X_IOPAD(0x174, PIN_OUTPUT, 0) /* (AD21) RGMII2_TD2 */
++			AM62X_IOPAD(0x178, PIN_OUTPUT, 0) /* (AC20) RGMII2_TD3 */
++			AM62X_IOPAD(0x168, PIN_OUTPUT, 0) /* (AE21) RGMII2_TXC */
++			AM62X_IOPAD(0x164, PIN_OUTPUT, 0) /* (AA19) RGMII2_TX_CTL */
++		>;
++	};
++
++	ospi0_pins_default: ospi0-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x000, PIN_OUTPUT, 0) /* (H24) OSPI0_CLK */
++			AM62X_IOPAD(0x02c, PIN_OUTPUT, 0) /* (F23) OSPI0_CSn0 */
++			AM62X_IOPAD(0x00c, PIN_INPUT, 0) /* (E25) OSPI0_D0 */
++			AM62X_IOPAD(0x010, PIN_INPUT, 0) /* (G24) OSPI0_D1 */
++			AM62X_IOPAD(0x014, PIN_INPUT, 0) /* (F25) OSPI0_D2 */
++			AM62X_IOPAD(0x018, PIN_INPUT, 0) /* (F24) OSPI0_D3 */
++			AM62X_IOPAD(0x01c, PIN_INPUT, 0) /* (J23) OSPI0_D4 */
++			AM62X_IOPAD(0x020, PIN_INPUT, 0) /* (J25) OSPI0_D5 */
++			AM62X_IOPAD(0x024, PIN_INPUT, 0) /* (H25) OSPI0_D6 */
++			AM62X_IOPAD(0x028, PIN_INPUT, 0) /* (J22) OSPI0_D7 */
++			AM62X_IOPAD(0x008, PIN_INPUT, 0) /* (J24) OSPI0_DQS */
++		>;
++	};
++
++	vdd_sd_dv_pins_default: vdd-sd-dv-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x07c, PIN_OUTPUT, 7) /* (P25) GPMC0_CLK.GPIO0_31 */
++		>;
++	};
++
++	main_gpio1_ioexp_intr_pins_default: main-gpio1-ioexp-intr-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x01d4, PIN_INPUT, 7) /* (B15) UART0_RTSn.GPIO1_23 */
++		>;
++	};
++
++	main_usb1_pins_default: main-usb1-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x0258, PIN_OUTPUT, 0) /* (F18) USB1_DRVVBUS */
++		>;
++	};
++
++	main_dss0_pins_default: main-dss0-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x0100, PIN_OUTPUT, 0) /* (AC25) VOUT0_VSYNC */
++			AM62X_IOPAD(0x00f8, PIN_OUTPUT, 0) /* (AB24) VOUT0_HSYNC */
++			AM62X_IOPAD(0x0104, PIN_OUTPUT, 0) /* (AC24) VOUT0_PCLK */
++			AM62X_IOPAD(0x00fc, PIN_OUTPUT, 0) /* (Y20) VOUT0_DE */
++			AM62X_IOPAD(0x00b8, PIN_OUTPUT, 0) /* (U22) VOUT0_DATA0 */
++			AM62X_IOPAD(0x00bc, PIN_OUTPUT, 0) /* (V24) VOUT0_DATA1 */
++			AM62X_IOPAD(0x00c0, PIN_OUTPUT, 0) /* (W25) VOUT0_DATA2 */
++			AM62X_IOPAD(0x00c4, PIN_OUTPUT, 0) /* (W24) VOUT0_DATA3 */
++			AM62X_IOPAD(0x00c8, PIN_OUTPUT, 0) /* (Y25) VOUT0_DATA4 */
++			AM62X_IOPAD(0x00cc, PIN_OUTPUT, 0) /* (Y24) VOUT0_DATA5 */
++			AM62X_IOPAD(0x00d0, PIN_OUTPUT, 0) /* (Y23) VOUT0_DATA6 */
++			AM62X_IOPAD(0x00d4, PIN_OUTPUT, 0) /* (AA25) VOUT0_DATA7 */
++			AM62X_IOPAD(0x00d8, PIN_OUTPUT, 0) /* (V21) VOUT0_DATA8 */
++			AM62X_IOPAD(0x00dc, PIN_OUTPUT, 0) /* (W21) VOUT0_DATA9 */
++			AM62X_IOPAD(0x00e0, PIN_OUTPUT, 0) /* (V20) VOUT0_DATA10 */
++			AM62X_IOPAD(0x00e4, PIN_OUTPUT, 0) /* (AA23) VOUT0_DATA11 */
++			AM62X_IOPAD(0x00e8, PIN_OUTPUT, 0) /* (AB25) VOUT0_DATA12 */
++			AM62X_IOPAD(0x00ec, PIN_OUTPUT, 0) /* (AA24) VOUT0_DATA13 */
++			AM62X_IOPAD(0x00f0, PIN_OUTPUT, 0) /* (Y22) VOUT0_DATA14 */
++			AM62X_IOPAD(0x00f4, PIN_OUTPUT, 0) /* (AA21) VOUT0_DATA15 */
++			AM62X_IOPAD(0x005c, PIN_OUTPUT, 1) /* (R24) GPMC0_AD8.VOUT0_DATA16 */
++			AM62X_IOPAD(0x0060, PIN_OUTPUT, 1) /* (R25) GPMC0_AD9.VOUT0_DATA17 */
++			AM62X_IOPAD(0x0064, PIN_OUTPUT, 1) /* (T25) GPMC0_AD10.VOUT0_DATA18 */
++			AM62X_IOPAD(0x0068, PIN_OUTPUT, 1) /* (R21) GPMC0_AD11.VOUT0_DATA19 */
++			AM62X_IOPAD(0x006c, PIN_OUTPUT, 1) /* (T22) GPMC0_AD12.VOUT0_DATA20 */
++			AM62X_IOPAD(0x0070, PIN_OUTPUT, 1) /* (T24) GPMC0_AD13.VOUT0_DATA21 */
++			AM62X_IOPAD(0x0074, PIN_OUTPUT, 1) /* (U25) GPMC0_AD14.VOUT0_DATA22 */
++			AM62X_IOPAD(0x0078, PIN_OUTPUT, 1) /* (U24) GPMC0_AD15.VOUT0_DATA23 */
++		>;
++	};
++};
++
++&wkup_uart0 {
++	/* WKUP UART0 is used by DM firmware */
++	status = "reserved";
++};
++
++&main_uart0 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_uart0_pins_default>;
++};
++
++&main_uart1 {
++	/* Main UART1 is used by TIFS firmware */
++	status = "reserved";
++};
++
++&main_i2c0 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_i2c0_pins_default>;
++	clock-frequency = <400000>;
++};
++
++&main_i2c1 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_i2c1_pins_default>;
++	clock-frequency = <400000>;
++
++	exp1: gpio@22 {
++		compatible = "ti,tca6424";
++		reg = <0x22>;
++		gpio-controller;
++		#gpio-cells = <2>;
++		gpio-line-names = "GPIO_CPSW2_RST", "GPIO_CPSW1_RST",
++				   "PRU_DETECT", "MMC1_SD_EN",
++				   "VPP_LDO_EN", "EXP_PS_3V3_En",
++				   "EXP_PS_5V0_En", "EXP_HAT_DETECT",
++				   "GPIO_AUD_RSTn", "GPIO_eMMC_RSTn",
++				   "UART1_FET_BUF_EN", "WL_LT_EN",
++				   "GPIO_HDMI_RSTn", "CSI_GPIO1",
++				   "CSI_GPIO2", "PRU_3V3_EN",
++				   "HDMI_INTn", "TEST_GPIO2",
++				   "MCASP1_FET_EN", "MCASP1_BUF_BT_EN",
++				   "MCASP1_FET_SEL", "UART1_FET_SEL",
++				   "TSINT#", "IO_EXP_TEST_LED";
++
++		interrupt-parent = <&main_gpio1>;
++		interrupts = <23 IRQ_TYPE_EDGE_FALLING>;
++		interrupt-controller;
++		#interrupt-cells = <2>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&main_gpio1_ioexp_intr_pins_default>;
++	};
++
++};
++
++&sdhci0 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_mmc0_pins_default>;
++	ti,driver-strength-ohm = <50>;
++	disable-wp;
++};
++
++&sdhci1 {
++	/* SD/MMC */
++	status = "okay";
++	vmmc-supply = <&vdd_mmc1>;
++	vqmmc-supply = <&vdd_sd_dv>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_mmc1_pins_default>;
++	ti,driver-strength-ohm = <50>;
++	disable-wp;
++};
++
++&cpsw3g {
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_rgmii1_pins_default
++		     &main_rgmii2_pins_default>;
++};
++
++&cpsw_port1 {
++	phy-mode = "rgmii-rxid";
++	phy-handle = <&cpsw3g_phy0>;
++};
++
++&cpsw_port2 {
++	phy-mode = "rgmii-rxid";
++	phy-handle = <&cpsw3g_phy1>;
++};
++
++&cpsw3g_mdio {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_mdio1_pins_default>;
++
++	cpsw3g_phy0: ethernet-phy@0 {
++		reg = <0>;
++		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
++		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
++		ti,min-output-impedance;
++	};
++
++	cpsw3g_phy1: ethernet-phy@1 {
++		reg = <1>;
++		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
++		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
++		ti,min-output-impedance;
++	};
++};
++
++&mailbox0_cluster0 {
++	mbox_m4_0: mbox-m4-0 {
++		ti,mbox-rx = <0 0 0>;
++		ti,mbox-tx = <1 0 0>;
++	};
++};
++
++&ospi0 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&ospi0_pins_default>;
++
++	flash@0{
++		compatible = "jedec,spi-nor";
++		reg = <0x0>;
++		spi-tx-bus-width = <8>;
++		spi-rx-bus-width = <8>;
++		spi-max-frequency = <25000000>;
++		cdns,tshsl-ns = <60>;
++		cdns,tsd2d-ns = <60>;
++		cdns,tchsh-ns = <60>;
++		cdns,tslch-ns = <60>;
++		cdns,read-delay = <4>;
++		cdns,phy-mode;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			partition@0 {
++				label = "ospi.tiboot3";
++				reg = <0x0 0x80000>;
++			};
++
++			partition@80000 {
++				label = "ospi.tispl";
++				reg = <0x80000 0x200000>;
++			};
++
++			partition@280000 {
++				label = "ospi.u-boot";
++				reg = <0x280000 0x400000>;
++			};
++
++			partition@680000 {
++				label = "ospi.env";
++				reg = <0x680000 0x40000>;
++			};
++
++			partition@6c0000 {
++				label = "ospi.env.backup";
++				reg = <0x6c0000 0x40000>;
++			};
++
++			partition@800000 {
++				label = "ospi.rootfs";
++				reg = <0x800000 0x37c0000>;
++			};
++
++			partition@3fc0000 {
++				label = "ospi.phypattern";
++				reg = <0x3fc0000 0x40000>;
++			};
++		};
++	};
++};
++
++&usbss0 {
++	status = "okay";
++	ti,vbus-divider;
++};
++
++&usbss1 {
++	status = "okay";
++};
++
++&usb0 {
++	dr_mode = "peripheral";
++};
++
++&usb1 {
++	dr_mode = "host";
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_usb1_pins_default>;
++};
++
++&dss {
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_dss0_pins_default>;
++};
++
++&dss_ports {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	/* VP1: LVDS Output (OLDI TX 0) */
++	port@0 {
++		reg = <0>;
++		oldi_out0: endpoint {
++			remote-endpoint = <&lcd_in0>;
++		};
++	};
++
++	/* VP1: LVDS Output (OLDI TX 1) */
++	port@2 {
++		reg = <2>;
++		oldi_out1: endpoint {
++			remote-endpoint = <&lcd_in1>;
++		};
++	};
++
++};
+diff --git a/arch/arm/mach-k3/Kconfig b/arch/arm/mach-k3/Kconfig
+index c5c909919d..f6bf88e2ff 100644
+--- a/arch/arm/mach-k3/Kconfig
++++ b/arch/arm/mach-k3/Kconfig
+@@ -205,6 +205,7 @@ config K3_X509_SWRV
+ 	help
+ 	  SWRV for X509 certificate used for boot images
+ 
++source "board/iesy/am62xx_eva_mi/Kconfig"
+ source "board/ti/am65x/Kconfig"
+ source "board/ti/am64x/Kconfig"
+ source "board/ti/am62x/Kconfig"
+diff --git a/board/iesy/am62xx_eva_mi/Kconfig b/board/iesy/am62xx_eva_mi/Kconfig
+new file mode 100644
+index 0000000000..0da594dac8
+--- /dev/null
++++ b/board/iesy/am62xx_eva_mi/Kconfig
+@@ -0,0 +1,58 @@
++# SPDX-License-Identifier: GPL-2.0+
++#
++# Copyright (C) 2024 iesy GmbH
++
++choice
++	prompt "iesy AM62XX EVA MI"
++	optional
++
++config TARGET_IESY_AM62XX_EVA_MI_A53
++	bool "iesy AM62XX EVA MI running on A53"
++	select ARM64
++	select BINMAN
++
++config TARGET_IESY_AM62XX_EVA_MI_R5
++	bool "iesy AM62XX EVA MI running on R5"
++	select CPU_V7R
++	select SYS_THUMB_BUILD
++	select K3_LOAD_SYSFW
++	select RAM
++	select SPL_RAM
++	select K3_DDRSS
++	select BINMAN
++	imply SYS_K3_SPL_ATF
++
++endchoice
++
++if TARGET_IESY_AM62XX_EVA_MI_A53
++
++config SYS_BOARD
++       default "am62xx_eva_mi"
++
++config SYS_VENDOR
++       default "iesy"
++
++config SYS_CONFIG_NAME
++       default "iesy_am62xx_eva_mi"
++
++source "board/ti/common/Kconfig"
++
++endif
++
++if TARGET_IESY_AM62XX_EVA_MI_R5
++
++config SYS_BOARD
++       default "am62xx_eva_mi"
++
++config SYS_VENDOR
++       default "iesy"
++
++config SYS_CONFIG_NAME
++       default "iesy_am62xx_eva_mi"
++
++config SPL_LDSCRIPT
++	default "arch/arm/mach-omap2/u-boot-spl.lds"
++
++source "board/ti/common/Kconfig"
++
++endif
+diff --git a/board/iesy/am62xx_eva_mi/MAINTAINERS b/board/iesy/am62xx_eva_mi/MAINTAINERS
+new file mode 100644
+index 0000000000..12336b5edf
+--- /dev/null
++++ b/board/iesy/am62xx_eva_mi/MAINTAINERS
+@@ -0,0 +1,7 @@
++AM62x BOARD
++M:	Dominik Poggel <pog@iesy.com>
++S:	Maintained
++F:	board/iesy/am62xx_eva_mi
++F:	include/configs/iesy_am62xx_eva_mi.h
++F:	configs/iesy_am62xx_eva_mi_a53_defconfig
++F:  configs/iesy_am62xx_eva_mi_r5_defconfig
+diff --git a/board/iesy/am62xx_eva_mi/Makefile b/board/iesy/am62xx_eva_mi/Makefile
+new file mode 100644
+index 0000000000..03383d7257
+--- /dev/null
++++ b/board/iesy/am62xx_eva_mi/Makefile
+@@ -0,0 +1,8 @@
++#
++# Copyright (C) 2020-2022 Texas Instruments Incorporated - https://www.ti.com/
++#	Suman Anna <s-anna@ti.com>
++#
++# SPDX-License-Identifier:     GPL-2.0+
++#
++
++obj-y	+= board.o
+diff --git a/board/iesy/am62xx_eva_mi/am62xx_eva_mi.env b/board/iesy/am62xx_eva_mi/am62xx_eva_mi.env
+new file mode 100644
+index 0000000000..e507ca276c
+--- /dev/null
++++ b/board/iesy/am62xx_eva_mi/am62xx_eva_mi.env
+@@ -0,0 +1,45 @@
++#include <environment/ti/ti_armv7_common.env>
++#include <environment/ti/mmc.env>
++#include <environment/ti/ospi_nand.env>
++#include <environment/ti/k3_dfu.env>
++#include <environment/ti/nand.env>
++#if CONFIG_CMD_REMOTEPROC
++#include <environment/ti/k3_rproc.env>
++#endif
++
++default_device_tree=ti/k3-am625-sk.dtb
++findfdt=
++	setenv name_fdt ${default_device_tree};
++	if test $board_name = am62x_skevm; then
++			setenv name_fdt ti/k3-am625-sk.dtb; fi;
++	if test $board_name = am62b_p1_skevm; then
++			setenv name_fdt ti/k3-am625-sk.dtb; fi;
++	if test $board_name = am62x_sip_skevm; then
++                        setenv name_fdt ti/k3-am625-sk.dtb; fi;
++	if test $board_name = am62x_lp_skevm; then
++			setenv name_fdt ti/k3-am62-lp-sk.dtb; fi;
++	if test $board_name = am62x_beagleplay; then
++			setenv name_fdt ti/k3-am625-beagleplay.dtb; fi;
++	setenv fdtfile ${name_fdt}
++name_kern=Image
++console=ttyS2,115200n8
++args_all=setenv optargs ${optargs} earlycon=ns16550a,mmio32,0x02800000
++	${mtdparts}
++run_kern=booti ${loadaddr} ${rd_spec} ${fdtaddr}
++
++boot=mmc
++mmcdev=1
++bootpart=1:2
++bootdir=/boot
++rd_spec=-
++
++splashfile=ti_logo_414x97_32bpp.bmp.gz
++splashimage=0x80200000
++splashpos=m,m
++splashsource=mmc
++
++rproc_fw_binaries= 0 /lib/firmware/am62-mcu-m4f0_0-fw
++
++#if CONFIG_CMD_ABOOTIMG
++#include <environment/ti/mmc_android.env>
++#endif
+diff --git a/board/iesy/am62xx_eva_mi/board-cfg.yaml b/board/iesy/am62xx_eva_mi/board-cfg.yaml
+new file mode 100644
+index 0000000000..a26ef55bd4
+--- /dev/null
++++ b/board/iesy/am62xx_eva_mi/board-cfg.yaml
+@@ -0,0 +1,36 @@
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (C) 2022 Texas Instruments Incorporated - https://www.ti.com/
++#
++# Board configuration for AM62
++#
++
++---
++
++board-cfg:
++    rev:
++        boardcfg_abi_maj : 0x0
++        boardcfg_abi_min : 0x1
++    control:
++        subhdr:
++            magic: 0xC1D3
++            size: 7
++        main_isolation_enable : 0x5A
++        main_isolation_hostid : 0x2
++    secproxy:
++        subhdr:
++            magic: 0x1207
++            size: 7
++        scaling_factor : 0x1
++        scaling_profile : 0x1
++        disable_main_nav_secure_proxy : 0
++    msmc:
++        subhdr:
++            magic: 0xA5C3
++            size: 5
++        msmc_cache_size : 0x0
++    debug_cfg:
++        subhdr:
++            magic: 0x020C
++            size: 8
++        trace_dst_enables : 0x00
++        trace_src_enables : 0x00
+diff --git a/board/iesy/am62xx_eva_mi/board.c b/board/iesy/am62xx_eva_mi/board.c
+new file mode 100644
+index 0000000000..afc0d5fd95
+--- /dev/null
++++ b/board/iesy/am62xx_eva_mi/board.c
+@@ -0,0 +1,398 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Board specific initialization for AM62x platforms
++ *
++ * Copyright (C) 2020-2022 Texas Instruments Incorporated - https://www.ti.com/
++ *	Suman Anna <s-anna@ti.com>
++ *
++ */
++
++#include <common.h>
++#include <env.h>
++#include <spl.h>
++#include <init.h>
++#include <video.h>
++#include <splash.h>
++#include <cpu_func.h>
++#include <k3-ddrss.h>
++#include <fdt_support.h>
++#include <asm/io.h>
++#include <asm/arch/hardware.h>
++#include <dm/uclass.h>
++#include <net.h>
++#include <asm/gpio.h>
++#include <cpu_func.h>
++
++#include <linux/sizes.h>
++
++#include "../common/board_detect.h"
++
++#include "../common/k3-ddr-init.h"
++
++DECLARE_GLOBAL_DATA_PTR;
++
++#define AM62X_MAX_DAUGHTER_CARDS	8
++
++/* Daughter card presence detection signals */
++enum {
++	AM62X_LPSK_HSE_BRD_DET,
++	AM62X_LPSK_BRD_DET_COUNT,
++};
++
++#if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_ARM64)
++static struct gpio_desc board_det_gpios[AM62X_LPSK_BRD_DET_COUNT];
++#endif
++
++/* Max number of MAC addresses that are parsed/processed per daughter card */
++#define DAUGHTER_CARD_NO_OF_MAC_ADDR	8
++
++#define board_is_am62x_skevm()  (board_ti_k3_is("AM62-SKEVM") || \
++				 board_ti_k3_is("AM62B-SKEVM"))
++#define board_is_am62b_p1_skevm() board_ti_k3_is("AM62B-SKEVM-P1")
++#define board_is_am62x_lp_skevm()  board_ti_k3_is("AM62-LP-SKEVM")
++#define board_is_am62x_sip_skevm()  board_ti_k3_is("AM62SIP-SKEVM")
++#define board_is_am62x_play()	board_ti_k3_is("BEAGLEPLAY-A0-")
++
++#if CONFIG_IS_ENABLED(SPLASH_SCREEN)
++static struct splash_location default_splash_locations[] = {
++	{
++		.name = "sf",
++		.storage = SPLASH_STORAGE_SF,
++		.flags = SPLASH_STORAGE_RAW,
++		.offset = 0x700000,
++	},
++	{
++		.name		= "mmc",
++		.storage	= SPLASH_STORAGE_MMC,
++		.flags		= SPLASH_STORAGE_FS,
++		.devpart	= "1:1",
++	},
++};
++
++int splash_screen_prepare(void)
++{
++	return splash_source_load(default_splash_locations,
++				ARRAY_SIZE(default_splash_locations));
++}
++#endif
++
++int board_init(void)
++{
++	return 0;
++}
++
++phys_size_t get_effective_memsize(void)
++{
++	/*
++	 * Just below 512MB are TF-A and OPTEE reserve regions, thus
++	 * SPL/U-Boot RAM has to start below that. Leave 64MB space for
++	 * all reserved memories.
++	 */
++	return gd->ram_size == SZ_512M ? SZ_512M - SZ_64M  : gd->ram_size;
++}
++
++#if defined(CONFIG_SPL_BUILD)
++static int video_setup(void)
++{
++	if (CONFIG_IS_ENABLED(VIDEO)) {
++		ulong addr;
++		int ret;
++
++		addr = gd->relocaddr;
++		ret = video_reserve(&addr);
++		if (ret)
++			return ret;
++		debug("Reserving %luk for video at: %08lx\n",
++		      ((unsigned long)gd->relocaddr - addr) >> 10, addr);
++		gd->relocaddr = addr;
++	}
++
++	return 0;
++}
++
++#define CTRLMMR_USB0_PHY_CTRL	0x43004008
++#define CTRLMMR_USB1_PHY_CTRL	0x43004018
++#define CORE_VOLTAGE		0x80000000
++
++void spl_board_init(void)
++{
++	u32 val;
++
++	/* Set USB0 PHY core voltage to 0.85V */
++	val = readl(CTRLMMR_USB0_PHY_CTRL);
++	val &= ~(CORE_VOLTAGE);
++	writel(val, CTRLMMR_USB0_PHY_CTRL);
++
++	/* Set USB1 PHY core voltage to 0.85V */
++	val = readl(CTRLMMR_USB1_PHY_CTRL);
++	val &= ~(CORE_VOLTAGE);
++	writel(val, CTRLMMR_USB1_PHY_CTRL);
++
++	video_setup();
++	enable_caches();
++	if (IS_ENABLED(CONFIG_SPL_SPLASH_SCREEN) && IS_ENABLED(CONFIG_SPL_BMP))
++		splash_display();
++
++	if (IS_ENABLED(CONFIG_SPL_ETH))
++		/* Init DRAM size for R5/A53 SPL */
++		dram_init_banksize();
++}
++
++void spl_perform_fixups(struct spl_image_info *spl_image)
++{
++	if (IS_ENABLED(CONFIG_K3_INLINE_ECC))
++		fixup_ddr_driver_for_ecc(spl_image);
++	else
++		fixup_memory_node(spl_image);
++}
++#endif
++
++#ifdef CONFIG_TI_I2C_BOARD_DETECT
++int do_board_detect(void)
++{
++	int ret;
++
++	ret = ti_i2c_eeprom_am6_get_base(CONFIG_EEPROM_BUS_ADDRESS,
++					 CONFIG_EEPROM_CHIP_ADDRESS);
++
++	if (ret) {
++		printf("EEPROM not available at %d, trying to read at %d\n",
++			CONFIG_EEPROM_CHIP_ADDRESS, CONFIG_EEPROM_CHIP_ADDRESS + 1);
++		ret = ti_i2c_eeprom_am6_get_base(CONFIG_EEPROM_BUS_ADDRESS,
++						 CONFIG_EEPROM_CHIP_ADDRESS + 1);
++		if (ret)
++			pr_err("Reading on-board EEPROM at 0x%02x failed %d\n",
++				CONFIG_EEPROM_CHIP_ADDRESS + 1, ret);
++	}
++	return ret;
++}
++
++int checkboard(void)
++{
++	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
++
++	if (!do_board_detect())
++		printf("Board: %s rev %s\n", ep->name, ep->version);
++
++	return 0;
++}
++#endif
++
++#ifdef CONFIG_BOARD_LATE_INIT
++static void setup_board_eeprom_env(void)
++{
++	char *name = "am62x_skevm";
++
++	if (do_board_detect())
++		goto invalid_eeprom;
++
++	if (board_is_am62x_skevm())
++		name = "am62x_skevm";
++	else if (board_is_am62b_p1_skevm())
++		name = "am62b_p1_skevm";
++	else if (board_is_am62x_lp_skevm())
++		name = "am62x_lp_skevm";
++	else if (board_is_am62x_sip_skevm())
++		name = "am62x_sip_skevm";
++	else if (board_is_am62x_play())
++		name = "am62x_beagleplay";
++	else
++		printf("Unidentified board claims %s in eeprom header\n",
++		       board_ti_get_name());
++
++invalid_eeprom:
++	set_board_info_env_am6(name);
++}
++
++static void setup_serial(void)
++{
++	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
++	unsigned long board_serial;
++	char *endp;
++	char serial_string[17] = { 0 };
++
++	if (env_get("serial#"))
++		return;
++
++	board_serial = simple_strtoul(ep->serial, &endp, 16);
++	if (*endp != '\0') {
++		pr_err("Error: Can't set serial# to %s\n", ep->serial);
++		return;
++	}
++
++	snprintf(serial_string, sizeof(serial_string), "%016lx", board_serial);
++	env_set("serial#", serial_string);
++}
++
++#if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_ARM64)
++static const char *k3_dtbo_list[AM62X_MAX_DAUGHTER_CARDS] = {NULL};
++
++static int init_daughtercard_det_gpio(char *gpio_name, struct gpio_desc *desc)
++{
++	int ret;
++
++	memset(desc, 0, sizeof(*desc));
++	ret = dm_gpio_lookup_name(gpio_name, desc);
++	if (ret < 0) {
++		pr_err("Failed to lookup gpio %s: %d\n", gpio_name, ret);
++		return ret;
++	}
++
++	/* Request GPIO, simply re-using the name as label */
++	ret = dm_gpio_request(desc, gpio_name);
++	if (ret < 0) {
++		pr_err("Failed to request gpio %s: %d\n", gpio_name, ret);
++		return ret;
++	}
++
++	return dm_gpio_set_dir_flags(desc, GPIOD_IS_IN);
++}
++
++static int probe_daughtercards(void)
++{
++	struct ti_am6_eeprom ep;
++	char mac_addr[DAUGHTER_CARD_NO_OF_MAC_ADDR][TI_EEPROM_HDR_ETH_ALEN];
++	u8 mac_addr_cnt;
++	char name_overlays[1024] = { 0 };
++	int i, nb_dtbos = 0;
++	int ret;
++
++	/*
++	 * Daughter card presence detection signal name to GPIO (via I2C I/O
++	 * expander @ address 0x53) name and EEPROM I2C address mapping.
++	 */
++	const struct {
++		char *gpio_name;
++		u8 i2c_addr;
++	} slot_map[AM62X_LPSK_BRD_DET_COUNT] = {
++		{ "gpio@22_2", 0x53, },	/* AM62X_LPSK_HSE_BRD_DET */
++	};
++
++	/* Declaration of daughtercards to probe */
++	const struct {
++		u8 slot_index;		/* Slot the card is installed */
++		char *card_name;	/* EEPROM-programmed card name */
++		char *dtbo_name;	/* Device tree overlay to apply */
++		u8 eth_offset;		/* ethXaddr MAC address index offset */
++	} cards[] = {
++		{
++			AM62X_LPSK_HSE_BRD_DET,
++			"SK-NAND-DC01",
++			"k3-am62x-lp-sk-nand.dtbo",
++			0,
++		},
++	};
++
++	/*
++	 * Initialize GPIO used for daughtercard slot presence detection and
++	 * keep the resulting handles in local array for easier access.
++	 */
++	for (i = 0; i < AM62X_LPSK_BRD_DET_COUNT; i++) {
++		ret = init_daughtercard_det_gpio(slot_map[i].gpio_name,
++						 &board_det_gpios[i]);
++		if (ret < 0)
++			return ret;
++	}
++
++	memset(k3_dtbo_list, 0, sizeof(k3_dtbo_list));
++	for (i = 0; i < ARRAY_SIZE(cards); i++) {
++		/* Obtain card-specific slot index and associated I2C address */
++		u8 slot_index = cards[i].slot_index;
++		u8 i2c_addr = slot_map[slot_index].i2c_addr;
++		const char *dtboname;
++
++		/*
++		 * The presence detection signal is active-low, hence skip
++		 * over this card slot if anything other than 0 is returned.
++		 */
++		ret = dm_gpio_get_value(&board_det_gpios[slot_index]);
++		if (ret < 0)
++			return ret;
++		else if (ret)
++			continue;
++
++		/* Get and parse the daughter card EEPROM record */
++		ret = ti_i2c_eeprom_am6_get(CONFIG_EEPROM_BUS_ADDRESS, i2c_addr,
++					    &ep,
++					    (char **)mac_addr,
++					    DAUGHTER_CARD_NO_OF_MAC_ADDR,
++					    &mac_addr_cnt);
++
++		if (ret) {
++			pr_err("Reading daughtercard EEPROM at 0x%02x failed %d\n",
++			       i2c_addr, ret);
++			/*
++			 * Even this is pretty serious let's just skip over
++			 * this particular daughtercard, rather than ending
++			 * the probing process altogether.
++			 */
++			continue;
++		}
++
++		/* Only process the parsed data if we found a match */
++		if (strncmp(ep.name, cards[i].card_name, sizeof(ep.name)))
++			continue;
++		printf("Detected: %s rev %s\n", ep.name, ep.version);
++
++		int j;
++
++		for (j = 0; j < mac_addr_cnt; j++) {
++			if (!is_valid_ethaddr((u8 *)mac_addr[j]))
++				continue;
++
++			eth_env_set_enetaddr_by_index("eth",
++						      cards[i].eth_offset + j,
++						      (uchar *)mac_addr[j]);
++		}
++		/* Skip if no overlays are to be added */
++		if (!strlen(cards[i].dtbo_name))
++			continue;
++
++		dtboname = cards[i].dtbo_name;
++		k3_dtbo_list[nb_dtbos++] = dtboname;
++
++		/*
++		 * Make sure we are not running out of buffer space by checking
++		 * if we can fit the new overlay, a trailing space to be used
++		 * as a separator, plus the terminating zero.
++		 */
++		if (strlen(name_overlays) + strlen(dtboname) + 2 >
++		    sizeof(name_overlays))
++			return -ENOMEM;
++
++		/* Append to our list of overlays */
++		strcat(name_overlays, dtboname);
++		strcat(name_overlays, " ");
++	}
++	/* Apply device tree overlay(s) to the U-Boot environment, if any */
++	if (strlen(name_overlays))
++		return env_set("name_overlays", name_overlays);
++	return 0;
++}
++#endif
++
++int board_late_init(void)
++{
++	if (IS_ENABLED(CONFIG_TI_I2C_BOARD_DETECT)) {
++		struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
++
++		setup_board_eeprom_env();
++		setup_serial();
++		/*
++		 * The first MAC address for ethernet a.k.a. ethernet0 comes from
++		 * efuse populated via the am654 gigabit eth switch subsystem driver.
++		 * All the other ones are populated via EEPROM, hence continue with
++		 * an index of 1.
++		 */
++		board_ti_am6_set_ethaddr(1, ep->mac_addr_cnt);
++
++#if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_ARM64)
++		/* Check for and probe any plugged-in daughtercards */
++		if (board_is_am62x_lp_skevm())
++			probe_daughtercards();
++#endif
++	}
++
++	return 0;
++}
++#endif
+diff --git a/board/iesy/am62xx_eva_mi/pm-cfg.yaml b/board/iesy/am62xx_eva_mi/pm-cfg.yaml
+new file mode 100644
+index 0000000000..aa94097e97
+--- /dev/null
++++ b/board/iesy/am62xx_eva_mi/pm-cfg.yaml
+@@ -0,0 +1,12 @@
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (C) 2022 Texas Instruments Incorporated - https://www.ti.com/
++#
++# Power management configuration for AM62
++#
++
++---
++
++pm-cfg:
++    rev:
++        boardcfg_abi_maj : 0x0
++        boardcfg_abi_min : 0x1
+diff --git a/board/iesy/am62xx_eva_mi/rm-cfg.yaml b/board/iesy/am62xx_eva_mi/rm-cfg.yaml
+new file mode 100644
+index 0000000000..f82aa7370d
+--- /dev/null
++++ b/board/iesy/am62xx_eva_mi/rm-cfg.yaml
+@@ -0,0 +1,981 @@
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (C) 2022-2024 Texas Instruments Incorporated - https://www.ti.com/
++#
++# Resource management configuration for AM62X
++#
++
++---
++
++rm-cfg:
++    rm_boardcfg:
++        rev:
++            boardcfg_abi_maj : 0x0
++            boardcfg_abi_min : 0x1
++        host_cfg:
++            subhdr:
++                magic: 0x4C41
++                size : 356
++            host_cfg_entries:
++                - #1
++                    host_id: 12
++                    allowed_atype: 0x2A
++                    allowed_qos: 0xAAAA
++                    allowed_orderid: 0xAAAAAAAA
++                    allowed_priority: 0xAAAA
++                    allowed_sched_priority: 0xAA
++                - #2
++                    host_id: 30
++                    allowed_atype: 0x2A
++                    allowed_qos: 0xAAAA
++                    allowed_orderid: 0xAAAAAAAA
++                    allowed_priority: 0xAAAA
++                    allowed_sched_priority: 0xAA
++                - #3
++                    host_id: 36
++                    allowed_atype: 0x2A
++                    allowed_qos: 0xAAAA
++                    allowed_orderid: 0xAAAAAAAA
++                    allowed_priority: 0xAAAA
++                    allowed_sched_priority: 0xAA
++                - #4
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #5
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #6
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #7
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #8
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #9
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #10
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #11
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #12
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #13
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #14
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #15
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #16
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #17
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #18
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #19
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #20
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #21
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #22
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #23
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #24
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #25
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #26
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #27
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #28
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #29
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #30
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #31
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++                - #32
++                    host_id: 0
++                    allowed_atype: 0
++                    allowed_qos: 0
++                    allowed_orderid: 0
++                    allowed_priority: 0
++                    allowed_sched_priority: 0
++        resasg:
++            subhdr:
++                magic: 0x7B25
++                size: 8
++            resasg_entries_size: 976
++            reserved: 0
++    resasg_entries:
++        -
++                start_resource: 0
++                num_resource: 16
++                type: 64
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 16
++                num_resource: 4
++                type: 64
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 16
++                num_resource: 4
++                type: 64
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 20
++                num_resource: 22
++                type: 64
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 16
++                type: 192
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 34
++                num_resource: 2
++                type: 192
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 2
++                type: 320
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 2
++                num_resource: 2
++                type: 320
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 2
++                num_resource: 2
++                type: 320
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 4
++                num_resource: 4
++                type: 320
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 26
++                type: 384
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 50176
++                num_resource: 164
++                type: 1666
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 1
++                type: 1667
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 18
++                type: 1677
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 18
++                num_resource: 6
++                type: 1677
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 18
++                num_resource: 6
++                type: 1677
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 24
++                num_resource: 2
++                type: 1677
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 26
++                num_resource: 6
++                type: 1677
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 54
++                num_resource: 18
++                type: 1678
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 72
++                num_resource: 6
++                type: 1678
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 72
++                num_resource: 6
++                type: 1678
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 78
++                num_resource: 2
++                type: 1678
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 80
++                num_resource: 2
++                type: 1678
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 32
++                num_resource: 12
++                type: 1679
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 44
++                num_resource: 6
++                type: 1679
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 44
++                num_resource: 6
++                type: 1679
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 50
++                num_resource: 2
++                type: 1679
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 52
++                num_resource: 2
++                type: 1679
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 18
++                type: 1696
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 18
++                num_resource: 6
++                type: 1696
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 18
++                num_resource: 6
++                type: 1696
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 24
++                num_resource: 2
++                type: 1696
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 26
++                num_resource: 6
++                type: 1696
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 18
++                type: 1697
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 18
++                num_resource: 6
++                type: 1697
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 18
++                num_resource: 6
++                type: 1697
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 24
++                num_resource: 2
++                type: 1697
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 26
++                num_resource: 2
++                type: 1697
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 12
++                type: 1698
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 12
++                num_resource: 6
++                type: 1698
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 12
++                num_resource: 6
++                type: 1698
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 18
++                num_resource: 2
++                type: 1698
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 20
++                num_resource: 2
++                type: 1698
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 5
++                num_resource: 35
++                type: 1802
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 44
++                num_resource: 35
++                type: 1802
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 44
++                num_resource: 35
++                type: 1802
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 168
++                num_resource: 8
++                type: 1802
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 13
++                num_resource: 512
++                type: 1805
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 525
++                num_resource: 256
++                type: 1805
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 525
++                num_resource: 256
++                type: 1805
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 781
++                num_resource: 128
++                type: 1805
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 909
++                num_resource: 626
++                type: 1805
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 1024
++                type: 1807
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 4096
++                num_resource: 29
++                type: 1808
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 4608
++                num_resource: 99
++                type: 1809
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 5120
++                num_resource: 24
++                type: 1810
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 5632
++                num_resource: 51
++                type: 1811
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 6144
++                num_resource: 51
++                type: 1812
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 6656
++                num_resource: 51
++                type: 1813
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 8192
++                num_resource: 32
++                type: 1814
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 8704
++                num_resource: 32
++                type: 1815
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 9216
++                num_resource: 32
++                type: 1816
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 9728
++                num_resource: 22
++                type: 1817
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 10240
++                num_resource: 22
++                type: 1818
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 10752
++                num_resource: 22
++                type: 1819
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 11264
++                num_resource: 28
++                type: 1820
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 11776
++                num_resource: 28
++                type: 1821
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 12288
++                num_resource: 28
++                type: 1822
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 1
++                type: 1923
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 10
++                type: 1936
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 10
++                num_resource: 3
++                type: 1936
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 10
++                num_resource: 3
++                type: 1936
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 13
++                num_resource: 3
++                type: 1936
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 16
++                num_resource: 3
++                type: 1936
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 19
++                num_resource: 64
++                type: 1937
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 19
++                num_resource: 64
++                type: 1937
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 83
++                num_resource: 8
++                type: 1938
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 91
++                num_resource: 8
++                type: 1939
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 99
++                num_resource: 10
++                type: 1942
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 109
++                num_resource: 3
++                type: 1942
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 109
++                num_resource: 3
++                type: 1942
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 112
++                num_resource: 3
++                type: 1942
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 115
++                num_resource: 3
++                type: 1942
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 118
++                num_resource: 16
++                type: 1943
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 118
++                num_resource: 16
++                type: 1943
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 134
++                num_resource: 8
++                type: 1944
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 134
++                num_resource: 8
++                type: 1945
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 142
++                num_resource: 8
++                type: 1946
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 142
++                num_resource: 8
++                type: 1947
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 10
++                type: 1955
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 10
++                num_resource: 3
++                type: 1955
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 10
++                num_resource: 3
++                type: 1955
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 13
++                num_resource: 3
++                type: 1955
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 16
++                num_resource: 3
++                type: 1955
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 19
++                num_resource: 8
++                type: 1956
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 19
++                num_resource: 8
++                type: 1956
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 27
++                num_resource: 1
++                type: 1957
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 28
++                num_resource: 1
++                type: 1958
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 10
++                type: 1961
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 10
++                num_resource: 3
++                type: 1961
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 10
++                num_resource: 3
++                type: 1961
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 13
++                num_resource: 3
++                type: 1961
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 16
++                num_resource: 3
++                type: 1961
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 10
++                type: 1962
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 10
++                num_resource: 3
++                type: 1962
++                host_id: 35
++                reserved: 0
++        -
++                start_resource: 10
++                num_resource: 3
++                type: 1962
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 13
++                num_resource: 3
++                type: 1962
++                host_id: 30
++                reserved: 0
++        -
++                start_resource: 16
++                num_resource: 3
++                type: 1962
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 19
++                num_resource: 1
++                type: 1963
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 19
++                num_resource: 1
++                type: 1963
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 19
++                num_resource: 16
++                type: 1964
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 19
++                num_resource: 16
++                type: 1964
++                host_id: 36
++                reserved: 0
++        -
++                start_resource: 20
++                num_resource: 1
++                type: 1965
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 35
++                num_resource: 8
++                type: 1966
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 21
++                num_resource: 1
++                type: 1967
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 35
++                num_resource: 8
++                type: 1968
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 22
++                num_resource: 1
++                type: 1969
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 43
++                num_resource: 8
++                type: 1970
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 23
++                num_resource: 1
++                type: 1971
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 43
++                num_resource: 8
++                type: 1972
++                host_id: 12
++                reserved: 0
++        -
++                start_resource: 0
++                num_resource: 1
++                type: 2112
++                host_id: 128
++                reserved: 0
++        -
++                start_resource: 2
++                num_resource: 2
++                type: 2122
++                host_id: 12
++                reserved: 0
+diff --git a/board/iesy/am62xx_eva_mi/sec-cfg.yaml b/board/iesy/am62xx_eva_mi/sec-cfg.yaml
+new file mode 100644
+index 0000000000..bd5ed418e8
+--- /dev/null
++++ b/board/iesy/am62xx_eva_mi/sec-cfg.yaml
+@@ -0,0 +1,379 @@
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (C) 2022 Texas Instruments Incorporated - https://www.ti.com/
++#
++# Security management configuration for AM62
++#
++
++---
++
++sec-cfg:
++    rev:
++        boardcfg_abi_maj : 0x0
++        boardcfg_abi_min : 0x1
++    processor_acl_list:
++        subhdr:
++            magic: 0xF1EA
++            size: 164
++        proc_acl_entries:
++            - #1
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #2
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #3
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #4
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #5
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #6
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #7
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #8
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #9
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #10
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #11
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #12
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #13
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #14
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #15
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #16
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #17
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #18
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #19
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #20
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #21
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #22
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #23
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #24
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #25
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #26
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #27
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #28
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #29
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #30
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #31
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++            - #32
++                processor_id: 0
++                proc_access_master: 0
++                proc_access_secondary: [0, 0, 0]
++    host_hierarchy:
++        subhdr:
++            magic: 0x8D27
++            size: 68
++        host_hierarchy_entries:
++            - #1
++                host_id: 0
++                supervisor_host_id: 0
++            - #2
++                host_id: 0
++                supervisor_host_id: 0
++            - #3
++                host_id: 0
++                supervisor_host_id: 0
++            - #4
++                host_id: 0
++                supervisor_host_id: 0
++            - #5
++                host_id: 0
++                supervisor_host_id: 0
++            - #6
++                host_id: 0
++                supervisor_host_id: 0
++            - #7
++                host_id: 0
++                supervisor_host_id: 0
++            - #8
++                host_id: 0
++                supervisor_host_id: 0
++            - #9
++                host_id: 0
++                supervisor_host_id: 0
++            - #10
++                host_id: 0
++                supervisor_host_id: 0
++            - #11
++                host_id: 0
++                supervisor_host_id: 0
++            - #12
++                host_id: 0
++                supervisor_host_id: 0
++            - #13
++                host_id: 0
++                supervisor_host_id: 0
++            - #14
++                host_id: 0
++                supervisor_host_id: 0
++            - #15
++                host_id: 0
++                supervisor_host_id: 0
++            - #16
++                host_id: 0
++                supervisor_host_id: 0
++            - #17
++                host_id: 0
++                supervisor_host_id: 0
++            - #18
++                host_id: 0
++                supervisor_host_id: 0
++            - #19
++                host_id: 0
++                supervisor_host_id: 0
++            - #20
++                host_id: 0
++                supervisor_host_id: 0
++            - #21
++                host_id: 0
++                supervisor_host_id: 0
++            - #22
++                host_id: 0
++                supervisor_host_id: 0
++            - #23
++                host_id: 0
++                supervisor_host_id: 0
++            - #24
++                host_id: 0
++                supervisor_host_id: 0
++            - #25
++                host_id: 0
++                supervisor_host_id: 0
++            - #26
++                host_id: 0
++                supervisor_host_id: 0
++            - #27
++                host_id: 0
++                supervisor_host_id: 0
++            - #28
++                host_id: 0
++                supervisor_host_id: 0
++            - #29
++                host_id: 0
++                supervisor_host_id: 0
++            - #30
++                host_id: 0
++                supervisor_host_id: 0
++            - #31
++                host_id: 0
++                supervisor_host_id: 0
++            - #32
++                host_id: 0
++                supervisor_host_id: 0
++    otp_config:
++        subhdr:
++            magic: 0x4081
++            size: 69
++        write_host_id : 0
++        otp_entry:
++            - #1
++                host_id: 0
++                host_perms: 0
++            - #2
++                host_id: 0
++                host_perms: 0
++            - #3
++                host_id: 0
++                host_perms: 0
++            - #4
++                host_id: 0
++                host_perms: 0
++            - #5
++                host_id: 0
++                host_perms: 0
++            - #6
++                host_id: 0
++                host_perms: 0
++            - #7
++                host_id: 0
++                host_perms: 0
++            - #8
++                host_id: 0
++                host_perms: 0
++            - #9
++                host_id: 0
++                host_perms: 0
++            - #10
++                host_id: 0
++                host_perms: 0
++            - #11
++                host_id: 0
++                host_perms: 0
++            - #12
++                host_id: 0
++                host_perms: 0
++            - #13
++                host_id: 0
++                host_perms: 0
++            - #14
++                host_id: 0
++                host_perms: 0
++            - #15
++                host_id: 0
++                host_perms: 0
++            - #16
++                host_id: 0
++                host_perms: 0
++            - #17
++                host_id: 0
++                host_perms: 0
++            - #18
++                host_id: 0
++                host_perms: 0
++            - #19
++                host_id: 0
++                host_perms: 0
++            - #20
++                host_id: 0
++                host_perms: 0
++            - #21
++                host_id: 0
++                host_perms: 0
++            - #22
++                host_id: 0
++                host_perms: 0
++            - #23
++                host_id: 0
++                host_perms: 0
++            - #24
++                host_id: 0
++                host_perms: 0
++            - #25
++                host_id: 0
++                host_perms: 0
++            - #26
++                host_id: 0
++                host_perms: 0
++            - #27
++                host_id: 0
++                host_perms: 0
++            - #28
++                host_id: 0
++                host_perms: 0
++            - #29
++                host_id: 0
++                host_perms: 0
++            - #30
++                host_id: 0
++                host_perms: 0
++            - #31
++                host_id: 0
++                host_perms: 0
++            - #32
++                host_id: 0
++                host_perms: 0
++    dkek_config:
++        subhdr:
++            magic: 0x5170
++            size: 12
++        allowed_hosts: [128, 0, 0, 0]
++        allow_dkek_export_tisci : 0x5A
++        rsvd: [0, 0, 0]
++    sa2ul_cfg:
++        subhdr:
++            magic: 0x23BE
++            size : 0
++        auth_resource_owner: 0
++        enable_saul_psil_global_config_writes: 0x5A
++        rsvd: [0, 0]
++    sec_dbg_config:
++        subhdr:
++            magic: 0x42AF
++            size: 16
++        allow_jtag_unlock : 0x5A
++        allow_wildcard_unlock : 0x5A
++        allowed_debug_level_rsvd: 0
++        rsvd: 0
++        min_cert_rev : 0x0
++        jtag_unlock_hosts: [0, 0, 0, 0]
++    sec_handover_cfg:
++        subhdr:
++            magic: 0x608F
++            size: 10
++        handover_msg_sender : 0
++        handover_to_host_id : 0
++        rsvd: [0, 0, 0, 0]
+diff --git a/board/iesy/common/Makefile b/board/iesy/common/Makefile
+new file mode 100644
+index 0000000000..387d718861
+--- /dev/null
++++ b/board/iesy/common/Makefile
+@@ -0,0 +1,4 @@
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (C) 2015-2016 Texas Instruments Incorporated - http://www.ti.com/
++
++obj-${CONFIG_ARCH_K3} += k3-ddr-init.o
+diff --git a/board/iesy/common/board_detect.c b/board/iesy/common/board_detect.c
+new file mode 100644
+index 0000000000..17fe8f8069
+--- /dev/null
++++ b/board/iesy/common/board_detect.c
+@@ -0,0 +1,826 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Library to support early TI EVM EEPROM handling
++ *
++ * Copyright (C) 2015-2016 Texas Instruments Incorporated - http://www.ti.com/
++ *	Lokesh Vutla
++ *	Steve Kipisz
++ */
++
++#include <common.h>
++#include <eeprom.h>
++#include <log.h>
++#include <net.h>
++#include <asm/arch/hardware.h>
++#include <asm/omap_common.h>
++#include <dm/uclass.h>
++#include <env.h>
++#include <i2c.h>
++#include <mmc.h>
++#include <errno.h>
++#include <malloc.h>
++
++#include "board_detect.h"
++
++#if !CONFIG_IS_ENABLED(DM_I2C)
++/**
++ * ti_i2c_eeprom_init - Initialize an i2c bus and probe for a device
++ * @i2c_bus: i2c bus number to initialize
++ * @dev_addr: Device address to probe for
++ *
++ * Return: 0 on success or corresponding error on failure.
++ */
++static int __maybe_unused ti_i2c_eeprom_init(int i2c_bus, int dev_addr)
++{
++	int rc;
++
++	if (i2c_bus >= 0) {
++		rc = i2c_set_bus_num(i2c_bus);
++		if (rc)
++			return rc;
++	}
++
++	return i2c_probe(dev_addr);
++}
++
++/**
++ * ti_i2c_eeprom_read - Read data from an EEPROM
++ * @dev_addr: The device address of the EEPROM
++ * @offset: Offset to start reading in the EEPROM
++ * @ep: Pointer to a buffer to read into
++ * @epsize: Size of buffer
++ *
++ * Return: 0 on success or corresponding result of i2c_read
++ */
++static int __maybe_unused ti_i2c_eeprom_read(int dev_addr, int offset,
++					     uchar *ep, int epsize)
++{
++	return i2c_read(dev_addr, offset, 2, ep, epsize);
++}
++#endif
++
++/**
++ * ti_eeprom_string_cleanup() - Handle eeprom programming errors
++ * @s:	eeprom string (should be NULL terminated)
++ *
++ * Some Board manufacturers do not add a NULL termination at the
++ * end of string, instead some binary information is kludged in, hence
++ * convert the string to just printable characters of ASCII chart.
++ */
++static void __maybe_unused ti_eeprom_string_cleanup(char *s)
++{
++	int i, l;
++
++	l = strlen(s);
++	for (i = 0; i < l; i++, s++)
++		if (*s < ' ' || *s > '~') {
++			*s = 0;
++			break;
++		}
++}
++
++__weak void gpi2c_init(void)
++{
++}
++
++static int __maybe_unused ti_i2c_eeprom_get(int bus_addr, int dev_addr,
++					    u32 header, u32 size, uint8_t *ep)
++{
++	int rc;
++	uint8_t offset_test;
++	bool one_byte_addressing = true;
++
++#if CONFIG_IS_ENABLED(DM_I2C)
++	struct udevice *dev;
++	struct udevice *bus;
++
++	rc = uclass_get_device_by_seq(UCLASS_I2C, bus_addr, &bus);
++	if (rc)
++		return rc;
++	rc = dm_i2c_probe(bus, dev_addr, 0, &dev);
++	if (rc)
++		return rc;
++
++	/*
++	 * Read the header first then only read the other contents.
++	 */
++	rc = i2c_set_chip_offset_len(dev, 1);
++	if (rc)
++		return rc;
++
++	/*
++	 * Skip checking result here since this could be a valid i2c read fail
++	 * on some boards that use 2 byte addressing.
++	 * We must allow for fall through to check the data if 2 byte
++	 * addressing works
++	 */
++	(void)dm_i2c_read(dev, 0, ep, size);
++
++	if (*((u32 *)ep) != header)
++		one_byte_addressing = false;
++
++	/*
++	 * Handle case of bad 2 byte eeproms that responds to 1 byte addressing
++	 * but gets stuck in const addressing when read requests are performed
++	 * on offsets. We perform an offset test to make sure it is not a 2 byte
++	 * eeprom that works with 1 byte addressing but just without an offset
++	 */
++
++	rc = dm_i2c_read(dev, 0x1, &offset_test, sizeof(offset_test));
++
++	if (offset_test != ((header >> 8) & 0xFF))
++		one_byte_addressing = false;
++
++	/* Corrupted data??? */
++	if (!one_byte_addressing) {
++		/*
++		 * read the eeprom header using i2c again, but use only a
++		 * 2 byte address (some newer boards need this..)
++		 */
++		rc = i2c_set_chip_offset_len(dev, 2);
++		if (rc)
++			return rc;
++
++		rc = dm_i2c_read(dev, 0, ep, size);
++		if (rc)
++			return rc;
++	}
++	if (*((u32 *)ep) != header)
++		return -1;
++#else
++	u32 byte;
++
++	gpi2c_init();
++	rc = ti_i2c_eeprom_init(bus_addr, dev_addr);
++	if (rc)
++		return rc;
++
++	/*
++	 * Read the header first then only read the other contents.
++	 */
++	byte = 1;
++
++	/*
++	 * Skip checking result here since this could be a valid i2c read fail
++	 * on some boards that use 2 byte addressing.
++	 * We must allow for fall through to check the data if 2 byte
++	 * addressing works
++	 */
++	(void)i2c_read(dev_addr, 0x0, byte, ep, size);
++
++	if (*((u32 *)ep) != header)
++		one_byte_addressing = false;
++
++	/*
++	 * Handle case of bad 2 byte eeproms that responds to 1 byte addressing
++	 * but gets stuck in const addressing when read requests are performed
++	 * on offsets. We perform an offset test to make sure it is not a 2 byte
++	 * eeprom that works with 1 byte addressing but just without an offset
++	 */
++
++	rc = i2c_read(dev_addr, 0x1, byte, &offset_test, sizeof(offset_test));
++
++	if (*((u32 *)ep) != (header & 0xFF))
++		one_byte_addressing = false;
++
++	/* Corrupted data??? */
++	if (!one_byte_addressing) {
++		/*
++		 * read the eeprom header using i2c again, but use only a
++		 * 2 byte address (some newer boards need this..)
++		 */
++		byte = 2;
++		rc = i2c_read(dev_addr, 0x0, byte, ep, size);
++		if (rc)
++			return rc;
++	}
++	if (*((u32 *)ep) != header)
++		return -1;
++#endif
++	return 0;
++}
++
++int __maybe_unused ti_emmc_boardid_get(void)
++{
++	int rc;
++	struct udevice *dev;
++	struct mmc *mmc;
++	struct ti_common_eeprom *ep;
++	struct ti_am_eeprom brdid;
++	struct blk_desc *bdesc;
++	uchar *buffer;
++
++	ep = TI_EEPROM_DATA;
++	if (ep->header == TI_EEPROM_HEADER_MAGIC)
++		return 0;       /* EEPROM has already been read */
++
++	/* Initialize with a known bad marker for emmc fails.. */
++	ep->header = TI_DEAD_EEPROM_MAGIC;
++	ep->name[0] = 0x0;
++	ep->version[0] = 0x0;
++	ep->serial[0] = 0x0;
++	ep->config[0] = 0x0;
++
++	/* uclass object initialization */
++	rc = mmc_initialize(NULL);
++	if (rc)
++		return rc;
++
++	/* Set device to /dev/mmcblk1 */
++	rc = uclass_get_device(UCLASS_MMC, 1, &dev);
++	if (rc)
++		return rc;
++
++	/* Grab the mmc device */
++	mmc = mmc_get_mmc_dev(dev);
++	if (!mmc)
++		return -ENODEV;
++
++	/* mmc hardware initialization routine */
++	mmc_init(mmc);
++
++	/* Set partition to /dev/mmcblk1boot1 */
++	rc = mmc_switch_part(mmc, 2);
++	if (rc)
++		return rc;
++
++	buffer = malloc(mmc->read_bl_len);
++	if (!buffer)
++		return -ENOMEM;
++
++	bdesc = mmc_get_blk_desc(mmc);
++
++	/* blk_dread returns the number of blocks read*/
++	if (blk_dread(bdesc, 0L, 1, buffer) != 1) {
++		rc = -EIO;
++		goto cleanup;
++	}
++
++	memcpy(&brdid, buffer, sizeof(brdid));
++
++	/* Write out the ep struct values */
++	ep->header = brdid.header;
++	strlcpy(ep->name, brdid.name, TI_EEPROM_HDR_NAME_LEN + 1);
++	ti_eeprom_string_cleanup(ep->name);
++	strlcpy(ep->version, brdid.version, TI_EEPROM_HDR_REV_LEN + 1);
++	ti_eeprom_string_cleanup(ep->version);
++	strlcpy(ep->serial, brdid.serial, TI_EEPROM_HDR_SERIAL_LEN + 1);
++	ti_eeprom_string_cleanup(ep->serial);
++
++cleanup:
++	free(buffer);
++
++	return rc;
++}
++
++int __maybe_unused ti_i2c_eeprom_am_set(const char *name, const char *rev)
++{
++	struct ti_common_eeprom *ep;
++
++	if (!name || !rev)
++		return -1;
++
++	ep = TI_EEPROM_DATA;
++	if (ep->header == TI_EEPROM_HEADER_MAGIC)
++		goto already_set;
++
++	/* Set to 0 all fields */
++	memset(ep, 0, sizeof(*ep));
++	strncpy(ep->name, name, TI_EEPROM_HDR_NAME_LEN);
++	strncpy(ep->version, rev, TI_EEPROM_HDR_REV_LEN);
++	/* Some dummy serial number to identify the platform */
++	strncpy(ep->serial, "0000", TI_EEPROM_HDR_SERIAL_LEN);
++	/* Mark it with a valid header */
++	ep->header = TI_EEPROM_HEADER_MAGIC;
++
++already_set:
++	return 0;
++}
++
++int __maybe_unused ti_i2c_eeprom_am_get(int bus_addr, int dev_addr)
++{
++	int rc;
++	struct ti_am_eeprom am_ep;
++	struct ti_common_eeprom *ep;
++
++	ep = TI_EEPROM_DATA;
++#ifndef CONFIG_SPL_BUILD
++	if (ep->header == TI_EEPROM_HEADER_MAGIC)
++		return 0; /* EEPROM has already been read */
++#endif
++
++	/* Initialize with a known bad marker for i2c fails.. */
++	ep->header = TI_DEAD_EEPROM_MAGIC;
++	ep->name[0] = 0x0;
++	ep->version[0] = 0x0;
++	ep->serial[0] = 0x0;
++	ep->config[0] = 0x0;
++
++	rc = ti_i2c_eeprom_get(bus_addr, dev_addr, TI_EEPROM_HEADER_MAGIC,
++			       sizeof(am_ep), (uint8_t *)&am_ep);
++	if (rc)
++		return rc;
++
++	ep->header = am_ep.header;
++	strlcpy(ep->name, am_ep.name, TI_EEPROM_HDR_NAME_LEN + 1);
++	ti_eeprom_string_cleanup(ep->name);
++
++	/* BeagleBone Green '1' eeprom, board_rev: 0x1a 0x00 0x00 0x00 */
++	if (am_ep.version[0] == 0x1a && am_ep.version[1] == 0x00 &&
++	    am_ep.version[2] == 0x00 && am_ep.version[3] == 0x00)
++		strlcpy(ep->version, "BBG1", TI_EEPROM_HDR_REV_LEN + 1);
++	else
++		strlcpy(ep->version, am_ep.version, TI_EEPROM_HDR_REV_LEN + 1);
++	ti_eeprom_string_cleanup(ep->version);
++	strlcpy(ep->serial, am_ep.serial, TI_EEPROM_HDR_SERIAL_LEN + 1);
++	ti_eeprom_string_cleanup(ep->serial);
++	strlcpy(ep->config, am_ep.config, TI_EEPROM_HDR_CONFIG_LEN + 1);
++	ti_eeprom_string_cleanup(ep->config);
++
++	memcpy(ep->mac_addr, am_ep.mac_addr,
++	       TI_EEPROM_HDR_NO_OF_MAC_ADDR * TI_EEPROM_HDR_ETH_ALEN);
++
++	return 0;
++}
++
++int __maybe_unused ti_i2c_eeprom_dra7_get(int bus_addr, int dev_addr)
++{
++	int rc, offset = 0;
++	struct dra7_eeprom dra7_ep;
++	struct ti_common_eeprom *ep;
++
++	ep = TI_EEPROM_DATA;
++#ifndef CONFIG_SPL_BUILD
++	if (ep->header == DRA7_EEPROM_HEADER_MAGIC)
++		return 0; /* EEPROM has already been read */
++#endif
++
++	/* Initialize with a known bad marker for i2c fails.. */
++	ep->header = TI_DEAD_EEPROM_MAGIC;
++	ep->name[0] = 0x0;
++	ep->version[0] = 0x0;
++	ep->serial[0] = 0x0;
++	ep->config[0] = 0x0;
++	ep->emif1_size = 0;
++	ep->emif2_size = 0;
++
++	rc = ti_i2c_eeprom_get(bus_addr, dev_addr, DRA7_EEPROM_HEADER_MAGIC,
++			       sizeof(dra7_ep), (uint8_t *)&dra7_ep);
++	if (rc)
++		return rc;
++
++	ep->header = dra7_ep.header;
++	strlcpy(ep->name, dra7_ep.name, TI_EEPROM_HDR_NAME_LEN + 1);
++	ti_eeprom_string_cleanup(ep->name);
++
++	offset = dra7_ep.version_major - 1;
++
++	/* Rev F is skipped */
++	if (offset >= 5)
++		offset = offset + 1;
++	snprintf(ep->version, TI_EEPROM_HDR_REV_LEN + 1, "%c.%d",
++		 'A' + offset, dra7_ep.version_minor);
++	ti_eeprom_string_cleanup(ep->version);
++	ep->emif1_size = (u64)dra7_ep.emif1_size;
++	ep->emif2_size = (u64)dra7_ep.emif2_size;
++	strlcpy(ep->config, dra7_ep.config, TI_EEPROM_HDR_CONFIG_LEN + 1);
++	ti_eeprom_string_cleanup(ep->config);
++
++	return 0;
++}
++
++static int ti_i2c_eeprom_am6_parse_record(struct ti_am6_eeprom_record *record,
++					  struct ti_am6_eeprom *ep,
++					  char **mac_addr,
++					  u8 mac_addr_max_cnt,
++					  u8 *mac_addr_cnt)
++{
++	switch (record->header.id) {
++	case TI_AM6_EEPROM_RECORD_BOARD_INFO:
++		if (record->header.len != sizeof(record->data.board_info))
++			return -EINVAL;
++
++		if (!ep)
++			break;
++
++		/* Populate (and clean, if needed) the board name */
++		strlcpy(ep->name, record->data.board_info.name,
++			sizeof(ep->name));
++		ti_eeprom_string_cleanup(ep->name);
++
++		/* Populate selected other fields from the board info record */
++		strlcpy(ep->version, record->data.board_info.version,
++			sizeof(ep->version));
++		strlcpy(ep->software_revision,
++			record->data.board_info.software_revision,
++			sizeof(ep->software_revision));
++		strlcpy(ep->serial, record->data.board_info.serial,
++			sizeof(ep->serial));
++		break;
++	case TI_AM6_EEPROM_RECORD_MAC_INFO:
++		if (record->header.len != sizeof(record->data.mac_info))
++			return -EINVAL;
++
++		if (!mac_addr || !mac_addr_max_cnt)
++			break;
++
++		*mac_addr_cnt = ((record->data.mac_info.mac_control &
++				 TI_AM6_EEPROM_MAC_ADDR_COUNT_MASK) >>
++				 TI_AM6_EEPROM_MAC_ADDR_COUNT_SHIFT) + 1;
++
++		/*
++		 * The EEPROM can (but may not) hold a very large amount
++		 * of MAC addresses, by far exceeding what we want/can store
++		 * in the common memory array, so only grab what we can fit.
++		 * Note that a value of 0 means 1 MAC address, and so on.
++		 */
++		*mac_addr_cnt = min(*mac_addr_cnt, mac_addr_max_cnt);
++
++		memcpy(mac_addr, record->data.mac_info.mac_addr,
++		       *mac_addr_cnt * TI_EEPROM_HDR_ETH_ALEN);
++		break;
++	case 0x00:
++		/* Illegal value... Fall through... */
++	case 0xFF:
++		/* Illegal value... Something went horribly wrong... */
++		return -EINVAL;
++	default:
++		pr_warn("%s: Ignoring record id %u\n", __func__,
++			record->header.id);
++	}
++
++	return 0;
++}
++
++int __maybe_unused ti_i2c_eeprom_am6_get(int bus_addr, int dev_addr,
++					 struct ti_am6_eeprom *ep,
++					 char **mac_addr,
++					 u8 mac_addr_max_cnt,
++					 u8 *mac_addr_cnt)
++{
++	struct udevice *dev;
++	struct udevice *bus;
++	unsigned int eeprom_addr;
++	struct ti_am6_eeprom_record_board_id board_id;
++	struct ti_am6_eeprom_record record;
++	int rc;
++	int consecutive_bad_records = 0;
++
++	/* Initialize with a known bad marker for i2c fails.. */
++	memset(ep, 0, sizeof(*ep));
++	ep->header = TI_DEAD_EEPROM_MAGIC;
++
++	/* Read the board ID record which is always the first EEPROM record */
++	rc = ti_i2c_eeprom_get(bus_addr, dev_addr, TI_EEPROM_HEADER_MAGIC,
++			       sizeof(board_id), (uint8_t *)&board_id);
++	if (rc)
++		return rc;
++
++	if (board_id.header.id != TI_AM6_EEPROM_RECORD_BOARD_ID) {
++		pr_err("%s: Invalid board ID record!\n", __func__);
++		return -EINVAL;
++	}
++
++	/* Establish DM handle to board config EEPROM */
++	rc = uclass_get_device_by_seq(UCLASS_I2C, bus_addr, &bus);
++	if (rc)
++		return rc;
++	rc = i2c_get_chip(bus, dev_addr, 1, &dev);
++	if (rc)
++		return rc;
++
++	ep->header = TI_EEPROM_HEADER_MAGIC;
++
++	/* Ready to parse TLV structure. Initialize variables... */
++	*mac_addr_cnt = 0;
++
++	/*
++	 * After the all-encompassing board ID record all other records follow
++	 * a TLV-type scheme. Point to the first such record and then start
++	 * parsing those one by one.
++	 */
++	eeprom_addr = sizeof(board_id);
++
++	while (consecutive_bad_records < 10) {
++		rc = dm_i2c_read(dev, eeprom_addr, (uint8_t *)&record.header,
++				 sizeof(record.header));
++		if (rc)
++			return rc;
++
++		/*
++		 * Check for end of list marker. If we reached it don't go
++		 * any further and stop parsing right here.
++		 */
++		if (record.header.id == TI_AM6_EEPROM_RECORD_END_LIST)
++			break;
++
++		eeprom_addr += sizeof(record.header);
++
++		debug("%s: dev_addr=0x%02x header.id=%u header.len=%u\n",
++		      __func__, dev_addr, record.header.id,
++		      record.header.len);
++
++		/* Read record into memory if it fits */
++		if (record.header.len <= sizeof(record.data)) {
++			rc = dm_i2c_read(dev, eeprom_addr,
++					 (uint8_t *)&record.data,
++					 record.header.len);
++			if (rc)
++				return rc;
++
++			/* Process record */
++			rc = ti_i2c_eeprom_am6_parse_record(&record, ep,
++							    mac_addr,
++							    mac_addr_max_cnt,
++							    mac_addr_cnt);
++			if (rc) {
++				pr_err("%s: EEPROM parsing error!\n", __func__);
++				return rc;
++			}
++			consecutive_bad_records = 0;
++		} else {
++			/*
++			 * We may get here in case of larger records which
++			 * are not yet understood.
++			 */
++			pr_err("%s: Ignoring record id %u\n", __func__,
++			       record.header.id);
++			consecutive_bad_records++;
++		}
++
++		eeprom_addr += record.header.len;
++	}
++
++	return 0;
++}
++
++int __maybe_unused ti_i2c_eeprom_am6_get_base(int bus_addr, int dev_addr)
++{
++	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
++	int ret;
++
++	/*
++	 * Always execute EEPROM read by not allowing to bypass it during the
++	 * first invocation of SPL which happens on the R5 core.
++	 */
++#if !(defined(CONFIG_SPL_BUILD) && defined(CONFIG_CPU_V7R))
++	if (ep->header == TI_EEPROM_HEADER_MAGIC) {
++		debug("%s: EEPROM has already been read\n", __func__);
++		return 0;
++	}
++#endif
++
++	ret = ti_i2c_eeprom_am6_get(bus_addr, dev_addr, ep,
++				    (char **)ep->mac_addr,
++				    AM6_EEPROM_HDR_NO_OF_MAC_ADDR,
++				    &ep->mac_addr_cnt);
++	return ret;
++}
++
++bool __maybe_unused board_ti_k3_is(char *name_tag)
++{
++	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
++
++	if (ep->header == TI_DEAD_EEPROM_MAGIC)
++		return false;
++	return !strncmp(ep->name, name_tag, AM6_EEPROM_HDR_NAME_LEN);
++}
++
++bool __maybe_unused board_ti_is(char *name_tag)
++{
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++
++	if (ep->header == TI_DEAD_EEPROM_MAGIC)
++		return false;
++	return !strncmp(ep->name, name_tag, TI_EEPROM_HDR_NAME_LEN);
++}
++
++bool __maybe_unused board_ti_rev_is(char *rev_tag, int cmp_len)
++{
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++	int l;
++
++	if (ep->header == TI_DEAD_EEPROM_MAGIC)
++		return false;
++
++	l = cmp_len > TI_EEPROM_HDR_REV_LEN ? TI_EEPROM_HDR_REV_LEN : cmp_len;
++	return !strncmp(ep->version, rev_tag, l);
++}
++
++char * __maybe_unused board_ti_get_rev(void)
++{
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++
++	/* if ep->header == TI_DEAD_EEPROM_MAGIC, this is empty already */
++	return ep->version;
++}
++
++char * __maybe_unused board_ti_get_config(void)
++{
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++
++	/* if ep->header == TI_DEAD_EEPROM_MAGIC, this is empty already */
++	return ep->config;
++}
++
++char * __maybe_unused board_ti_get_name(void)
++{
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++
++	/* if ep->header == TI_DEAD_EEPROM_MAGIC, this is empty already */
++	return ep->name;
++}
++
++void __maybe_unused
++board_ti_get_eth_mac_addr(int index,
++			  u8 mac_addr[TI_EEPROM_HDR_ETH_ALEN])
++{
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++
++	if (ep->header == TI_DEAD_EEPROM_MAGIC)
++		goto fail;
++
++	if (index < 0 || index >= TI_EEPROM_HDR_NO_OF_MAC_ADDR)
++		goto fail;
++
++	memcpy(mac_addr, ep->mac_addr[index], TI_EEPROM_HDR_ETH_ALEN);
++	return;
++
++fail:
++	memset(mac_addr, 0, TI_EEPROM_HDR_ETH_ALEN);
++}
++
++void __maybe_unused
++board_ti_am6_get_eth_mac_addr(int index,
++			      u8 mac_addr[TI_EEPROM_HDR_ETH_ALEN])
++{
++	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
++
++	if (ep->header == TI_DEAD_EEPROM_MAGIC)
++		goto fail;
++
++	if (index < 0 || index >= ep->mac_addr_cnt)
++		goto fail;
++
++	memcpy(mac_addr, ep->mac_addr[index], TI_EEPROM_HDR_ETH_ALEN);
++	return;
++
++fail:
++	memset(mac_addr, 0, TI_EEPROM_HDR_ETH_ALEN);
++}
++
++u64 __maybe_unused board_ti_get_emif1_size(void)
++{
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++
++	if (ep->header != DRA7_EEPROM_HEADER_MAGIC)
++		return 0;
++
++	return ep->emif1_size;
++}
++
++u64 __maybe_unused board_ti_get_emif2_size(void)
++{
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++
++	if (ep->header != DRA7_EEPROM_HEADER_MAGIC)
++		return 0;
++
++	return ep->emif2_size;
++}
++
++void __maybe_unused set_board_info_env(char *name)
++{
++	char *unknown = "unknown";
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++
++	if (name)
++		env_set("board_name", name);
++	else if (strlen(ep->name) != 0)
++		env_set("board_name", ep->name);
++	else
++		env_set("board_name", unknown);
++
++	if (strlen(ep->version) != 0)
++		env_set("board_rev", ep->version);
++	else
++		env_set("board_rev", unknown);
++
++	if (strlen(ep->serial) != 0)
++		env_set("board_serial", ep->serial);
++	else
++		env_set("board_serial", unknown);
++}
++
++void __maybe_unused set_board_info_env_am6(char *name)
++{
++	char *unknown = "unknown";
++	struct ti_am6_eeprom *ep = TI_AM6_EEPROM_DATA;
++
++	if (name)
++		env_set("board_name", name);
++	else if (strlen(ep->name) != 0)
++		env_set("board_name", ep->name);
++	else
++		env_set("board_name", unknown);
++
++	if (strlen(ep->version) != 0)
++		env_set("board_rev", ep->version);
++	else
++		env_set("board_rev", unknown);
++
++	if (strlen(ep->software_revision) != 0)
++		env_set("board_software_revision", ep->software_revision);
++	else
++		env_set("board_software_revision", unknown);
++
++	if (strlen(ep->serial) != 0)
++		env_set("board_serial", ep->serial);
++	else
++		env_set("board_serial", unknown);
++}
++
++static u64 mac_to_u64(u8 mac[6])
++{
++	int i;
++	u64 addr = 0;
++
++	for (i = 0; i < 6; i++) {
++		addr <<= 8;
++		addr |= mac[i];
++	}
++
++	return addr;
++}
++
++static void u64_to_mac(u64 addr, u8 mac[6])
++{
++	mac[5] = addr;
++	mac[4] = addr >> 8;
++	mac[3] = addr >> 16;
++	mac[2] = addr >> 24;
++	mac[1] = addr >> 32;
++	mac[0] = addr >> 40;
++}
++
++void board_ti_set_ethaddr(int index)
++{
++	uint8_t mac_addr[6];
++	int i;
++	u64 mac1, mac2;
++	u8 mac_addr1[6], mac_addr2[6];
++	int num_macs;
++	/*
++	 * Export any Ethernet MAC addresses from EEPROM.
++	 * The 2 MAC addresses in EEPROM define the address range.
++	 */
++	board_ti_get_eth_mac_addr(0, mac_addr1);
++	board_ti_get_eth_mac_addr(1, mac_addr2);
++
++	if (is_valid_ethaddr(mac_addr1) && is_valid_ethaddr(mac_addr2)) {
++		mac1 = mac_to_u64(mac_addr1);
++		mac2 = mac_to_u64(mac_addr2);
++
++		/* must contain an address range */
++		num_macs = mac2 - mac1 + 1;
++		if (num_macs <= 0)
++			return;
++
++		if (num_macs > 50) {
++			printf("%s: Too many MAC addresses: %d. Limiting to 50\n",
++			       __func__, num_macs);
++			num_macs = 50;
++		}
++
++		for (i = 0; i < num_macs; i++) {
++			u64_to_mac(mac1 + i, mac_addr);
++			if (is_valid_ethaddr(mac_addr)) {
++				eth_env_set_enetaddr_by_index("eth", i + index,
++							      mac_addr);
++			}
++		}
++	}
++}
++
++void board_ti_am6_set_ethaddr(int index, int count)
++{
++	u8 mac_addr[6];
++	int i;
++
++	for (i = 0; i < count; i++) {
++		board_ti_am6_get_eth_mac_addr(i, mac_addr);
++		if (is_valid_ethaddr(mac_addr))
++			eth_env_set_enetaddr_by_index("eth", i + index,
++						      mac_addr);
++	}
++}
++
++bool __maybe_unused board_ti_was_eeprom_read(void)
++{
++	struct ti_common_eeprom *ep = TI_EEPROM_DATA;
++
++	if (ep->header == TI_EEPROM_HEADER_MAGIC)
++		return true;
++	else
++		return false;
++}
+diff --git a/board/iesy/common/board_detect.h b/board/iesy/common/board_detect.h
+new file mode 100644
+index 0000000000..de7cb52dfc
+--- /dev/null
++++ b/board/iesy/common/board_detect.h
+@@ -0,0 +1,471 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Library to support early TI EVM EEPROM handling
++ *
++ * Copyright (C) 2015-2016 Texas Instruments Incorporated - http://www.ti.com
++ */
++
++#ifndef __BOARD_DETECT_H
++#define __BOARD_DETECT_H
++
++/* TI EEPROM MAGIC Header identifier */
++#include <linux/bitops.h>
++#define TI_EEPROM_HEADER_MAGIC	0xEE3355AA
++#define TI_DEAD_EEPROM_MAGIC	0xADEAD12C
++
++#define TI_EEPROM_HDR_NAME_LEN		8
++#define TI_EEPROM_HDR_REV_LEN		4
++#define TI_EEPROM_HDR_SERIAL_LEN	12
++#define TI_EEPROM_HDR_CONFIG_LEN	32
++#define TI_EEPROM_HDR_NO_OF_MAC_ADDR	3
++#define TI_EEPROM_HDR_ETH_ALEN		6
++
++/**
++ * struct ti_am_eeprom - This structure holds data read in from the
++ *                     AM335x, AM437x, AM57xx TI EVM EEPROMs.
++ * @header: This holds the magic number
++ * @name: The name of the board
++ * @version: Board revision
++ * @serial: Board serial number
++ * @config: Reserved
++ * @mac_addr: Any MAC addresses written in the EEPROM
++ *
++ * The data is this structure is read from the EEPROM on the board.
++ * It is used for board detection which is based on name. It is used
++ * to configure specific TI boards. This allows booting of multiple
++ * TI boards with a single MLO and u-boot.
++ */
++struct ti_am_eeprom {
++	unsigned int header;
++	char name[TI_EEPROM_HDR_NAME_LEN];
++	char version[TI_EEPROM_HDR_REV_LEN];
++	char serial[TI_EEPROM_HDR_SERIAL_LEN];
++	char config[TI_EEPROM_HDR_CONFIG_LEN];
++	char mac_addr[TI_EEPROM_HDR_NO_OF_MAC_ADDR][TI_EEPROM_HDR_ETH_ALEN];
++} __attribute__ ((__packed__));
++
++/* AM6x TI EVM EEPROM Definitions */
++#define TI_AM6_EEPROM_RECORD_BOARD_ID		0x01
++#define TI_AM6_EEPROM_RECORD_BOARD_INFO		0x10
++#define TI_AM6_EEPROM_RECORD_DDR_INFO		0x11
++#define TI_AM6_EEPROM_RECORD_DDR_SPD		0x12
++#define TI_AM6_EEPROM_RECORD_MAC_INFO		0x13
++#define TI_AM6_EEPROM_RECORD_END_LIST		0xFE
++
++/*
++ * Common header for AM6x TI EVM EEPROM records. Used to encapsulate the config
++ * EEPROM in its entirety as well as for individual records contained within.
++ */
++struct ti_am6_eeprom_record_header {
++	u8 id;
++	u16 len;
++} __attribute__ ((__packed__));
++
++/* AM6x TI EVM EEPROM board ID structure */
++struct ti_am6_eeprom_record_board_id {
++	u32 magic_number;
++	struct ti_am6_eeprom_record_header header;
++} __attribute__ ((__packed__));
++
++/* AM6x TI EVM EEPROM board info structure */
++#define AM6_EEPROM_HDR_NAME_LEN			16
++#define AM6_EEPROM_HDR_VERSION_LEN		2
++#define AM6_EEPROM_HDR_PROC_NR_LEN		4
++#define AM6_EEPROM_HDR_VARIANT_LEN		2
++#define AM6_EEPROM_HDR_PCB_REV_LEN		2
++#define AM6_EEPROM_HDR_SCH_BOM_REV_LEN		2
++#define AM6_EEPROM_HDR_SW_REV_LEN		2
++#define AM6_EEPROM_HDR_VID_LEN			2
++#define AM6_EEPROM_HDR_BLD_WK_LEN		2
++#define AM6_EEPROM_HDR_BLD_YR_LEN		2
++#define AM6_EEPROM_HDR_4P_NR_LEN		6
++#define AM6_EEPROM_HDR_SERIAL_LEN		4
++
++struct ti_am6_eeprom_record_board_info {
++	char name[AM6_EEPROM_HDR_NAME_LEN];
++	char version[AM6_EEPROM_HDR_VERSION_LEN];
++	char proc_number[AM6_EEPROM_HDR_PROC_NR_LEN];
++	char variant[AM6_EEPROM_HDR_VARIANT_LEN];
++	char pcb_revision[AM6_EEPROM_HDR_PCB_REV_LEN];
++	char schematic_bom_revision[AM6_EEPROM_HDR_SCH_BOM_REV_LEN];
++	char software_revision[AM6_EEPROM_HDR_SW_REV_LEN];
++	char vendor_id[AM6_EEPROM_HDR_VID_LEN];
++	char build_week[AM6_EEPROM_HDR_BLD_WK_LEN];
++	char build_year[AM6_EEPROM_HDR_BLD_YR_LEN];
++	char board_4p_number[AM6_EEPROM_HDR_4P_NR_LEN];
++	char serial[AM6_EEPROM_HDR_SERIAL_LEN];
++} __attribute__ ((__packed__));
++
++/* Memory location to keep a copy of the AM6 board info record */
++#define TI_AM6_EEPROM_BD_INFO_DATA ((struct ti_am6_eeprom_record_board_info *) \
++					     TI_SRAM_SCRATCH_BOARD_EEPROM_START)
++
++/* AM6x TI EVM EEPROM DDR info structure */
++#define TI_AM6_EEPROM_DDR_CTRL_INSTANCE_MASK		GENMASK(1, 0)
++#define TI_AM6_EEPROM_DDR_CTRL_INSTANCE_SHIFT		0
++#define TI_AM6_EEPROM_DDR_CTRL_SPD_DATA_LOC_MASK	GENMASK(3, 2)
++#define TI_AM6_EEPROM_DDR_CTRL_SPD_DATA_LOC_NA		(0 << 2)
++#define TI_AM6_EEPROM_DDR_CTRL_SPD_DATA_LOC_BOARDID	(2 << 2)
++#define TI_AM6_EEPROM_DDR_CTRL_SPD_DATA_LOC_I2C51	(3 << 2)
++#define TI_AM6_EEPROM_DDR_CTRL_MEM_TYPE_MASK		GENMASK(5, 4)
++#define TI_AM6_EEPROM_DDR_CTRL_MEM_TYPE_DDR3		(0 << 4)
++#define TI_AM6_EEPROM_DDR_CTRL_MEM_TYPE_DDR4		(1 << 4)
++#define TI_AM6_EEPROM_DDR_CTRL_MEM_TYPE_LPDDR4		(2 << 4)
++#define TI_AM6_EEPROM_DDR_CTRL_IF_DATA_WIDTH_MASK	GENMASK(7, 6)
++#define TI_AM6_EEPROM_DDR_CTRL_IF_DATA_WIDTH_16		(0 << 6)
++#define TI_AM6_EEPROM_DDR_CTRL_IF_DATA_WIDTH_32		(1 << 6)
++#define TI_AM6_EEPROM_DDR_CTRL_IF_DATA_WIDTH_64		(2 << 6)
++#define TI_AM6_EEPROM_DDR_CTRL_DEV_DATA_WIDTH_MASK	GENMASK(9, 8)
++#define TI_AM6_EEPROM_DDR_CTRL_DEV_DATA_WIDTH_8		(0 << 8)
++#define TI_AM6_EEPROM_DDR_CTRL_DEV_DATA_WIDTH_16	(1 << 8)
++#define TI_AM6_EEPROM_DDR_CTRL_DEV_DATA_WIDTH_32	(2 << 8)
++#define TI_AM6_EEPROM_DDR_CTRL_RANKS_2			BIT(10)
++#define TI_AM6_EEPROM_DDR_CTRL_DENS_MASK		GENMASK(13, 11)
++#define TI_AM6_EEPROM_DDR_CTRL_DENS_1GB			(0 << 11)
++#define TI_AM6_EEPROM_DDR_CTRL_DENS_2GB			(1 << 11)
++#define TI_AM6_EEPROM_DDR_CTRL_DENS_4GB			(2 << 11)
++#define TI_AM6_EEPROM_DDR_CTRL_DENS_8GB			(3 << 11)
++#define TI_AM6_EEPROM_DDR_CTRL_DENS_12GB		(4 << 11)
++#define TI_AM6_EEPROM_DDR_CTRL_DENS_16GB		(5 << 11)
++#define TI_AM6_EEPROM_DDR_CTRL_DENS_24GB		(6 << 11)
++#define TI_AM6_EEPROM_DDR_CTRL_DENS_32GB		(7 << 11)
++#define TI_AM6_EEPROM_DDR_CTRL_ECC			BIT(14)
++
++struct ti_am6_eeprom_record_ddr_info {
++	u16 ddr_control;
++} __attribute__ ((__packed__));
++
++/* AM6x TI EVM EEPROM DDR SPD structure */
++#define TI_AM6_EEPROM_DDR_SPD_INSTANCE_MASK		GENMASK(1, 0)
++#define TI_AM6_EEPROM_DDR_SPD_INSTANCE_SHIFT		0
++#define TI_AM6_EEPROM_DDR_SPD_MEM_TYPE_MASK		GENMASK(4, 3)
++#define TI_AM6_EEPROM_DDR_SPD_MEM_TYPE_DDR3		(0 << 3)
++#define TI_AM6_EEPROM_DDR_SPD_MEM_TYPE_DDR4		(1 << 3)
++#define TI_AM6_EEPROM_DDR_SPD_MEM_TYPE_LPDDR4		(2 << 3)
++#define TI_AM6_EEPROM_DDR_SPD_DATA_LEN			512
++
++struct ti_am6_eeprom_record_ddr_spd {
++	u16 spd_control;
++	u8 data[TI_AM6_EEPROM_DDR_SPD_DATA_LEN];
++} __attribute__ ((__packed__));
++
++/* AM6x TI EVM EEPROM MAC info structure */
++#define TI_AM6_EEPROM_MAC_INFO_INSTANCE_MASK		GENMASK(2, 0)
++#define TI_AM6_EEPROM_MAC_INFO_INSTANCE_SHIFT		0
++#define TI_AM6_EEPROM_MAC_ADDR_COUNT_MASK		GENMASK(7, 3)
++#define TI_AM6_EEPROM_MAC_ADDR_COUNT_SHIFT		3
++#define TI_AM6_EEPROM_MAC_ADDR_MAX_COUNT		32
++
++struct ti_am6_eeprom_record_mac_info {
++	u16 mac_control;
++	u8 mac_addr[TI_AM6_EEPROM_MAC_ADDR_MAX_COUNT][TI_EEPROM_HDR_ETH_ALEN];
++} __attribute__ ((__packed__));
++
++struct ti_am6_eeprom_record {
++	struct ti_am6_eeprom_record_header header;
++	union {
++		struct ti_am6_eeprom_record_board_info board_info;
++		struct ti_am6_eeprom_record_ddr_info ddr_info;
++		struct ti_am6_eeprom_record_ddr_spd ddr_spd;
++		struct ti_am6_eeprom_record_mac_info mac_info;
++	} data;
++} __attribute__ ((__packed__));
++
++/* DRA7 EEPROM MAGIC Header identifier */
++#define DRA7_EEPROM_HEADER_MAGIC	0xAA5533EE
++#define DRA7_EEPROM_HDR_NAME_LEN	16
++#define DRA7_EEPROM_HDR_CONFIG_LEN	4
++
++/**
++ * struct dra7_eeprom - This structure holds data read in from the DRA7 EVM
++ *			EEPROMs.
++ * @header: This holds the magic number
++ * @name: The name of the board
++ * @version_major: Board major version
++ * @version_minor: Board minor version
++ * @config: Board specific config options
++ * @emif1_size: Size of DDR attached to EMIF1
++ * @emif2_size: Size of DDR attached to EMIF2
++ *
++ * The data is this structure is read from the EEPROM on the board.
++ * It is used for board detection which is based on name. It is used
++ * to configure specific DRA7 boards. This allows booting of multiple
++ * DRA7 boards with a single MLO and u-boot.
++ */
++struct dra7_eeprom {
++	u32 header;
++	char name[DRA7_EEPROM_HDR_NAME_LEN];
++	u16 version_major;
++	u16 version_minor;
++	char config[DRA7_EEPROM_HDR_CONFIG_LEN];
++	u32 emif1_size;
++	u32 emif2_size;
++} __attribute__ ((__packed__));
++
++/**
++ * struct ti_common_eeprom - Null terminated, usable EEPROM contents.
++ * header:	Magic number
++ * @name:	NULL terminated name
++ * @version:	NULL terminated version
++ * @serial:	NULL terminated serial number
++ * @config:	NULL terminated Board specific config options
++ * @mac_addr:	MAC addresses
++ * @emif1_size:	Size of the ddr available on emif1
++ * @emif2_size:	Size of the ddr available on emif2
++ */
++struct ti_common_eeprom {
++	u32 header;
++	char name[TI_EEPROM_HDR_NAME_LEN + 1];
++	char version[TI_EEPROM_HDR_REV_LEN + 1];
++	char serial[TI_EEPROM_HDR_SERIAL_LEN + 1];
++	char config[TI_EEPROM_HDR_CONFIG_LEN + 1];
++	char mac_addr[TI_EEPROM_HDR_NO_OF_MAC_ADDR][TI_EEPROM_HDR_ETH_ALEN];
++	u64 emif1_size;
++	u64 emif2_size;
++};
++
++#define TI_EEPROM_DATA ((struct ti_common_eeprom *)\
++				TI_SRAM_SCRATCH_BOARD_EEPROM_START)
++
++/*
++ * Maximum number of Ethernet MAC addresses extracted from the AM6x on-board
++ * EEPROM during the initial probe and carried forward in SRAM.
++ */
++#define AM6_EEPROM_HDR_NO_OF_MAC_ADDR	8
++
++/**
++ * struct ti_am6_eeprom - Null terminated, usable EEPROM contents, as extracted
++ *	from the AM6 on-board EEPROM. Note that we only carry a subset of data
++ *	at this time to be considerate about memory consumption.
++ * @header:		Magic number for data validity indication
++ * @name:		NULL terminated name
++ * @version:		NULL terminated version
++ * @software_revision:	NULL terminated software revision
++ * @serial:		Board serial number
++ * @mac_addr_cnt:	Number of MAC addresses stored in this object
++ * @mac_addr:		MAC addresses
++ */
++struct ti_am6_eeprom {
++	u32 header;
++	char name[AM6_EEPROM_HDR_NAME_LEN + 1];
++	char version[AM6_EEPROM_HDR_VERSION_LEN + 1];
++	char software_revision[AM6_EEPROM_HDR_SW_REV_LEN + 1];
++	char serial[AM6_EEPROM_HDR_SERIAL_LEN + 1];
++	u8 mac_addr_cnt;
++	char mac_addr[AM6_EEPROM_HDR_NO_OF_MAC_ADDR][TI_EEPROM_HDR_ETH_ALEN];
++};
++
++#define TI_AM6_EEPROM_DATA ((struct ti_am6_eeprom *) \
++				TI_SRAM_SCRATCH_BOARD_EEPROM_START)
++
++/**
++ * ti_i2c_eeprom_am_get() - Consolidated eeprom data collection for AM* TI EVMs
++ * @bus_addr:	I2C bus address
++ * @dev_addr:	I2C slave address
++ *
++ * ep in SRAM is populated by the this AM generic function that consolidates
++ * the basic initialization logic common across all AM* platforms.
++ */
++int ti_i2c_eeprom_am_get(int bus_addr, int dev_addr);
++
++/**
++ * ti_emmc_boardid_get() - Fetch board ID information from eMMC
++ *
++ * ep in SRAM is populated by the this function that is currently
++ * based on BeagleBone AI, but could be made more general across AM*
++ * platforms.
++ */
++int __maybe_unused ti_emmc_boardid_get(void);
++
++/**
++ * ti_i2c_eeprom_dra7_get() - Consolidated eeprom data for DRA7 TI EVMs
++ * @bus_addr:	I2C bus address
++ * @dev_addr:	I2C slave address
++ */
++int ti_i2c_eeprom_dra7_get(int bus_addr, int dev_addr);
++
++/**
++ * ti_i2c_eeprom_am6_get() - Consolidated eeprom data for AM6x TI EVMs and
++ *			     associated daughter cards, parsed into user-
++ *			     provided data structures
++ * @bus_addr:	I2C bus address
++ * @dev_addr:	I2C slave address
++ * @ep:		Pointer to structure receiving AM6-specific header data
++ * @mac_addr:	Pointer to memory receiving parsed MAC addresses. May be
++ *		NULL to skip MAC parsing.
++ * @mac_addr_max_cnt: Maximum number of MAC addresses that can be stored into
++ *		      mac_addr. May be NULL to skip MAC parsing.
++ * @mac_addr_cnt: Pointer to a location returning how many MAC addressed got
++ *		  actually parsed.
++ */
++int __maybe_unused ti_i2c_eeprom_am6_get(int bus_addr, int dev_addr,
++					 struct ti_am6_eeprom *ep,
++					 char **mac_addr,
++					 u8 mac_addr_max_cnt,
++					 u8 *mac_addr_cnt);
++
++/**
++ * ti_i2c_eeprom_am6_get_base() - Consolidated eeprom data for AM6x TI EVMs
++ * @bus_addr:	I2C bus address
++ * @dev_addr:	I2C slave address
++ */
++int __maybe_unused ti_i2c_eeprom_am6_get_base(int bus_addr, int dev_addr);
++
++#ifdef CONFIG_TI_I2C_BOARD_DETECT
++/**
++ * board_ti_is() - Board detection logic for TI EVMs
++ * @name_tag:	Tag used in eeprom for the board
++ *
++ * Return: false if board information does not match OR eeprom wasn't read.
++ *	   true otherwise
++ */
++bool board_ti_is(char *name_tag);
++
++/**
++ * board_ti_k3_is() - Board detection logic for TI K3 EVMs
++ * @name_tag:	Tag used in eeprom for the board
++ *
++ * Return: false if board information does not match OR eeprom wasn't read.
++ *	   true otherwise
++ */
++bool board_ti_k3_is(char *name_tag);
++
++/**
++ * board_ti_rev_is() - Compare board revision for TI EVMs
++ * @rev_tag:	Revision tag to check in eeprom
++ * @cmp_len:	How many chars to compare?
++ *
++ * NOTE: revision information is often messed up (hence the str len match) :(
++ *
++ * Return: false if board information does not match OR eeprom wasn't read.
++ *	   true otherwise
++ */
++bool board_ti_rev_is(char *rev_tag, int cmp_len);
++
++/**
++ * board_ti_get_rev() - Get board revision for TI EVMs
++ *
++ * Return: Empty string if eeprom wasn't read.
++ *	   Board revision otherwise
++ */
++char *board_ti_get_rev(void);
++
++/**
++ * board_ti_get_config() - Get board config for TI EVMs
++ *
++ * Return: Empty string if eeprom wasn't read.
++ *	   Board config otherwise
++ */
++char *board_ti_get_config(void);
++
++/**
++ * board_ti_get_name() - Get board name for TI EVMs
++ *
++ * Return: Empty string if eeprom wasn't read.
++ *	   Board name otherwise
++ */
++char *board_ti_get_name(void);
++
++/**
++ * board_ti_get_eth_mac_addr() - Get Ethernet MAC address from EEPROM MAC list
++ * @index:	0 based index within the list of MAC addresses
++ * @mac_addr:	MAC address contained at the index is returned here
++ *
++ * Does not sanity check the mac_addr. Whatever is stored in EEPROM is returned.
++ */
++void board_ti_get_eth_mac_addr(int index, u8 mac_addr[TI_EEPROM_HDR_ETH_ALEN]);
++
++/**
++ * board_ti_get_emif1_size() - Get size of the DDR on emif1 for TI EVMs
++ *
++ * Return: NULL if eeprom wasn't read or emif1_size is not available.
++ */
++u64 board_ti_get_emif1_size(void);
++
++/**
++ * board_ti_get_emif2_size() - Get size of the DDR on emif2 for TI EVMs
++ *
++ * Return: NULL if eeprom wasn't read or emif2_size is not available.
++ */
++u64 board_ti_get_emif2_size(void);
++
++/**
++ * set_board_info_env() - Setup commonly used board information environment vars
++ * @name:	Name of the board
++ *
++ * If name is NULL, default_name is used.
++ */
++void set_board_info_env(char *name);
++
++/**
++ * set_board_info_env_am6() - Setup commonly used board information environment
++ *			      vars for AM6-type boards
++ * @name:	Name of the board
++ *
++ * If name is NULL, default_name is used.
++ */
++void set_board_info_env_am6(char *name);
++
++/**
++ * board_ti_set_ethaddr- Sets the ethaddr environment from EEPROM
++ * @index: The first eth<index>addr environment variable to set
++ *
++ * EEPROM should be already read before calling this function.
++ * The EEPROM contains 2 MAC addresses which define the MAC address
++ * range (i.e. first and last MAC address).
++ * This function sets the ethaddr environment variable for all
++ * the available MAC addresses starting from eth<index>addr.
++ */
++void board_ti_set_ethaddr(int index);
++
++/**
++ * board_ti_am6_set_ethaddr- Sets the ethaddr environment from EEPROM
++ * @index: The first eth<index>addr environment variable to set
++ * @count: The number of MAC addresses to process
++ *
++ * EEPROM should be already read before calling this function. The EEPROM
++ * contains n dedicated MAC addresses. This function sets the ethaddr
++ * environment variable for all the available MAC addresses starting
++ * from eth<index>addr.
++ */
++void board_ti_am6_set_ethaddr(int index, int count);
++
++/**
++ * board_ti_was_eeprom_read() - Check to see if the eeprom contents have been read
++ *
++ * This function is useful to determine if the eeprom has already been read and
++ * its contents have already been loaded into memory. It utiltzes the magic
++ * number that the header value is set to upon successful eeprom read.
++ */
++bool board_ti_was_eeprom_read(void);
++
++/**
++ * ti_i2c_eeprom_am_set() - Setup the eeprom data with predefined values
++ * @name:	Name of the board
++ * @rev:	Revision of the board
++ *
++ * In some cases such as in RTC-only mode, we are able to skip reading eeprom
++ * and wasting i2c based initialization time by using predefined flags for
++ * detecting what platform we are booting on. For those platforms, provide
++ * a handy function to pre-program information.
++ *
++ * NOTE: many eeprom information such as serial number, mac address etc is not
++ * available.
++ *
++ * Return: 0 if all went fine, else return error.
++ */
++int ti_i2c_eeprom_am_set(const char *name, const char *rev);
++#else
++static inline bool board_ti_is(char *name_tag) { return false; };
++static inline bool board_ti_k3_is(char *name_tag) { return false; };
++static inline bool board_ti_rev_is(char *rev_tag, int cmp_len)
++{ return false; };
++static inline char *board_ti_get_rev(void) { return NULL; };
++static inline char *board_ti_get_config(void) { return NULL; };
++static inline char *board_ti_get_name(void) { return NULL; };
++static inline bool board_ti_was_eeprom_read(void) { return false; };
++static inline int ti_i2c_eeprom_am_set(const char *name, const char *rev)
++{ return -EINVAL; };
++#endif
++
++#endif	/* __BOARD_DETECT_H */
+diff --git a/board/iesy/common/k3-ddr-init.c b/board/iesy/common/k3-ddr-init.c
+new file mode 100644
+index 0000000000..2e0b7ed860
+--- /dev/null
++++ b/board/iesy/common/k3-ddr-init.c
+@@ -0,0 +1,86 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2023, Texas Instruments Incorporated - https://www.ti.com/
++ */
++
++#include <fdt_support.h>
++#include <dm/uclass.h>
++#include <k3-ddrss.h>
++#include <spl.h>
++
++#include "k3-ddr-init.h"
++
++int dram_init(void)
++{
++	s32 ret;
++
++	ret = fdtdec_setup_mem_size_base_lowest();
++	if (ret)
++		printf("Error setting up mem size and base. %d\n", ret);
++
++	return ret;
++}
++
++int dram_init_banksize(void)
++{
++	s32 ret;
++
++	ret = fdtdec_setup_memory_banksize();
++	if (ret)
++		printf("Error setting up memory banksize. %d\n", ret);
++
++	return ret;
++}
++
++#if defined(CONFIG_SPL_BUILD)
++
++void fixup_ddr_driver_for_ecc(struct spl_image_info *spl_image)
++{
++	struct udevice *dev;
++	int ret, ctr = 1;
++
++	dram_init_banksize();
++
++	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
++	if (ret)
++		panic("Cannnot get RAM device for ddr size fixup: %d\n", ret);
++
++	ret = k3_ddrss_ddr_fdt_fixup(dev, spl_image->fdt_addr, gd->bd);
++	if (ret)
++		printf("Error fixing up ddr node for ECC use! %d\n", ret);
++
++	ret = uclass_next_device_err(&dev);
++
++	while (ret && ret != -ENODEV) {
++		ret = k3_ddrss_ddr_fdt_fixup(dev, spl_image->fdt_addr, gd->bd);
++		if (ret)
++			printf("Error fixing up ddr node %d for ECC use! %d\n", ctr, ret);
++
++		ret = uclass_next_device_err(&dev);
++		ctr++;
++	}
++}
++
++void fixup_memory_node(struct spl_image_info *spl_image)
++{
++	u64 start[CONFIG_NR_DRAM_BANKS];
++	u64 size[CONFIG_NR_DRAM_BANKS];
++	int bank;
++	int ret;
++
++	dram_init();
++	dram_init_banksize();
++
++	for (bank = 0; bank < CONFIG_NR_DRAM_BANKS; bank++) {
++		start[bank] = gd->bd->bi_dram[bank].start;
++		size[bank] = gd->bd->bi_dram[bank].size;
++	}
++
++	ret = fdt_fixup_memory_banks(spl_image->fdt_addr, start, size,
++				     CONFIG_NR_DRAM_BANKS);
++
++	if (ret)
++		printf("Error fixing up memory node! %d\n", ret);
++}
++
++#endif
+diff --git a/board/iesy/common/k3-ddr-init.h b/board/iesy/common/k3-ddr-init.h
+new file mode 100644
+index 0000000000..9d1826815d
+--- /dev/null
++++ b/board/iesy/common/k3-ddr-init.h
+@@ -0,0 +1,15 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Copyright (C) 2023, Texas Instruments Incorporated - https://www.ti.com/
++ */
++
++#ifndef __K3_DDR_INIT_H
++#define __K3_DDR_INIT_H
++
++int dram_init(void);
++int dram_init_banksize(void);
++
++void fixup_ddr_driver_for_ecc(struct spl_image_info *spl_image);
++void fixup_memory_node(struct spl_image_info *spl_image);
++
++#endif /* __K3_DDR_INIT_H */
+diff --git a/board/iesy/common/schema.yaml b/board/iesy/common/schema.yaml
+new file mode 100644
+index 0000000000..8023ecb0e0
+--- /dev/null
++++ b/board/iesy/common/schema.yaml
+@@ -0,0 +1,436 @@
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (C) 2022 Texas Instruments Incorporated - https://www.ti.com/
++#
++# Config schema for TI K3 devices
++#
++
++---
++
++definitions:
++    u8:
++        type: integer
++        minimum: 0
++        maximum: 0xff
++    u16:
++        type: integer
++        minimum: 0
++        maximum: 0xffff
++    u32:
++        type: integer
++        minimum: 0
++        maximum: 0xffffffff
++
++
++
++type: object
++properties:
++    pm-cfg:
++        type: object
++        properties:
++            rev:
++                type: object
++                properties:
++                    boardcfg_abi_maj:
++                        $ref: "#/definitions/u8"
++                    boardcfg_abi_min:
++                        $ref: "#/definitions/u8"
++    board-cfg:
++        type: object
++        properties:
++            rev:
++                type: object
++                properties:
++                    boardcfg_abi_maj:
++                        $ref: "#/definitions/u8"
++                    boardcfg_abi_min:
++                        $ref: "#/definitions/u8"
++            control:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    main_isolation_enable:
++                        $ref: "#/definitions/u8"
++                    main_isolation_hostid:
++                        $ref: "#/definitions/u16"
++
++
++            secproxy:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    scaling_factor:
++                        $ref: "#/definitions/u8"
++                    scaling_profile:
++                        $ref: "#/definitions/u8"
++                    disable_main_nav_secure_proxy:
++                        $ref: "#/definitions/u8"
++
++            msmc:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    msmc_cache_size:
++                        $ref: "#/definitions/u8"
++            debug_cfg:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    trace_dst_enables:
++                        $ref: "#/definitions/u16"
++                    trace_src_enables:
++                        $ref: "#/definitions/u16"
++
++    sec-cfg:
++        type: object
++        properties:
++            rev:
++                type: object
++                properties:
++                    boardcfg_abi_maj:
++                        $ref: "#/definitions/u8"
++                    boardcfg_abi_min:
++                        $ref: "#/definitions/u8"
++
++            processor_acl_list:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    proc_acl_entries:
++                        type: array
++                        minItems: 32
++                        maxItems: 32
++                        items:
++                            type: object
++                            properties:
++                                processor_id:
++                                    $ref: "#/definitions/u8"
++                                proc_access_master:
++                                    $ref: "#/definitions/u8"
++                                proc_access_secondary:
++                                    type: array
++                                    minItems: 3
++                                    maxItems: 3
++                                    items:
++                                        $ref: "#/definitions/u8"
++            host_hierarchy:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    host_hierarchy_entries:
++                        type: array
++                        minItems: 32
++                        maxItems: 32
++                        items:
++                            type: object
++                            properties:
++                                host_id:
++                                    $ref: "#/definitions/u8"
++                                supervisor_host_id:
++                                    $ref: "#/definitions/u8"
++
++            otp_config:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    otp_entry:
++                        type: array
++                        minItems: 32
++                        maxItems: 32
++                        items:
++                            type: object
++                            properties:
++                                host_id:
++                                    $ref: "#/definitions/u8"
++                                host_perms:
++                                    $ref: "#/definitions/u8"
++                    write_host_id:
++                        $ref: "#/definitions/u8"
++
++            dkek_config:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    allowed_hosts:
++                        type: array
++                        minItems: 4
++                        maxItems: 4
++                        items:
++                            $ref: "#/definitions/u8"
++                    allow_dkek_export_tisci:
++                        $ref: "#/definitions/u8"
++                    rsvd:
++                        type: array
++                        minItems: 3
++                        maxItems: 3
++                        items:
++                            $ref: "#/definitions/u8"
++
++            sa2ul_cfg:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    rsvd:
++                        type: array
++                        minItems: 2
++                        maxItems: 4
++                        items:
++                            $ref: "#/definitions/u8"
++                    enable_saul_psil_global_config_writes:
++                        $ref: "#/definitions/u8"
++                    auth_resource_owner:
++                        $ref: "#/definitions/u8"
++
++            sec_dbg_config:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    allow_jtag_unlock:
++                        $ref: "#/definitions/u8"
++                    allow_wildcard_unlock:
++                        $ref: "#/definitions/u8"
++                    allowed_debug_level_rsvd:
++                        $ref: "#/definitions/u8"
++                    rsvd:
++                        $ref: "#/definitions/u8"
++                    min_cert_rev:
++                        $ref: "#/definitions/u32"
++                    jtag_unlock_hosts:
++                        type: array
++                        minItems: 4
++                        maxItems: 4
++                        items:
++                            $ref: "#/definitions/u8"
++
++
++            sec_handover_cfg:
++                type: object
++                properties:
++                    subhdr:
++                        type: object
++                        properties:
++                            magic:
++                                $ref: "#/definitions/u16"
++                            size:
++                                $ref: "#/definitions/u16"
++                    handover_msg_sender:
++                        $ref: "#/definitions/u8"
++                    handover_to_host_id:
++                        $ref: "#/definitions/u8"
++                    rsvd:
++                        type: array
++                        minItems: 4
++                        maxItems: 4
++                        items:
++                            $ref: "#/definitions/u8"
++
++    rm-cfg:
++        type: object
++        properties:
++            rm_boardcfg:
++                type: object
++                properties:
++                    rev:
++                        type: object
++                        properties:
++                            boardcfg_abi_maj:
++                                $ref: "#/definitions/u8"
++                            boardcfg_abi_min:
++                                $ref: "#/definitions/u8"
++
++                    host_cfg:
++                        type: object
++                        properties:
++                            subhdr:
++                                type: object
++                                properties:
++                                    magic:
++                                        $ref: "#/definitions/u16"
++                                    size:
++                                        $ref: "#/definitions/u16"
++                            host_cfg_entries:
++                                type: array
++                                minItems: 0
++                                maxItems: 32
++                                items:
++                                    type: object
++                                    properties:
++                                        host_id:
++                                            $ref: "#/definitions/u8"
++                                        allowed_atype:
++                                            $ref: "#/definitions/u8"
++                                        allowed_qos:
++                                            $ref: "#/definitions/u16"
++                                        allowed_orderid:
++                                            $ref: "#/definitions/u32"
++                                        allowed_priority:
++                                            $ref: "#/definitions/u16"
++                                        allowed_sched_priority:
++                                            $ref: "#/definitions/u8"
++                    resasg:
++                        type: object
++                        properties:
++                            subhdr:
++                                type: object
++                                properties:
++                                    magic:
++                                        $ref: "#/definitions/u16"
++                                    size:
++                                        $ref: "#/definitions/u16"
++                            resasg_entries_size:
++                                        $ref: "#/definitions/u16"
++                            reserved:
++                                        $ref: "#/definitions/u16"
++
++            resasg_entries:
++                type: array
++                minItems: 0
++                maxItems: 468
++                items:
++                    type: object
++                    properties:
++                        start_resource:
++                            $ref: "#/definitions/u16"
++                        num_resource:
++                            $ref: "#/definitions/u16"
++                        type:
++                            $ref: "#/definitions/u16"
++                        host_id:
++                            $ref: "#/definitions/u8"
++                        reserved:
++                            $ref: "#/definitions/u8"
++
++    tifs-rm-cfg:
++        type: object
++        properties:
++            rm_boardcfg:
++                type: object
++                properties:
++                    rev:
++                        type: object
++                        properties:
++                            boardcfg_abi_maj:
++                                $ref: "#/definitions/u8"
++                            boardcfg_abi_min:
++                                $ref: "#/definitions/u8"
++
++                    host_cfg:
++                        type: object
++                        properties:
++                            subhdr:
++                                type: object
++                                properties:
++                                    magic:
++                                        $ref: "#/definitions/u16"
++                                    size:
++                                        $ref: "#/definitions/u16"
++                            host_cfg_entries:
++                                type: array
++                                minItems: 0
++                                maxItems: 32
++                                items:
++                                    type: object
++                                    properties:
++                                        host_id:
++                                            $ref: "#/definitions/u8"
++                                        allowed_atype:
++                                            $ref: "#/definitions/u8"
++                                        allowed_qos:
++                                            $ref: "#/definitions/u16"
++                                        allowed_orderid:
++                                            $ref: "#/definitions/u32"
++                                        allowed_priority:
++                                            $ref: "#/definitions/u16"
++                                        allowed_sched_priority:
++                                            $ref: "#/definitions/u8"
++                    resasg:
++                        type: object
++                        properties:
++                            subhdr:
++                                type: object
++                                properties:
++                                    magic:
++                                        $ref: "#/definitions/u16"
++                                    size:
++                                        $ref: "#/definitions/u16"
++                            resasg_entries_size:
++                                        $ref: "#/definitions/u16"
++                            reserved:
++                                        $ref: "#/definitions/u16"
++
++            resasg_entries:
++                type: array
++                minItems: 0
++                maxItems: 468
++                items:
++                    type: object
++                    properties:
++                        start_resource:
++                            $ref: "#/definitions/u16"
++                        num_resource:
++                            $ref: "#/definitions/u16"
++                        type:
++                            $ref: "#/definitions/u16"
++                        host_id:
++                            $ref: "#/definitions/u8"
++                        reserved:
++                            $ref: "#/definitions/u8"
+diff --git a/board/iesy/keys/custMpk.crt b/board/iesy/keys/custMpk.crt
+new file mode 100644
+index 0000000000..01bd64aae5
+--- /dev/null
++++ b/board/iesy/keys/custMpk.crt
+@@ -0,0 +1,33 @@
++-----BEGIN CERTIFICATE-----
++MIIFwzCCA6sCFHKW0ueol0+vsilVaZyqKhppo9ryMA0GCSqGSIb3DQEBCwUAMIGd
++MQswCQYDVQQGEwJVUzELMAkGA1UECAwCVFgxDzANBgNVBAcMBkRhbGxhczEnMCUG
++A1UECgweVGV4YXMgSW5zdHJ1bWVudHMgSW5jb3Jwb3JhdGVkMRMwEQYDVQQLDApQ
++cm9jZXNzb3JzMRMwEQYDVQQDDApUSSBTdXBwb3J0MR0wGwYJKoZIhvcNAQkBFg5z
++dXBwb3J0QHRpLmNvbTAeFw0yMzA2MDEwNTIxMTZaFw0zMzA1MjkwNTIxMTZaMIGd
++MQswCQYDVQQGEwJVUzELMAkGA1UECAwCVFgxDzANBgNVBAcMBkRhbGxhczEnMCUG
++A1UECgweVGV4YXMgSW5zdHJ1bWVudHMgSW5jb3Jwb3JhdGVkMRMwEQYDVQQLDApQ
++cm9jZXNzb3JzMRMwEQYDVQQDDApUSSBTdXBwb3J0MR0wGwYJKoZIhvcNAQkBFg5z
++dXBwb3J0QHRpLmNvbTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBAL8U
++rknYf3LTayPN60gOZdwiTfIOT4L27bXy3dt8kfpuWf/V97beBB2KzNKV2dHgxMH4
++UL//SAyRIlCaTHuL85YKKCazpNngqVVBGvs+Wydsv8rAca8vciLuRgElYq0+xwT2
++sRi2LMASbg/imz7lpqCoBkUDQRdOFh+pdNaETtZ5pxC4EakOkh8l3X+x8tG58mjY
++M1lLgn13zNGc+iO0+1iI8s3q1RbyLHUt+mLDwQlu4AZw4LUHCZli2dbk52xtyIIH
++UJP34tjt0V/j0J7Pk1TZX91dzjdg8asUigR7Zae6f99FRXxLoVuuTsaUPYxOh9KU
++PKTzn9r88jZ85w2tWkI38SqB0G6hp2cDHoftALtzSmgoMaKCmqMEweiH/0V+qsGf
++1DsFx4P9IXH+vX84yRYZUg7mAzONHR7JNhzNTp2CKYjNmyq+bF97srI6eQBqffWt
++Gp0ezVgqz170ToCrO0/d+NTeNKLEINlZGS2FAl4faLFMjbkRBuktdrVYjFCoN25m
++eG+DMEZNNJ+0GEq5u/p7xa7WMhCEhGw/moAzNfxNvNVuYFRQz35tgJcE+o8LIP29
++mCuhN71Z/UrsRaEJixfJchQztwVeEl3iWh3OIVT24erVVaon600J3xlAgi5miRdl
++2W6z1jhOjWEW1nTU3hZfURnVQriD0sjeS6lpl7aNAgMBAAEwDQYJKoZIhvcNAQEL
++BQADggIBAHy+h1FQKedFTJWgqGJkTwtcym5LyXD6ig8LyhJpVEbXmqK7ZKY2F2hB
++PqVbfCZNogszIvl8q3ykz+tcGbfBk3rq+KMUwbk5E29mSMmAJ9DNNozudgKkKq9w
++RmcO1bXCEspFgNvNEkYAQCBvMOyH/nCyFu9QzOzN35XIzf0fI3jM6rueLxSXq3xO
++7yHUZ3mzAZp6e1Qo6cuABAw1q6KqKYJCnJ3Nq6F42bmGp8mSD+2AuGV8cU+7Z3sh
++k/ooFMCsulj1R5+TlKgEfqspQXbefEsvRW3n3ZD8bcQF0ytiX7XVmDMFVpQkTzps
++92fjZ08Zcj7bCZQsFXXACIQkMiTiiMW6NwLFZDyq11/B1oe1bhjFUuqqUkHC/PKx
++gdWRwluGRt+onFRD5/upXnugKT99j/hQ7sy80a64A1xoCcKVbwcHU7YBQG1vLk6D
++idg0vI3gj7v+/jZEPkv/KrqAI6YuvpplkcHkEKuAUFAkozvVJ5pPK3K0xHBJGNMK
++kJ9FMAakFj6jfZaR5Ay3ZuOAn5oPMwd6RaauNOzVpBll6DFOyw2rU6fbId/gi841
++drmBfM6ufue6ecslkp9zSOpPLXhjt2g9NRVKPE20CmRetVSDLcMFet7ZImbxqggw
++yjDxA7oR+Px+o+xr+djcDlfj6500Rys6W1SNHe99HXOCcpQqivX0
++-----END CERTIFICATE-----
+diff --git a/board/iesy/keys/custMpk.key b/board/iesy/keys/custMpk.key
+new file mode 100644
+index 0000000000..adba378c80
+--- /dev/null
++++ b/board/iesy/keys/custMpk.key
+@@ -0,0 +1,51 @@
++-----BEGIN RSA PRIVATE KEY-----
++MIIJKQIBAAKCAgEAvxSuSdh/ctNrI83rSA5l3CJN8g5PgvbttfLd23yR+m5Z/9X3
++tt4EHYrM0pXZ0eDEwfhQv/9IDJEiUJpMe4vzlgooJrOk2eCpVUEa+z5bJ2y/ysBx
++ry9yIu5GASVirT7HBPaxGLYswBJuD+KbPuWmoKgGRQNBF04WH6l01oRO1nmnELgR
++qQ6SHyXdf7Hy0bnyaNgzWUuCfXfM0Zz6I7T7WIjyzerVFvIsdS36YsPBCW7gBnDg
++tQcJmWLZ1uTnbG3IggdQk/fi2O3RX+PQns+TVNlf3V3ON2DxqxSKBHtlp7p/30VF
++fEuhW65OxpQ9jE6H0pQ8pPOf2vzyNnznDa1aQjfxKoHQbqGnZwMeh+0Au3NKaCgx
++ooKaowTB6If/RX6qwZ/UOwXHg/0hcf69fzjJFhlSDuYDM40dHsk2HM1OnYIpiM2b
++Kr5sX3uysjp5AGp99a0anR7NWCrPXvROgKs7T9341N40osQg2VkZLYUCXh9osUyN
++uREG6S12tViMUKg3bmZ4b4MwRk00n7QYSrm7+nvFrtYyEISEbD+agDM1/E281W5g
++VFDPfm2AlwT6jwsg/b2YK6E3vVn9SuxFoQmLF8lyFDO3BV4SXeJaHc4hVPbh6tVV
++qifrTQnfGUCCLmaJF2XZbrPWOE6NYRbWdNTeFl9RGdVCuIPSyN5LqWmXto0CAwEA
++AQKCAgAzkAwcJ0z1GnId/lJQZno8NhGckRoJuEKbR8dwlCP8VUz6Ca5H7Y9kvXDa
++Hs/hn+rYgP6hYOz7XyrIX2rmJ/T6dxEwqGeC1+o59FConcIRWHpE5zuGT6JYJL5F
++TuZa48bm4v8VMQvQZOjIZpkIFwao8c6HTwKAnHTB5IN/48I2hCt+Cn3RhfoOZ7Rm
++4gkpaSkt+7GXlhXHb82YfujNO+hbktEamhUYlQ9EK70Wa8aqmf3gHxO0JgsEFjW8
++lJaSnultlTW8SDcx3LMUUjCYumECk4oX/VlJfmKYjPlVjkr3QQ+Cm3nNucb4K4hc
++c+JL+2ERhSj8RjXL7VgbNgdPnIjvQDJuTNqecTU8xWPYrkOLQpNibbLjnutLkhJz
++fMyRtmDtrsey8WiCDuCHkPJ8/f8RjL2zWI9fzTDDIzdlEKouUFGOovaHVnbua6pn
++hymcu9d9FV3p2rcbj0ivCs7e8j+vhSxFJEJoAbcQdXCTi/n2uR7pLtoMNiUzsejy
++d46Uz+KEU920NTwE2z6JJq8I2vegnxjc7PDDrV3/5rK04B93aXiqvwWseCpxelrI
++xaMkRHbXrIXRO6MXQ3N+zNq8Dg3hjGTTvaBKuwgvqLwlXY8+Aa3ooFzEOInIOSsI
++XcWqXxt/tgZgsj9RwpC42t8kbA+BkbNk9EIUa+P5kEr2P/fO7QKCAQEA4EtArnOX
++D6tQF8uTw8USOZC2P9s/ez1z4jRq3oKP0Kv4tJiuIObJ/dUvGVD7aM5v2xaCfhm8
++xpk09VPUgghfG5jR5qVvQr75kCNToJQudWi4ngk1HwKJzzTO11giFEdybvTUA+Pj
++fmxCM0dYYqRWZoj0hLqXlUCwxE74BFIhJVjeYbf+nTQrqpllTLoW7MTZHzGx5SXx
++4dNzyVAUH49Yt2D8mgXXCkf5sGLh762wj34b/rR10Kr4O5utGMZrfTRIbuQ1pNjU
++m66baPzq+mC0BzqZEW70TgEb7lOr8rcVXLOi3r36omfd9/MHx7iZD6o3K1axSO15
++grD4ZrN7Ac3QJwKCAQEA2heCoBdpvy6YUk8AO2k8qDygTdmPQRuwjjT+Z2fMslBt
++D7DkpKwZ6Bl9OclcpiiLHmH+hv65KqYg+tR0RRb7PcogB9El9x7yKkGTPZEYWGky
++n8P84rJpKwjnwWQvPQktI1cs3YGvZA9DQTFBavRrwuzgd1oSJq5aPQ2tme0kMvWp
++l1/B/cPK+PKCi/Wfisaze1TjijP9qIeUwkdNN6WLrLU3QgsGppcg2I7RQtAIikT6
++GkuiOQAvWMsrJVV6PNrVKz4fJDJ59Rz6jbDHZNi1MEYNxQoB/Pl7QIakbfjWpHLv
++8Ey7cB2JKxjQy8tmyl8WNQVbXbE6daPXcMTUmaRAKwKCAQBv1lYMJmq+T2eCVen6
++BbvOpE+bi5EdvEiaFBTtmiBnpjg+pJq+oRU60h/H+c9CNR0lGxY6Fk9An4f+g6xE
++ojP6KLsQzJCrsVny+wpp2TlJJcxYULMCIVvhy60PR0zG29E9biqBPhJjKUvhEcQK
++e3LxcXyq6fdHXphFajLUxLbuTl+kTgBRFoBnclFGbsubh5PTsA3J+p+fQLZNPPar
++veg4l82cZykQYU8pGkUaI3sUMYd3+zd7sqRP5JHs9pMGPRmY4YW2CsAIWIn5UZNB
++ARMDP76vKKn8cyUgMuxb+9pU/OVLN2NPs4bEaZQJjAwV+YPEwldny7F47xEM9JVz
++EtKlAoIBAQDUt62u3GdGE/p5/ZgqWoDRTyDEDfmN9aYFbmbdEP80xQE7FrxMaZhz
++K7laja6SWmUm40nQ/c45bQQp4uLtKHcxU15egX7YRBTLZl5o5IasZR79ebnEm2O8
++l9kEZeU1USf3mmWmP4GExOZCRfqaiYA6BbUCdJXTqKdXeWnkAssV8UrS3JFoJHpq
++yo7OWGqefyQ8nRW6jO9SW7uaqtUD+7H6aF5XSk3YWvusfdBZrHNH+fM/hpnZovaL
++Us7ogTDS/laA8PyK37jYfMVdQhmZoU1Iomt3zkUWK3gt/aWPpfAlQf4Jka4YspZB
++tNiijefaZ1hPqsPs5Joyd/YAhdsfaHc1AoIBAQCn/9j6RRjRaw0ip756oad4AXHz
++XBwVB2CrY96qT6Hj9Sq7tGgdskqGkOQkAivBLBizUdcWv0t1yenOsSgasQeMlvlh
++B8md9cLvpKXPB3HM3rTDH/xNXe0TpVKLf7SXC8HfDyIweHwMW3QgO2DWrvI4BV/T
++ckBatRNQ90HxkqGFhC/Mp529lQlyg3ifxPxJsvZOyPMUnrflAvsKQk5c2ZiQg3nZ
++h7I2pjSYgCl+Ib52l8p9bf1kcrVGgPM+auzm496i0RPobFeDBoBvSoznJktHJ7+3
++NnZH+jLiZCODiQPGtQUi+T6eIZUIJF0YASpsCCtUzXCxwW3lYIDNy7UlMivF
++-----END RSA PRIVATE KEY-----
+diff --git a/board/iesy/keys/custMpk.pem b/board/iesy/keys/custMpk.pem
+new file mode 100644
+index 0000000000..adba378c80
+--- /dev/null
++++ b/board/iesy/keys/custMpk.pem
+@@ -0,0 +1,51 @@
++-----BEGIN RSA PRIVATE KEY-----
++MIIJKQIBAAKCAgEAvxSuSdh/ctNrI83rSA5l3CJN8g5PgvbttfLd23yR+m5Z/9X3
++tt4EHYrM0pXZ0eDEwfhQv/9IDJEiUJpMe4vzlgooJrOk2eCpVUEa+z5bJ2y/ysBx
++ry9yIu5GASVirT7HBPaxGLYswBJuD+KbPuWmoKgGRQNBF04WH6l01oRO1nmnELgR
++qQ6SHyXdf7Hy0bnyaNgzWUuCfXfM0Zz6I7T7WIjyzerVFvIsdS36YsPBCW7gBnDg
++tQcJmWLZ1uTnbG3IggdQk/fi2O3RX+PQns+TVNlf3V3ON2DxqxSKBHtlp7p/30VF
++fEuhW65OxpQ9jE6H0pQ8pPOf2vzyNnznDa1aQjfxKoHQbqGnZwMeh+0Au3NKaCgx
++ooKaowTB6If/RX6qwZ/UOwXHg/0hcf69fzjJFhlSDuYDM40dHsk2HM1OnYIpiM2b
++Kr5sX3uysjp5AGp99a0anR7NWCrPXvROgKs7T9341N40osQg2VkZLYUCXh9osUyN
++uREG6S12tViMUKg3bmZ4b4MwRk00n7QYSrm7+nvFrtYyEISEbD+agDM1/E281W5g
++VFDPfm2AlwT6jwsg/b2YK6E3vVn9SuxFoQmLF8lyFDO3BV4SXeJaHc4hVPbh6tVV
++qifrTQnfGUCCLmaJF2XZbrPWOE6NYRbWdNTeFl9RGdVCuIPSyN5LqWmXto0CAwEA
++AQKCAgAzkAwcJ0z1GnId/lJQZno8NhGckRoJuEKbR8dwlCP8VUz6Ca5H7Y9kvXDa
++Hs/hn+rYgP6hYOz7XyrIX2rmJ/T6dxEwqGeC1+o59FConcIRWHpE5zuGT6JYJL5F
++TuZa48bm4v8VMQvQZOjIZpkIFwao8c6HTwKAnHTB5IN/48I2hCt+Cn3RhfoOZ7Rm
++4gkpaSkt+7GXlhXHb82YfujNO+hbktEamhUYlQ9EK70Wa8aqmf3gHxO0JgsEFjW8
++lJaSnultlTW8SDcx3LMUUjCYumECk4oX/VlJfmKYjPlVjkr3QQ+Cm3nNucb4K4hc
++c+JL+2ERhSj8RjXL7VgbNgdPnIjvQDJuTNqecTU8xWPYrkOLQpNibbLjnutLkhJz
++fMyRtmDtrsey8WiCDuCHkPJ8/f8RjL2zWI9fzTDDIzdlEKouUFGOovaHVnbua6pn
++hymcu9d9FV3p2rcbj0ivCs7e8j+vhSxFJEJoAbcQdXCTi/n2uR7pLtoMNiUzsejy
++d46Uz+KEU920NTwE2z6JJq8I2vegnxjc7PDDrV3/5rK04B93aXiqvwWseCpxelrI
++xaMkRHbXrIXRO6MXQ3N+zNq8Dg3hjGTTvaBKuwgvqLwlXY8+Aa3ooFzEOInIOSsI
++XcWqXxt/tgZgsj9RwpC42t8kbA+BkbNk9EIUa+P5kEr2P/fO7QKCAQEA4EtArnOX
++D6tQF8uTw8USOZC2P9s/ez1z4jRq3oKP0Kv4tJiuIObJ/dUvGVD7aM5v2xaCfhm8
++xpk09VPUgghfG5jR5qVvQr75kCNToJQudWi4ngk1HwKJzzTO11giFEdybvTUA+Pj
++fmxCM0dYYqRWZoj0hLqXlUCwxE74BFIhJVjeYbf+nTQrqpllTLoW7MTZHzGx5SXx
++4dNzyVAUH49Yt2D8mgXXCkf5sGLh762wj34b/rR10Kr4O5utGMZrfTRIbuQ1pNjU
++m66baPzq+mC0BzqZEW70TgEb7lOr8rcVXLOi3r36omfd9/MHx7iZD6o3K1axSO15
++grD4ZrN7Ac3QJwKCAQEA2heCoBdpvy6YUk8AO2k8qDygTdmPQRuwjjT+Z2fMslBt
++D7DkpKwZ6Bl9OclcpiiLHmH+hv65KqYg+tR0RRb7PcogB9El9x7yKkGTPZEYWGky
++n8P84rJpKwjnwWQvPQktI1cs3YGvZA9DQTFBavRrwuzgd1oSJq5aPQ2tme0kMvWp
++l1/B/cPK+PKCi/Wfisaze1TjijP9qIeUwkdNN6WLrLU3QgsGppcg2I7RQtAIikT6
++GkuiOQAvWMsrJVV6PNrVKz4fJDJ59Rz6jbDHZNi1MEYNxQoB/Pl7QIakbfjWpHLv
++8Ey7cB2JKxjQy8tmyl8WNQVbXbE6daPXcMTUmaRAKwKCAQBv1lYMJmq+T2eCVen6
++BbvOpE+bi5EdvEiaFBTtmiBnpjg+pJq+oRU60h/H+c9CNR0lGxY6Fk9An4f+g6xE
++ojP6KLsQzJCrsVny+wpp2TlJJcxYULMCIVvhy60PR0zG29E9biqBPhJjKUvhEcQK
++e3LxcXyq6fdHXphFajLUxLbuTl+kTgBRFoBnclFGbsubh5PTsA3J+p+fQLZNPPar
++veg4l82cZykQYU8pGkUaI3sUMYd3+zd7sqRP5JHs9pMGPRmY4YW2CsAIWIn5UZNB
++ARMDP76vKKn8cyUgMuxb+9pU/OVLN2NPs4bEaZQJjAwV+YPEwldny7F47xEM9JVz
++EtKlAoIBAQDUt62u3GdGE/p5/ZgqWoDRTyDEDfmN9aYFbmbdEP80xQE7FrxMaZhz
++K7laja6SWmUm40nQ/c45bQQp4uLtKHcxU15egX7YRBTLZl5o5IasZR79ebnEm2O8
++l9kEZeU1USf3mmWmP4GExOZCRfqaiYA6BbUCdJXTqKdXeWnkAssV8UrS3JFoJHpq
++yo7OWGqefyQ8nRW6jO9SW7uaqtUD+7H6aF5XSk3YWvusfdBZrHNH+fM/hpnZovaL
++Us7ogTDS/laA8PyK37jYfMVdQhmZoU1Iomt3zkUWK3gt/aWPpfAlQf4Jka4YspZB
++tNiijefaZ1hPqsPs5Joyd/YAhdsfaHc1AoIBAQCn/9j6RRjRaw0ip756oad4AXHz
++XBwVB2CrY96qT6Hj9Sq7tGgdskqGkOQkAivBLBizUdcWv0t1yenOsSgasQeMlvlh
++B8md9cLvpKXPB3HM3rTDH/xNXe0TpVKLf7SXC8HfDyIweHwMW3QgO2DWrvI4BV/T
++ckBatRNQ90HxkqGFhC/Mp529lQlyg3ifxPxJsvZOyPMUnrflAvsKQk5c2ZiQg3nZ
++h7I2pjSYgCl+Ib52l8p9bf1kcrVGgPM+auzm496i0RPobFeDBoBvSoznJktHJ7+3
++NnZH+jLiZCODiQPGtQUi+T6eIZUIJF0YASpsCCtUzXCxwW3lYIDNy7UlMivF
++-----END RSA PRIVATE KEY-----
+diff --git a/board/iesy/keys/ti-degenerate-key.pem b/board/iesy/keys/ti-degenerate-key.pem
+new file mode 100644
+index 0000000000..bd7d3745ad
+--- /dev/null
++++ b/board/iesy/keys/ti-degenerate-key.pem
+@@ -0,0 +1,10 @@
++-----BEGIN RSA PRIVATE KEY-----
++MIIBWwIBAAKBgQDRfrnXQaP0k6vRK/gZ+bDflSU6y1JagGeQ/b+QYuiDz14japog
++8fRSu5WBsAxaSaySAUwS3L9Ppw+hGMecmyIJ494aMfZTtk1g49gU58joduiRnu7e
++QSZHMnehhuNlfD7A2tAAKnxIYuabs8zHYM/SS9Ne7t3kIQMbKfUSzNy6qQIBAQIB
++AQJBAOelUA376o6w3HkShXfN+shaOZYqFuTJ9exLMwsLp7DZKXB5F9I4JJ+Vkvho
++k6QWs7vkhleLSYUZknXHYm26ZE0CQQDnhTtd4PTBoZPjPXOeYMJFtEdMNy0XP6ey
++bcce389ugoY7BEkvASrd8PHgJQHziepgWOG4DGp33c64Hfq4zI3NAgEBAgEBAkA0
++RbK4uqoLciQluesTPU6lBy7Se3Dw0F9xBqlF5SR4KI6q+zQrHpBKyFOofMHZgizR
++iCrL55cxEM146zMw3AnF
++-----END RSA PRIVATE KEY-----
+diff --git a/configs/iesy_am62xx_eva_mi_a53_defconfig b/configs/iesy_am62xx_eva_mi_a53_defconfig
+new file mode 100644
+index 0000000000..4fddd50231
+--- /dev/null
++++ b/configs/iesy_am62xx_eva_mi_a53_defconfig
+@@ -0,0 +1,204 @@
++CONFIG_ARM=y
++CONFIG_ARCH_K3=y
++CONFIG_TI_SECURE_DEVICE=y
++CONFIG_TI_COMMON_CMD_OPTIONS=y
++CONFIG_SYS_MALLOC_F_LEN=0x8000
++CONFIG_SPL_GPIO=y
++CONFIG_SPL_LIBCOMMON_SUPPORT=y
++CONFIG_SPL_LIBGENERIC_SUPPORT=y
++CONFIG_NR_DRAM_BANKS=2
++CONFIG_SOC_K3_AM625=y
++CONFIG_K3_ATF_LOAD_ADDR=0x9e780000
++CONFIG_TARGET_IESY_AM62XX_EVA_MI_A53=y
++CONFIG_HAS_CUSTOM_SYS_INIT_SP_ADDR=y
++CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x80B80000
++CONFIG_DM_GPIO=y
++CONFIG_SPL_DM_SPI=y
++CONFIG_DEFAULT_DEVICE_TREE="iesy-am62xx-eva-mi"
++CONFIG_SPL_TEXT_BASE=0x80080000
++CONFIG_DM_RESET=y
++CONFIG_SPL_MMC=y
++CONFIG_SPL_SERIAL=y
++CONFIG_SPL_DRIVERS_MISC=y
++CONFIG_SPL_STACK_R_ADDR=0x82000000
++CONFIG_SPL_SIZE_LIMIT=0x80000
++CONFIG_SPL_SIZE_LIMIT_PROVIDE_STACK=0x800
++CONFIG_SPL_FS_FAT=y
++CONFIG_SPL_LIBDISK_SUPPORT=y
++CONFIG_SPL_SPI_FLASH_SUPPORT=y
++CONFIG_SPL_SPI=y
++# CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
++CONFIG_SPL_LOAD_FIT=y
++CONFIG_SPL_LOAD_FIT_ADDRESS=0x81000000
++CONFIG_DISTRO_DEFAULTS=y
++CONFIG_BOOTCOMMAND="run envboot; run distro_bootcmd;"
++CONFIG_BLOBLIST=y
++CONFIG_BLOBLIST_ADDR=0x80D00000
++CONFIG_SPL_MAX_SIZE=0x80000
++CONFIG_SPL_HAS_BSS_LINKER_SECTION=y
++CONFIG_SPL_BSS_START_ADDR=0x80c80000
++CONFIG_SPL_BSS_MAX_SIZE=0x80000
++CONFIG_SPL_SYS_REPORT_STACK_F_USAGE=y
++CONFIG_SPL_BOARD_INIT=y
++CONFIG_SPL_SYS_MALLOC_SIMPLE=y
++CONFIG_SPL_STACK_R=y
++CONFIG_SYS_SPL_MALLOC=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x1400
++CONFIG_SPL_DMA=y
++CONFIG_SPL_ENV_SUPPORT=y
++CONFIG_SPL_ETH=y
++CONFIG_SPL_FS_LOAD_PAYLOAD_NAME="u-boot.img"
++CONFIG_SPL_I2C=y
++CONFIG_SPL_DM_MAILBOX=y
++CONFIG_SPL_DM_SPI_FLASH=y
++CONFIG_SPL_NET=y
++CONFIG_SPL_NET_VCI_STRING="AM62X U-Boot A53 SPL"
++CONFIG_SPL_POWER_DOMAIN=y
++CONFIG_SPL_RAM_SUPPORT=y
++CONFIG_SPL_RAM_DEVICE=y
++# CONFIG_SPL_SPI_FLASH_TINY is not set
++CONFIG_SPL_SPI_FLASH_SFDP_SUPPORT=y
++CONFIG_SPL_SPI_LOAD=y
++CONFIG_SYS_SPI_U_BOOT_OFFS=0x280000
++CONFIG_SPL_THERMAL=y
++CONFIG_SPL_USB_HOST=y
++CONFIG_SPL_USB_STORAGE=y
++CONFIG_SPL_USB_GADGET=y
++CONFIG_SPL_DFU=y
++CONFIG_SPL_YMODEM_SUPPORT=y
++CONFIG_SPL_BMP=y
++CONFIG_SYS_MAXARGS=64
++CONFIG_CMD_CLK=y
++CONFIG_CMD_DDRSS=y
++CONFIG_CMD_DFU=y
++CONFIG_CMD_DM=y
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_GPT=y
++CONFIG_CMD_I2C=y
++CONFIG_CMD_MMC=y
++CONFIG_CMD_REMOTEPROC=y
++CONFIG_CMD_USB=y
++CONFIG_CMD_USB_MASS_STORAGE=y
++CONFIG_CMD_BMP=y
++CONFIG_CMD_TIME=y
++CONFIG_CMD_EXT4_WRITE=y
++CONFIG_OF_CONTROL=y
++CONFIG_SPL_OF_CONTROL=y
++CONFIG_MULTI_DTB_FIT=y
++CONFIG_SPL_MULTI_DTB_FIT=y
++CONFIG_SPL_MULTI_DTB_FIT_NO_COMPRESSION=y
++CONFIG_NET_RANDOM_ETHADDR=y
++CONFIG_SPL_DM=y
++CONFIG_SPL_DM_DEVICE_REMOVE=y
++CONFIG_SPL_DM_SEQ_ALIAS=y
++CONFIG_REGMAP=y
++CONFIG_SPL_REGMAP=y
++CONFIG_SYSCON=y
++CONFIG_SPL_SYSCON=y
++CONFIG_SPL_OF_TRANSLATE=y
++CONFIG_CLK=y
++CONFIG_SPL_CLK=y
++CONFIG_CLK_TI_SCI=y
++CONFIG_DFU_MMC=y
++CONFIG_DFU_RAM=y
++CONFIG_DFU_SF=y
++CONFIG_SYS_DFU_DATA_BUF_SIZE=0x40000
++CONFIG_SYS_DFU_MAX_FILE_SIZE=0x800000
++CONFIG_DMA_CHANNELS=y
++CONFIG_TI_K3_NAVSS_UDMA=y
++CONFIG_TI_SCI_PROTOCOL=y
++CONFIG_SPL_DM_GPIO_LOOKUP_LABEL=y
++CONFIG_DA8XX_GPIO=y
++CONFIG_DM_PCA953X=y
++CONFIG_SPL_DM_PCA953X=y
++CONFIG_DM_I2C=y
++CONFIG_SYS_I2C_OMAP24XX=y
++CONFIG_DM_MAILBOX=y
++CONFIG_K3_SEC_PROXY=y
++CONFIG_I2C_EEPROM=y
++CONFIG_SPL_I2C_EEPROM=y
++CONFIG_FS_LOADER=y
++CONFIG_SUPPORT_EMMC_BOOT=y
++CONFIG_MMC_IO_VOLTAGE=y
++CONFIG_SPL_MMC_IO_VOLTAGE=y
++CONFIG_MMC_UHS_SUPPORT=y
++CONFIG_SPL_MMC_UHS_SUPPORT=y
++CONFIG_MMC_HS200_SUPPORT=y
++CONFIG_SPL_MMC_HS200_SUPPORT=y
++CONFIG_MMC_SDHCI=y
++CONFIG_MMC_SDHCI_ADMA=y
++CONFIG_SPL_MMC_SDHCI_ADMA=y
++CONFIG_MMC_SDHCI_AM654=y
++CONFIG_DM_SPI_FLASH=y
++CONFIG_SF_DEFAULT_SPEED=25000000
++CONFIG_SPI_FLASH_SFDP_SUPPORT=y
++CONFIG_SPI_FLASH_SOFT_RESET=y
++CONFIG_SPI_FLASH_SOFT_RESET_ON_BOOT=y
++CONFIG_SPI_FLASH_SPANSION=y
++CONFIG_SPI_FLASH_S28HX_T=y
++CONFIG_PHY_TI_DP83867=y
++CONFIG_PHY_FIXED=y
++CONFIG_TI_AM65_CPSW_NUSS=y
++CONFIG_PHY=y
++CONFIG_PINCTRL=y
++CONFIG_SPL_PINCTRL=y
++CONFIG_PINCTRL_SINGLE=y
++CONFIG_POWER_DOMAIN=y
++CONFIG_TI_SCI_POWER_DOMAIN=y
++CONFIG_DM_REGULATOR=y
++CONFIG_SPL_DM_REGULATOR=y
++CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_SPL_DM_REGULATOR_FIXED=y
++CONFIG_DM_REGULATOR_GPIO=y
++CONFIG_SPL_DM_REGULATOR_GPIO=y
++CONFIG_K3_SYSTEM_CONTROLLER=y
++CONFIG_REMOTEPROC_TI_K3_ARM64=y
++CONFIG_REMOTEPROC_TI_K3_M4F=y
++CONFIG_RESET_TI_SCI=y
++CONFIG_DM_SERIAL=y
++CONFIG_SOC_DEVICE=y
++CONFIG_SOC_DEVICE_TI_K3=y
++CONFIG_SOC_TI=y
++CONFIG_SPI=y
++CONFIG_DM_SPI=y
++CONFIG_CADENCE_QSPI=y
++CONFIG_CADENCE_QSPI_PHY=y
++CONFIG_SYSRESET=y
++CONFIG_SPL_SYSRESET=y
++CONFIG_SYSRESET_TI_SCI=y
++CONFIG_DM_THERMAL=y
++CONFIG_USB=y
++CONFIG_DM_USB_GADGET=y
++CONFIG_SPL_DM_USB_GADGET=y
++CONFIG_USB_XHCI_HCD=y
++CONFIG_USB_DWC3=y
++CONFIG_USB_DWC3_GENERIC=y
++CONFIG_SPL_USB_DWC3_GENERIC=y
++CONFIG_SPL_USB_DWC3_AM62=y
++CONFIG_USB_DWC3_AM62=y
++CONFIG_USB_GADGET=y
++CONFIG_USB_GADGET_MANUFACTURER="Texas Instruments"
++CONFIG_USB_GADGET_VENDOR_NUM=0x0451
++CONFIG_USB_GADGET_PRODUCT_NUM=0x6165
++CONFIG_USB_GADGET_DOWNLOAD=y
++CONFIG_VIDEO=y
++# CONFIG_VIDEO_LOGO is not set
++CONFIG_SYS_WHITE_ON_BLACK=y
++CONFIG_VIDEO_TIDSS=y
++CONFIG_SPL_VIDEO_TIDSS=y
++CONFIG_VIDEO_BMP_GZIP=y
++CONFIG_BMP_24BPP=y
++CONFIG_BMP_32BPP=y
++CONFIG_SPL_VIDEO=y
++CONFIG_SPL_SPLASH_SCREEN=y
++CONFIG_SPL_SYS_WHITE_ON_BLACK=y
++CONFIG_SPL_SPLASH_SCREEN_ALIGN=y
++CONFIG_SPL_SPLASH_SOURCE=y
++CONFIG_SPL_VIDEO_BMP_GZIP=y
++CONFIG_SPL_BMP_24BPP=y
++CONFIG_SPL_BMP_32BPP=y
++CONFIG_SPL_HIDE_LOGO_VERSION=y
++CONFIG_FS_FAT_MAX_CLUSTSIZE=16384
++CONFIG_SPL_GZIP=y
++CONFIG_OF_LIBFDT_OVERLAY=y
+diff --git a/configs/iesy_am62xx_eva_mi_r5_defconfig b/configs/iesy_am62xx_eva_mi_r5_defconfig
+new file mode 100644
+index 0000000000..654db527aa
+--- /dev/null
++++ b/configs/iesy_am62xx_eva_mi_r5_defconfig
+@@ -0,0 +1,131 @@
++CONFIG_ARM=y
++CONFIG_ARCH_K3=y
++CONFIG_TI_SECURE_DEVICE=y
++CONFIG_SPL_STACK_R_MALLOC_SIMPLE_LEN=0x200000
++CONFIG_SYS_MALLOC_F_LEN=0x9000
++CONFIG_SPL_LIBCOMMON_SUPPORT=y
++CONFIG_SPL_LIBGENERIC_SUPPORT=y
++CONFIG_NR_DRAM_BANKS=2
++CONFIG_SOC_K3_AM625=y
++CONFIG_TARGET_IESY_AM62XX_EVA_MI_R5=y
++CONFIG_HAS_CUSTOM_SYS_INIT_SP_ADDR=y
++CONFIG_CUSTOM_SYS_INIT_SP_ADDR=0x43c3a7f0
++CONFIG_ENV_SIZE=0x20000
++CONFIG_DM_GPIO=y
++CONFIG_SPL_DM_SPI=y
++CONFIG_DEFAULT_DEVICE_TREE="iesy-am62xx-eva-mi-r5"
++CONFIG_DM_I2C=y
++CONFIG_SPL_I2C=y
++CONFIG_SYS_I2C_OMAP24XX=y
++CONFIG_SPL_TEXT_BASE=0x43c00000
++CONFIG_DM_RESET=y
++CONFIG_SPL_MMC=y
++CONFIG_SPL_SERIAL=y
++CONFIG_SPL_DRIVERS_MISC=y
++CONFIG_SPL_STACK_R_ADDR=0x82000000
++CONFIG_SPL_SYS_MALLOC_F_LEN=0x7000
++CONFIG_SPL_SIZE_LIMIT=0x3A7F0
++CONFIG_SPL_SIZE_LIMIT_PROVIDE_STACK=0x3500
++CONFIG_SPL_FS_FAT=y
++CONFIG_SPL_LIBDISK_SUPPORT=y
++CONFIG_SPL_SPI_FLASH_SUPPORT=y
++CONFIG_SPL_SPI=y
++CONFIG_SPL_LOAD_FIT=y
++CONFIG_SPL_LOAD_FIT_ADDRESS=0x80080000
++CONFIG_SPL_FIT_IMAGE_POST_PROCESS=y
++# CONFIG_DISPLAY_CPUINFO is not set
++CONFIG_SPL_SIZE_LIMIT_SUBTRACT_GD=y
++CONFIG_SPL_SIZE_LIMIT_SUBTRACT_MALLOC=y
++CONFIG_SPL_MAX_SIZE=0x3B000
++CONFIG_SPL_PAD_TO=0x0
++CONFIG_SPL_HAS_BSS_LINKER_SECTION=y
++CONFIG_SPL_BSS_START_ADDR=0x43c3b000
++CONFIG_SPL_BSS_MAX_SIZE=0x3000
++CONFIG_SPL_SYS_REPORT_STACK_F_USAGE=y
++CONFIG_SPL_SYS_MALLOC_SIMPLE=y
++CONFIG_SPL_STACK_R=y
++CONFIG_SPL_SEPARATE_BSS=y
++CONFIG_SYS_SPL_MALLOC=y
++CONFIG_HAS_CUSTOM_SPL_MALLOC_START=y
++CONFIG_CUSTOM_SYS_SPL_MALLOC_ADDR=0x84000000
++CONFIG_SYS_SPL_MALLOC_SIZE=0x1000000
++CONFIG_SPL_EARLY_BSS=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x400
++CONFIG_SPL_DM_MAILBOX=y
++CONFIG_SPL_DM_SPI_FLASH=y
++CONFIG_SPL_DM_RESET=y
++CONFIG_SPL_POWER_DOMAIN=y
++CONFIG_SPL_RAM_SUPPORT=y
++CONFIG_SPL_RAM_DEVICE=y
++CONFIG_SPL_REMOTEPROC=y
++# CONFIG_SPL_SPI_FLASH_TINY is not set
++CONFIG_SPL_SPI_FLASH_SFDP_SUPPORT=y
++CONFIG_SPL_SPI_LOAD=y
++CONFIG_SYS_SPI_U_BOOT_OFFS=0x80000
++CONFIG_SPL_YMODEM_SUPPORT=y
++CONFIG_HUSH_PARSER=y
++CONFIG_CMD_ASKENV=y
++CONFIG_CMD_DFU=y
++CONFIG_CMD_GPT=y
++CONFIG_CMD_MMC=y
++CONFIG_CMD_REMOTEPROC=y
++# CONFIG_CMD_SETEXPR is not set
++CONFIG_CMD_TIME=y
++CONFIG_CMD_FAT=y
++CONFIG_OF_CONTROL=y
++CONFIG_SPL_OF_CONTROL=y
++CONFIG_SPL_MULTI_DTB_FIT=y
++CONFIG_SPL_MULTI_DTB_FIT_NO_COMPRESSION=y
++CONFIG_SYS_RELOC_GD_ENV_ADDR=y
++CONFIG_SPL_DM=y
++CONFIG_SPL_DM_SEQ_ALIAS=y
++CONFIG_REGMAP=y
++CONFIG_SPL_REGMAP=y
++CONFIG_SPL_OF_TRANSLATE=y
++CONFIG_CLK=y
++CONFIG_SPL_CLK=y
++CONFIG_SPL_CLK_CCF=y
++CONFIG_SPL_CLK_K3_PLL=y
++CONFIG_SPL_CLK_K3=y
++CONFIG_TI_SCI_PROTOCOL=y
++CONFIG_DA8XX_GPIO=y
++CONFIG_DM_MAILBOX=y
++CONFIG_K3_SEC_PROXY=y
++CONFIG_SPL_MISC=y
++CONFIG_ESM_K3=y
++CONFIG_MMC_SDHCI=y
++CONFIG_MMC_SDHCI_ADMA=y
++CONFIG_SPL_MMC_SDHCI_ADMA=y
++CONFIG_MMC_SDHCI_AM654=y
++CONFIG_DM_SPI_FLASH=y
++CONFIG_SF_DEFAULT_MODE=0
++CONFIG_SF_DEFAULT_SPEED=25000000
++CONFIG_SPI_FLASH_SFDP_SUPPORT=y
++CONFIG_SPI_FLASH_SOFT_RESET=y
++CONFIG_SPI_FLASH_SOFT_RESET_ON_BOOT=y
++CONFIG_SPI_FLASH_SPANSION=y
++CONFIG_SPI_FLASH_S28HX_T=y
++CONFIG_PINCTRL=y
++# CONFIG_PINCTRL_GENERIC is not set
++CONFIG_SPL_PINCTRL=y
++# CONFIG_SPL_PINCTRL_GENERIC is not set
++CONFIG_PINCTRL_SINGLE=y
++CONFIG_POWER_DOMAIN=y
++CONFIG_TI_POWER_DOMAIN=y
++CONFIG_K3_SYSTEM_CONTROLLER=y
++CONFIG_REMOTEPROC_TI_K3_ARM64=y
++CONFIG_RESET_TI_SCI=y
++CONFIG_SPECIFY_CONSOLE_INDEX=y
++CONFIG_DM_SERIAL=y
++CONFIG_SOC_DEVICE=y
++CONFIG_SOC_DEVICE_TI_K3=y
++CONFIG_SOC_TI=y
++CONFIG_SPI=y
++CONFIG_DM_SPI=y
++CONFIG_CADENCE_QSPI=y
++CONFIG_TIMER=y
++CONFIG_SPL_TIMER=y
++CONFIG_OMAP_TIMER=y
++CONFIG_LIB_RATIONAL=y
++CONFIG_SPL_LIB_RATIONAL=y
+diff --git a/include/configs/iesy_am62xx_eva_mi.h b/include/configs/iesy_am62xx_eva_mi.h
+new file mode 100644
+index 0000000000..601eb83000
+--- /dev/null
++++ b/include/configs/iesy_am62xx_eva_mi.h
+@@ -0,0 +1,41 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Configuration header file for K3 AM625 SoC family
++ *
++ * Copyright (C) 2020-2022 Texas Instruments Incorporated - https://www.ti.com/
++ *	Suman Anna <s-anna@ti.com>
++ */
++
++#ifndef __CONFIG_IESY_AM62XX_EVA_MI_H
++#define __CONFIG_IESY_AM62XX_EVA_MI_H
++
++#include <config_distro_bootcmd.h>
++
++/* DDR Configuration */
++#define CFG_SYS_SDRAM_BASE1             0x880000000
++
++/* Now for the remaining common defines */
++#include <configs/ti_armv7_common.h>
++
++/* include Android related settings */
++#if CONFIG_CMD_ABOOTIMG
++#include <configs/am62x_evm_android.h>
++#endif
++
++/* NAND Driver config */
++#define CFG_SYS_NAND_BASE            0x51000000
++
++#define CFG_SYS_NAND_ECCPOS		{ 2, 3, 4, 5, 6, 7, 8, 9, \
++					 10, 11, 12, 13, 14, 15, 16, 17, \
++					 18, 19, 20, 21, 22, 23, 24, 25, \
++					 26, 27, 28, 29, 30, 31, 32, 33, \
++					 34, 35, 36, 37, 38, 39, 40, 41, \
++					 42, 43, 44, 45, 46, 47, 48, 49, \
++					 50, 51, 52, 53, 54, 55, 56, 57, }
++
++#define CFG_SYS_NAND_ECCSIZE         512
++
++#define CFG_SYS_NAND_ECCBYTES        14
++/*-- end NAND config --*/
++
++#endif /* __CONFIG_IESY_AM62XX_EVA_MI_H */
+-- 
+2.30.2
+
