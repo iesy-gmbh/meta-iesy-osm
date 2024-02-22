@@ -12,6 +12,7 @@ SRC_URI += " \
     file://0008-driver-net-phy-config-eth-phy-behavior.patch \
     file://0009-arm64-dts-iesy-iesy-imx8mm-osm-sf-fix-UART-B.patch \
     file://0010-arm64-dts-iesy-iesy-imx8mm-osm-sf-add-DMIC.patch \
+    file://0011-arm64-dts-iesy-set-HW-revision-for-i.MX8-evaluation-.patch \
 "
 
 
