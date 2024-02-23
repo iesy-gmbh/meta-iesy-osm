@@ -1,0 +1,76 @@
+From 4f3f24aa58254d528dbabd6dacaf89e41ff035bd Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 23 Feb 2024 09:20:57 +0100
+Subject: [PATCH 12/12] arm64: dts: iesy: move i2c2 pinmux to module
+
+the pin muxing of the i2c2 bus should be done in the module, the board should only activate the interface and use it, or adjust the drive strength.
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts | 10 ----------
+ arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi   | 14 ++++++++++++++
+ 2 files changed, 14 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
+index 6ab6e2d06af6..d5abf7e68e73 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
+@@ -209,9 +209,6 @@ eeprom@53 {
+ };
+ 
+ &i2c2 {
+-	clock-frequency = <400000>;
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_i2c2>;
+ 	status = "okay";
+ 
+ 	max9867: audio_codec@18 {
+@@ -307,13 +304,6 @@ MX8MM_IOMUXC_SAI2_RXD0_GPIO4_IO23	0x156
+ 		>;
+ 	};
+ 
+-	pinctrl_i2c2: i2c2grp {
+-		fsl,pins = <
+-			MX8MM_IOMUXC_I2C2_SCL_I2C2_SCL			0x400001c3
+-			MX8MM_IOMUXC_I2C2_SDA_I2C2_SDA			0x400001c3
+-		>;
+-	};
+-
+ 	pinctrl_i2c3: i2c3grp {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_I2C3_SCL_I2C3_SCL			0x400001c3
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
+index 18304bb767d2..fcb57f3a0019 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
+@@ -305,6 +305,13 @@ eeprom@50 {
+ 	};
+ };
+ 
++&i2c2 {
++	clock-frequency = <400000>;
++	status = "disabled";
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c2>;
++};
++
+ &pwm1 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+@@ -352,6 +359,13 @@ MX8MM_IOMUXC_I2C1_SDA_GPIO5_IO15        	0x1c3
+ 		>;
+ 	};
+ 
++	pinctrl_i2c2: i2c2grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_I2C2_SCL_I2C2_SCL			0x400001c3
++			MX8MM_IOMUXC_I2C2_SDA_I2C2_SDA			0x400001c3
++		>;
++	};
++
+     pinctrl_pmic: pmicirq {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_GPIO1_IO03_GPIO1_IO3		0x41
+-- 
+2.30.2
+
