@@ -4,8 +4,8 @@ SUMMARY = "Arm Trusted Firmware for Rockchip platforms"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://docs/license.rst;md5=b2c740efedc159745b9b31f88ff03dde"
 
-SRCREV = "${AUTOREV}"
-SRC_URI = "git://github.com/ARM-software/arm-trusted-firmware.git;protocol=https;branch=master"
+SRCREV = "a1be69e6c5db450f841f0edd9d734bf3cffb6621"
+SRC_URI = "git://github.com/ARM-software/arm-trusted-firmware.git;protocol=https;nobranch=1"
 
 S = "${WORKDIR}/git"
 
