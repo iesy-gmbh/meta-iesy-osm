@@ -1,0 +1,57 @@
+From d47ede1ec467b481a2f66f4ade322bfdcb66d60d Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 8 Mar 2024 12:31:03 +0100
+Subject: [PATCH 3/3] arm64: dts: ti: iesy-am62x: update regulators for sd card
+
+vqmmc-supply should move to the module, the voltage is provided by the pmic
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     | 20 ++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index b1075ef28004..24a444026232 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -54,16 +54,21 @@ vcc_3v3_sys: regulator-2 {
+ 		regulator-boot-on;
+ 	};
+ 
+-	vdd_mmc1: regulator-3 {
+-		/* TPS22918DBVR */
++	reg_3v3_carrier: 3v3_regulator {
+ 		compatible = "regulator-fixed";
+-		regulator-name = "vdd_mmc1";
++		regulator-name = "3V3_carrier_reg";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-always-on;
++	};
++
++	reg_3v3_sd: 3v3_regulator_sd {
++		compatible = "regulator-fixed";
++		regulator-name = "3V3 SD";
+ 		regulator-min-microvolt = <3300000>;
+ 		regulator-max-microvolt = <3300000>;
+ 		regulator-boot-on;
+-		// enable-active-high;
+-		vin-supply = <&vcc_3v3_sys>;
+-		// gpio = <&exp1 3 GPIO_ACTIVE_HIGH>;
++		vin-supply = <&reg_3v3_carrier>;
+ 	};
+ 
+ 	vdd_sd_dv: regulator-4 {
+@@ -229,7 +234,8 @@ exp1: gpio@22 {
+ };
+ 
+ &sdhci1 {
+-	vmmc-supply = <&vdd_mmc1>;
++	vmmc-supply = <&reg_3v3_sd>;
++	// TODO: replace with PMIC LDO1, move to module
+ 	vqmmc-supply = <&vdd_sd_dv>;
+ };
+ 
+-- 
+2.30.2
+
