@@ -1,0 +1,49 @@
+From 432eb4ee99f0c69f7c5a817f9818d813094111ae Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 8 Mar 2024 09:35:22 +0100
+Subject: [PATCH 2/2] arm64: dts: ti: iesy-am62x: config memory
+
+remove the memory node from the baseboard, set memory to 1GB in the module
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts | 7 -------
+ arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi   | 4 ++--
+ 2 files changed, 2 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 9b8e00589b7a..b1075ef28004 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -22,13 +22,6 @@ opp-1400000000 {
+ 		};
+ 	};
+ 
+-	memory@80000000 {
+-		device_type = "memory";
+-		/* 2G RAM */
+-		reg = <0x00000000 0x80000000 0x00000000 0x40000000>;
+-
+-	};
+-
+ 	vmain_pd: regulator-0 {
+ 		/* TPS65988 PD CONTROLLER OUTPUT */
+ 		compatible = "regulator-fixed";
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index cb5f20778b3e..eb2962f4bbc5 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -50,8 +50,8 @@ framebuffer0: framebuffer@0 {
+ 
+ 	memory@80000000 {
+ 		device_type = "memory";
+-		/* 2G RAM */
+-		reg = <0x00000000 0x80000000 0x00000000 0x80000000>;
++		/* 1G RAM */
++		reg = <0x00000000 0x80000000 0x00000000 0x40000000>;
+ 
+ 	};
+ 
+-- 
+2.30.2
+
