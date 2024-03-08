@@ -1,0 +1,38 @@
+From 009c979ba3e83b94e935f4fca1f6fcde7b04692e Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 7 Mar 2024 17:38:50 +0100
+Subject: [PATCH 2/2] board: ti: am62x: use iesy device tree
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ board/ti/am62x/am62x.env | 12 +-----------
+ 1 file changed, 1 insertion(+), 11 deletions(-)
+
+diff --git a/board/ti/am62x/am62x.env b/board/ti/am62x/am62x.env
+index e507ca276c..dda527fa8e 100644
+--- a/board/ti/am62x/am62x.env
++++ b/board/ti/am62x/am62x.env
+@@ -7,19 +7,9 @@
+ #include <environment/ti/k3_rproc.env>
+ #endif
+ 
+-default_device_tree=ti/k3-am625-sk.dtb
++default_device_tree=ti/iesy-am62xx-eva-mi-v1.dtb
+ findfdt=
+ 	setenv name_fdt ${default_device_tree};
+-	if test $board_name = am62x_skevm; then
+-			setenv name_fdt ti/k3-am625-sk.dtb; fi;
+-	if test $board_name = am62b_p1_skevm; then
+-			setenv name_fdt ti/k3-am625-sk.dtb; fi;
+-	if test $board_name = am62x_sip_skevm; then
+-                        setenv name_fdt ti/k3-am625-sk.dtb; fi;
+-	if test $board_name = am62x_lp_skevm; then
+-			setenv name_fdt ti/k3-am62-lp-sk.dtb; fi;
+-	if test $board_name = am62x_beagleplay; then
+-			setenv name_fdt ti/k3-am625-beagleplay.dtb; fi;
+ 	setenv fdtfile ${name_fdt}
+ name_kern=Image
+ console=ttyS2,115200n8
+-- 
+2.30.2
+
