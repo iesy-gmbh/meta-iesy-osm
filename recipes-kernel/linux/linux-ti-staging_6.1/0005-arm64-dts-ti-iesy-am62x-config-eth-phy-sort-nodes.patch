@@ -1,0 +1,144 @@
+From 284339b77d477937251f20102a3e086b96f74952 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 11 Mar 2024 12:25:20 +0100
+Subject: [PATCH 5/6] arm64: dts: ti: iesy-am62x: config eth phy, sort nodes
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     | 37 ++++++++-----------
+ .../arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 32 +++++++++-------
+ 2 files changed, 35 insertions(+), 34 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 22ff4b0e6d9b..aa293d5f165c 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -7,6 +7,7 @@
+ 
+ /dts-v1/;
+ 
++#include <dt-bindings/net/mscc-phy-vsc8531.h>
+ #include "iesy-am62xx-osm-lf.dtsi"
+ 
+ / {
+@@ -116,23 +117,6 @@ vdd_core: regulator-8 {
+ };
+ 
+ &main_pmx0 {
+-	main_rgmii2_pins_default: main-rgmii2-pins-default {
+-		pinctrl-single,pins = <
+-			AM62X_IOPAD(0x184, PIN_INPUT, 0) /* (AE23) RGMII2_RD0 */
+-			AM62X_IOPAD(0x188, PIN_INPUT, 0) /* (AB20) RGMII2_RD1 */
+-			AM62X_IOPAD(0x18c, PIN_INPUT, 0) /* (AC21) RGMII2_RD2 */
+-			AM62X_IOPAD(0x190, PIN_INPUT, 0) /* (AE22) RGMII2_RD3 */
+-			AM62X_IOPAD(0x180, PIN_INPUT, 0) /* (AD23) RGMII2_RXC */
+-			AM62X_IOPAD(0x17c, PIN_INPUT, 0) /* (AD22) RGMII2_RX_CTL */
+-			AM62X_IOPAD(0x16c, PIN_OUTPUT, 0) /* (Y18) RGMII2_TD0 */
+-			AM62X_IOPAD(0x170, PIN_OUTPUT, 0) /* (AA18) RGMII2_TD1 */
+-			AM62X_IOPAD(0x174, PIN_OUTPUT, 0) /* (AD21) RGMII2_TD2 */
+-			AM62X_IOPAD(0x178, PIN_OUTPUT, 0) /* (AC20) RGMII2_TD3 */
+-			AM62X_IOPAD(0x168, PIN_OUTPUT, 0) /* (AE21) RGMII2_TXC */
+-			AM62X_IOPAD(0x164, PIN_OUTPUT, 0) /* (AA19) RGMII2_TX_CTL */
+-		>;
+-	};
+-
+ 	ospi0_pins_default: ospi0-pins-default {
+ 		pinctrl-single,pins = <
+ 			AM62X_IOPAD(0x000, PIN_OUTPUT, 0) /* (H24) OSPI0_CLK */
+@@ -243,22 +227,33 @@ wlcore: wlcore@2 {
+ };
+ 
+ &cpsw3g {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&main_rgmii1_pins_default
+-		     &main_rgmii2_pins_default>;
+-
+ 	cpts@3d000 {
+ 		/* MAP HW3_TS_PUSH to GENF1 */
+ 		ti,pps = <2 1>;
+ 	};
+ };
+ 
++&cpsw_port1 {
++	phy-mode = "rgmii-rxid";
++	phy-handle = <&cpsw3g_phy0>;
++};
++
+ &cpsw_port2 {
+ 	phy-mode = "rgmii-rxid";
+ 	phy-handle = <&cpsw3g_phy1>;
+ };
+ 
+ &cpsw3g_mdio {
++	cpsw3g_phy0: ethernet-phy@0 {
++		reg = <0>;
++		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
++		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
++		ti,min-output-impedance;
++		compatible = "ethernet-phy-id0007.0770";
++		vsc8531,led-0-mode = <VSC8531_LINK_1000_ACTIVITY>;
++		vsc8531,led-1-mode = <VSC8531_LINK_1000_ACTIVITY>;
++	};
++
+ 	cpsw3g_phy1: ethernet-phy@1 {
+ 		reg = <1>;
+ 		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 96626c616028..85a6824f2c1e 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -293,6 +293,23 @@ AM62X_IOPAD(0x12c, PIN_OUTPUT, 0) /* (AD19/V15) RGMII1_TX_CTL */
+ 		>;
+ 	};
+ 
++	main_rgmii2_pins_default: main-rgmii2-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x184, PIN_INPUT, 0) /* (AE23) RGMII2_RD0 */
++			AM62X_IOPAD(0x188, PIN_INPUT, 0) /* (AB20) RGMII2_RD1 */
++			AM62X_IOPAD(0x18c, PIN_INPUT, 0) /* (AC21) RGMII2_RD2 */
++			AM62X_IOPAD(0x190, PIN_INPUT, 0) /* (AE22) RGMII2_RD3 */
++			AM62X_IOPAD(0x180, PIN_INPUT, 0) /* (AD23) RGMII2_RXC */
++			AM62X_IOPAD(0x17c, PIN_INPUT, 0) /* (AD22) RGMII2_RX_CTL */
++			AM62X_IOPAD(0x16c, PIN_OUTPUT, 0) /* (Y18) RGMII2_TD0 */
++			AM62X_IOPAD(0x170, PIN_OUTPUT, 0) /* (AA18) RGMII2_TD1 */
++			AM62X_IOPAD(0x174, PIN_OUTPUT, 0) /* (AD21) RGMII2_TD2 */
++			AM62X_IOPAD(0x178, PIN_OUTPUT, 0) /* (AC20) RGMII2_TD3 */
++			AM62X_IOPAD(0x168, PIN_OUTPUT, 0) /* (AE21) RGMII2_TXC */
++			AM62X_IOPAD(0x164, PIN_OUTPUT, 0) /* (AA19) RGMII2_TX_CTL */
++		>;
++	};
++
+ 	ospi0_pins_default: ospi0-pins-default {
+ 		pinctrl-single,pins = <
+ 			AM62X_IOPAD(0x000, PIN_OUTPUT, 0) /* (H24) OSPI0_CLK */
+@@ -543,25 +560,14 @@ &sdhci1 {
+ 
+ &cpsw3g {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&main_rgmii1_pins_default>;
+-};
+-
+-&cpsw_port1 {
+-	phy-mode = "rgmii-rxid";
+-	phy-handle = <&cpsw3g_phy0>;
++	pinctrl-0 = <&main_rgmii1_pins_default
++		     &main_rgmii2_pins_default>;
+ };
+ 
+ &cpsw3g_mdio {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&main_mdio1_pins_default>;
+-
+-	cpsw3g_phy0: ethernet-phy@0 {
+-		reg = <0>;
+-		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
+-		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
+-		ti,min-output-impedance;
+-	};
+ };
+ 
+ &mailbox0_cluster0 {
+-- 
+2.30.2
+
