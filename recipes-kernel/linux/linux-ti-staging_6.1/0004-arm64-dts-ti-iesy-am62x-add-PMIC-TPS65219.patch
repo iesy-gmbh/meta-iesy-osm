@@ -1,0 +1,172 @@
+From 2e6d84cb58f1f1aec3453fabf7c36c56793313ad Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 11 Mar 2024 09:41:12 +0100
+Subject: [PATCH 4/4] arm64: dts: ti: iesy-am62x: add PMIC TPS65219
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     | 23 ------
+ .../arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 78 +++++++++++++++++++
+ 2 files changed, 78 insertions(+), 23 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 24a444026232..22ff4b0e6d9b 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -71,21 +71,6 @@ reg_3v3_sd: 3v3_regulator_sd {
+ 		vin-supply = <&reg_3v3_carrier>;
+ 	};
+ 
+-	vdd_sd_dv: regulator-4 {
+-		/* Output of TLV71033 */
+-		compatible = "regulator-gpio";
+-		regulator-name = "tlv71033";
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&vdd_sd_dv_pins_default>;
+-		regulator-min-microvolt = <1800000>;
+-		regulator-max-microvolt = <3300000>;
+-		regulator-boot-on;
+-		vin-supply = <&vcc_5v0>;
+-		gpios = <&main_gpio0 31 GPIO_ACTIVE_HIGH>;
+-		states = <1800000 0x0>,
+-			 <3300000 0x1>;
+-	};
+-
+ 	vcc_1v8: regulator-5 {
+ 		/* output of TPS6282518DMQ */
+ 		compatible = "regulator-fixed";
+@@ -164,12 +149,6 @@ AM62X_IOPAD(0x008, PIN_INPUT, 0) /* (J24) OSPI0_DQS */
+ 		>;
+ 	};
+ 
+-	vdd_sd_dv_pins_default: vdd-sd-dv-pins-default {
+-		pinctrl-single,pins = <
+-			AM62X_IOPAD(0x07c, PIN_OUTPUT, 7) /* (P25) GPMC0_CLK.GPIO0_31 */
+-		>;
+-	};
+-
+ 	main_gpio1_ioexp_intr_pins_default: main-gpio1-ioexp-intr-pins-default {
+ 		pinctrl-single,pins = <
+ 			AM62X_IOPAD(0x01d4, PIN_INPUT, 7) /* (B15) UART0_RTSn.GPIO1_23 */
+@@ -235,8 +214,6 @@ exp1: gpio@22 {
+ 
+ &sdhci1 {
+ 	vmmc-supply = <&reg_3v3_sd>;
+-	// TODO: replace with PMIC LDO1, move to module
+-	vqmmc-supply = <&vdd_sd_dv>;
+ };
+ 
+ &sdhci2 {
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index eb2962f4bbc5..96626c616028 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -125,6 +125,20 @@ framebuffer: framebuffer@ff700000 {
+ 		};
+ 	};
+ 
++	sdcard_io_reg: ldo1-regulator{
++		/* Output of LDO1 */
++		compatible = "regulator-gpio";
++		regulator-name = "SDCARD_IO_reg";
++		pinctrl-names = "default";
++		pinctrl-0 = <&sdcard_io_reg_pins_default>;
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-boot-on;
++		gpios = <&main_gpio0 31 GPIO_ACTIVE_HIGH>;
++		states = <1800000 0x0>,
++			 <3300000 0x1>;
++	};
++
+ 	leds {
+ 		compatible = "gpio-leds";
+ 		pinctrl-names = "default";
+@@ -216,6 +230,12 @@ AM62X_IOPAD(0x0b4, PIN_INPUT_PULLUP, 1) /* (K24/H19) GPMC0_CSn3.I2C2_SDA */
+ 		>;
+ 	};
+ 
++	sdcard_io_reg_pins_default: sdcard-io-reg-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x07c, PIN_OUTPUT, 7) /* (P25) GPMC0_CLK.GPIO0_31 */
++		>;
++	};
++
+ 	main_mmc0_pins_default: main-mmc0-pins-default {
+ 		pinctrl-single,pins = <
+ 			AM62X_IOPAD(0x220, PIN_INPUT, 0) /* (Y3/V3) MMC0_CMD */
+@@ -363,6 +383,63 @@ &main_i2c0 {
+ 	pinctrl-0 = <&main_i2c0_pins_default>;
+ 	clock-frequency = <400000>;
+ 
++	tps65219: pmic@30 {
++		compatible = "ti,tps65219";
++		reg = <0x30>;
++
++		interrupts = <GIC_SPI 224 IRQ_TYPE_LEVEL_HIGH>;
++
++		regulators {
++			buck1_reg: buck1 {
++				regulator-name = "0V8_CORE";
++				regulator-min-microvolt = <750000>;
++				regulator-max-microvolt = <750000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			buck2_reg: buck2 {
++				regulator-name = "1V8_IO";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			buck3_reg: buck3 {
++				regulator-name = "1V1_DDR";
++				regulator-min-microvolt = <1100000>;
++				regulator-max-microvolt = <1100000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			ldo1_reg: ldo1 {
++				regulator-name = "SDCARD_IO";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			ldo2_reg: ldo2 {
++				regulator-name = "0V85_CORE";
++				regulator-min-microvolt = <850000>;
++				regulator-max-microvolt = <850000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++
++			ldo3_reg: ldo3 {
++				regulator-name = "1V8_VDDA";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-boot-on;
++				regulator-always-on;
++			};
++		};
++	};
++
+ 	typec_pd0: tps6598x@3f {
+ 		compatible = "ti,tps6598x";
+ 		reg = <0x3f>;
+@@ -459,6 +536,7 @@ &sdhci1 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&main_mmc1_pins_default>;
++	vqmmc-supply = <&sdcard_io_reg>;
+ 	ti,driver-strength-ohm = <50>;
+ 	disable-wp;
+ };
+-- 
+2.30.2
+
