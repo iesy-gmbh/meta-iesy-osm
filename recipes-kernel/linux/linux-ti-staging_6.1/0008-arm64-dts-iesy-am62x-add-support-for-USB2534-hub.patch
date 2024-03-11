@@ -1,0 +1,29 @@
+From b09924954221548f6bb5d5743dd4410936e9feac Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 11 Mar 2024 16:30:56 +0100
+Subject: [PATCH 8/8] arm64: dts: iesy-am62x: add support for USB2534 hub
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 85a6824f2c1e..54f33cc25977 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -400,6 +400,11 @@ &main_i2c0 {
+ 	pinctrl-0 = <&main_i2c0_pins_default>;
+ 	clock-frequency = <400000>;
+ 
++	usb2534: usb2534@2d {
++		compatible = "microchip,usb2534";
++		reg = <0x2d>;
++	};
++
+ 	tps65219: pmic@30 {
+ 		compatible = "ti,tps65219";
+ 		reg = <0x30>;
+-- 
+2.30.2
+
