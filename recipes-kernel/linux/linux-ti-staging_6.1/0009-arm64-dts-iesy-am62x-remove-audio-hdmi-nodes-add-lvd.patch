@@ -1,0 +1,232 @@
+From 747b10f5d01bf1f59a42c1b379268abaaf503be8 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 12 Mar 2024 16:30:00 +0100
+Subject: [PATCH 9/9] arm64: dts: iesy-am62x: remove audio/hdmi nodes, add lvds
+ display
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     |  28 +++-
+ .../arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 135 +++++-------------
+ 2 files changed, 64 insertions(+), 99 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index aa293d5f165c..555853152d4f 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -23,6 +23,31 @@ opp-1400000000 {
+ 		};
+ 	};
+ 
++	display {
++		compatible = "microtips,mf-101hiebcaf0";
++		/*
++		* Note that the OLDI TX 0 transmits the odd set of pixels
++		* while the OLDI TX 1 transmits the even set. This is a
++		* fixed configuration in the IP integration and is not
++		* changeable. The properties, "dual-lvds-odd-pixels" and
++		* "dual-lvds-even-pixels" have been used to merely
++		* identify if a Dual Link configuration is required.
++		* Swapping them will not make any difference.
++		*/
++		port@0 {
++			dual-lvds-odd-pixels;
++			lcd_in0: endpoint {
++				remote-endpoint = <&oldi_out0>;
++			};
++		};
++		port@1 {
++			dual-lvds-even-pixels;
++			lcd_in1: endpoint {
++				remote-endpoint = <&oldi_out1>;
++			};
++		};
++	};
++
+ 	vmain_pd: regulator-0 {
+ 		/* TPS65988 PD CONTROLLER OUTPUT */
+ 		compatible = "regulator-fixed";
+@@ -164,9 +189,6 @@ AM62X_IOPAD(0x128, PIN_INPUT, 7) /* (B23) MMC2_SDWP.GPIO0_72 */
+ 	};
+ };
+ 
+-/delete-node/ &tlv320aic3106;
+-/delete-node/ &codec_audio;
+-
+ &main_i2c1 {
+ 	exp1: gpio@22 {
+ 		compatible = "ti,tca6424";
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 54f33cc25977..019ea14b34e5 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -152,52 +152,6 @@ led-0 {
+ 			default-state = "off";
+ 		};
+ 	};
+-
+-	tlv320_mclk: clk-0 {
+-		#clock-cells = <0>;
+-		compatible = "fixed-clock";
+-		clock-frequency = <12288000>;
+-	};
+-
+-	codec_audio: sound {
+-		compatible = "simple-audio-card";
+-		simple-audio-card,name = "AM62x-SKEVM";
+-		simple-audio-card,widgets =
+-			"Headphone",	"Headphone Jack",
+-			"Line",		"Line In",
+-			"Microphone",	"Microphone Jack";
+-		simple-audio-card,routing =
+-			"Headphone Jack",	"HPLOUT",
+-			"Headphone Jack",	"HPROUT",
+-			"LINE1L",		"Line In",
+-			"LINE1R",		"Line In",
+-			"MIC3R",		"Microphone Jack",
+-			"Microphone Jack",	"Mic Bias";
+-		simple-audio-card,format = "dsp_b";
+-		simple-audio-card,bitclock-master = <&sound_master>;
+-		simple-audio-card,frame-master = <&sound_master>;
+-		simple-audio-card,bitclock-inversion;
+-
+-		simple-audio-card,cpu {
+-			sound-dai = <&mcasp1>;
+-		};
+-
+-		sound_master: simple-audio-card,codec {
+-			sound-dai = <&tlv320aic3106>;
+-			clocks = <&tlv320_mclk>;
+-		};
+-	};
+-
+-	hdmi: connector {
+-		compatible = "hdmi-connector";
+-		label = "hdmi";
+-		type = "a";
+-		port {
+-			hdmi_connector_in: endpoint {
+-				remote-endpoint = <&sii9022_out>;
+-			};
+-		};
+-	};
+ };
+ 
+ &main_pmx0 {
+@@ -373,6 +327,31 @@ AM62X_IOPAD(0x0074, PIN_OUTPUT, 1) /* (U25) GPMC0_AD14.VOUT0_DATA22 */
+ 			AM62X_IOPAD(0x0078, PIN_OUTPUT, 1) /* (U24) GPMC0_AD15.VOUT0_DATA23 */
+ 		>;
+ 	};
++
++	main_oldi0_pins_default: main-oldi0-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x0260, PIN_OUTPUT, 0) /* (AA5) OLDI0_A0N */
++			AM62X_IOPAD(0x025c, PIN_OUTPUT, 0) /* (Y6) OLDI0_A0P */
++			AM62X_IOPAD(0x0268, PIN_OUTPUT, 0) /* (AD3) OLDI0_A1N */
++			AM62X_IOPAD(0x0264, PIN_OUTPUT, 0) /* (AB4) OLDI0_A1P */
++			AM62X_IOPAD(0x0270, PIN_OUTPUT, 0) /* (Y8) OLDI0_A2N */
++			AM62X_IOPAD(0x026c, PIN_OUTPUT, 0) /* (AA8) OLDI0_A2P */
++			AM62X_IOPAD(0x0278, PIN_OUTPUT, 0) /* (AB6) OLDI0_A3N */
++			AM62X_IOPAD(0x0274, PIN_OUTPUT, 0) /* (AA7) OLDI0_A3P */
++			AM62X_IOPAD(0x0280, PIN_OUTPUT, 0) /* (AC6) OLDI0_A4N */
++			AM62X_IOPAD(0x027c, PIN_OUTPUT, 0) /* (AC5) OLDI0_A4P */
++			AM62X_IOPAD(0x0288, PIN_OUTPUT, 0) /* (AE5) OLDI0_A5N */
++			AM62X_IOPAD(0x0284, PIN_OUTPUT, 0) /* (AD6) OLDI0_A5P */
++			AM62X_IOPAD(0x0290, PIN_OUTPUT, 0) /* (AE6) OLDI0_A6N */
++			AM62X_IOPAD(0x028c, PIN_OUTPUT, 0) /* (AD7) OLDI0_A6P */
++			AM62X_IOPAD(0x0298, PIN_OUTPUT, 0) /* (AD8) OLDI0_A7N */
++			AM62X_IOPAD(0x0294, PIN_OUTPUT, 0) /* (AE7) OLDI0_A7P */
++			AM62X_IOPAD(0x02a0, PIN_OUTPUT, 0) /* (AD4) OLDI0_CLK0N */
++			AM62X_IOPAD(0x029c, PIN_OUTPUT, 0) /* (AE3) OLDI0_CLK0P */
++			AM62X_IOPAD(0x02a8, PIN_OUTPUT, 0) /* (AE4) OLDI0_CLK1N */
++			AM62X_IOPAD(0x02a4, PIN_OUTPUT, 0) /* (AD5) OLDI0_CLK1P */
++		>;
++	};
+ };
+ 
+ &wkup_uart0 {
+@@ -492,50 +471,6 @@ &main_i2c1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&main_i2c1_pins_default>;
+ 	clock-frequency = <100000>;
+-
+-	tlv320aic3106: audio-codec@1b {
+-		#sound-dai-cells = <0>;
+-		compatible = "ti,tlv320aic3106";
+-		reg = <0x1b>;
+-		ai3x-micbias-vg = <1>;	/* 2.0V */
+-
+-		/* Regulators */
+-		AVDD-supply = <&vcc_3v3_sys>;
+-		IOVDD-supply = <&vcc_3v3_sys>;
+-		DRVDD-supply = <&vcc_3v3_sys>;
+-	};
+-
+-	sii9022: sii9022@3b {
+-		#sound-dai-cells = <0>;
+-		compatible = "sil,sii9022";
+-		reg = <0x3b>;
+-
+-		interrupt-parent = <&exp1>;
+-		interrupts = <16 IRQ_TYPE_EDGE_FALLING>;
+-
+-		sil,i2s-data-lanes = < 0 >;
+-
+-		ports {
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+-
+-			port@0 {
+-				reg = <0>;
+-
+-				sii9022_in: endpoint {
+-					remote-endpoint = <&dpi1_out>;
+-				};
+-			};
+-
+-			port@1 {
+-				reg = <1>;
+-
+-				sii9022_out: endpoint {
+-					remote-endpoint = <&hdmi_connector_in>;
+-				};
+-			};
+-		};
+-	};
+ };
+ 
+ &main_i2c2 {
+@@ -664,16 +599,24 @@ &dphy0 {
+ 
+ &dss {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&main_dss0_pins_default>;
++	pinctrl-0 = <&main_oldi0_pins_default &main_dss0_pins_default>;
++	status = "okay";
+ };
+ 
+ &dss_ports {
+-	/* VP2: DPI Output */
+-	port@1 {
+-		reg = <1>;
++	/* VP1: LVDS Output (OLDI TX 0) */
++	port@0 {
++		reg = <0>;
++		oldi_out0: endpoint {
++			remote-endpoint = <&lcd_in0>;
++		};
++	};
+ 
+-		dpi1_out: endpoint {
+-			remote-endpoint = <&sii9022_in>;
++	/* VP1: LVDS Output (OLDI TX 1) */
++	port@2 {
++		reg = <2>;
++		oldi_out1: endpoint {
++			remote-endpoint = <&lcd_in1>;
+ 		};
+ 	};
+ };
+-- 
+2.30.2
+

@@ -13,6 +13,7 @@ SRC_URI += " \
     file://0006-driver-net-phy-config-eth-phy-behavior.patch \
     file://0007-dt-bindings-usb-Add-Microchip-USB253x-USB3x13-USB46x.patch \
     file://0008-arm64-dts-iesy-am62x-add-support-for-USB2534-hub.patch \
+    file://0009-arm64-dts-iesy-am62x-remove-audio-hdmi-nodes-add-lvd.patch \
 "
 KERNEL_CONFIG_FRAGMENTS:append = "\
     ${APPEND_DIR}/fragment.config \
