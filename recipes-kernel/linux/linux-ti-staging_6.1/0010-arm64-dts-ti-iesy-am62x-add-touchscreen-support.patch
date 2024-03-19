@@ -1,0 +1,139 @@
+From 8e62d5151be0149537b0a0d161d367b53092ea4b Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 18 Mar 2024 14:03:21 +0100
+Subject: [PATCH 10/10] arm64: dts: ti: iesy-am62x: add touchscreen support
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     | 24 +++++++++
+ .../arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 50 +++++++------------
+ 2 files changed, 41 insertions(+), 33 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 555853152d4f..17c67c090044 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -218,6 +218,30 @@ exp1: gpio@22 {
+ 	};
+ };
+ 
++&main_i2c3 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	touchscreen@41 {
++		compatible = "ilitek,ili251x";
++		reg = <0x41>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&main_ts_pins_default>;
++		interrupt-parent = <&mcu_gpio0>;
++		interrupts = <11 IRQ_TYPE_EDGE_FALLING>;
++	};
++};
++
++&mcu_pmx0 {
++	status = "okay";
++
++	main_ts_pins_default: main-ts-pins-default {
++		pinctrl-single,pins = <
++			AM62X_MCU_IOPAD(0x002c, PIN_INPUT, 7) /* (C6) WKUP_UART0_CTSn.MCU_GPIO0_11 */
++		>;
++	};
++};
++
+ &sdhci1 {
+ 	vmmc-supply = <&reg_3v3_sd>;
+ };
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 019ea14b34e5..7af554d56ccd 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -280,6 +280,13 @@ AM62X_IOPAD(0x008, PIN_INPUT, 0) /* (J24) OSPI0_DQS */
+ 		>;
+ 	};
+ 
++	lvdsi2c_pins_default: lvdsi2c-default-pins {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x01d0, PIN_INPUT, 2) /* (A15) UART0_CTSn.I2C3_SCL */
++			AM62X_IOPAD(0x01d4, PIN_INPUT, 2) /* (B15) UART0_RTSn.I2C3_SDA */
++		>;
++	};
++
+ 	main_usb1_pins_default: main-usb1-pins-default {
+ 		pinctrl-single,pins = <
+ 			AM62X_IOPAD(0x0258, PIN_OUTPUT, 0) /* (F18/E16) USB1_DRVVBUS */
+@@ -440,30 +447,6 @@ ldo3_reg: ldo3 {
+ 			};
+ 		};
+ 	};
+-
+-	typec_pd0: tps6598x@3f {
+-		compatible = "ti,tps6598x";
+-		reg = <0x3f>;
+-
+-		connector {
+-			compatible = "usb-c-connector";
+-			label = "USB-C";
+-			self-powered;
+-			data-role = "dual";
+-			power-role = "sink";
+-			ports {
+-				#address-cells = <1>;
+-				#size-cells = <0>;
+-
+-				port@0 {
+-					reg = <0>;
+-					usb_con_hs: endpoint {
+-						remote-endpoint = <&usb0_hs_ep>;
+-					};
+-				};
+-			};
+-		};
+-	};
+ };
+ 
+ &main_i2c1 {
+@@ -480,6 +463,14 @@ &main_i2c2 {
+ 	clock-frequency = <400000>;
+ };
+ 
++/* LVDS CTRL */
++&main_i2c3 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&lvdsi2c_pins_default>;
++	clock-frequency = <100000>;
++};
++
+ &sdhci0 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+@@ -548,13 +539,6 @@ &usb0 {
+ 	#address-cells = <1>;
+ 	#size-cells = <0>;
+ 	usb-role-switch;
+-
+-	port@0 {
+-		reg = <0>;
+-		usb0_hs_ep: endpoint {
+-		    remote-endpoint = <&usb_con_hs>;
+-	       };
+-	};
+ };
+ 
+ &usb1 {
+@@ -623,9 +607,9 @@ oldi_out1: endpoint {
+ 
+ /* mcu_gpio0 and mcu_gpio_intr are reserved for mcu firmware usage */
+ &mcu_gpio0 {
+-	status = "reserved";
++	status = "okay";
+ };
+ 
+ &mcu_gpio_intr {
+-	status = "reserved";
++	status = "okay";
+ };
+-- 
+2.30.2
+
