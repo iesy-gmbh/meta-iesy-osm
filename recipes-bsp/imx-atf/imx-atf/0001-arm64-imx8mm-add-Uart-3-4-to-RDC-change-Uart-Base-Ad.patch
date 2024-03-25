@@ -1,18 +1,19 @@
-From 48a0237ee02bbf0299e760b68143482341211087 Mon Sep 17 00:00:00 2001
+From 81037aaa4fd35288083873ff72e741eecbf248d7 Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
 Date: Thu, 30 Mar 2023 08:15:00 +0200
 Subject: [PATCH] arm64: imx8mm: add Uart 3,4 to RDC, change Uart Base Addr
 
+Signed-off-by: Dominik Poggel <pog@iesy.com>
 ---
  plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c | 3 ++-
  plat/imx/imx8m/imx8mm/platform.mk         | 2 +-
  2 files changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-index 8702d5160..6ba3a027b 100644
+index b2e9d10ae..0c83f236d 100644
 --- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-@@ -108,7 +108,8 @@ static const struct imx_rdc_cfg rdc[] = {
+@@ -116,7 +116,8 @@ static const struct imx_rdc_cfg rdc[] = {
  	RDC_MDAn(RDC_MDA_M4, DID1),
  
  	/* peripherals domain permission */
@@ -23,10 +24,10 @@ index 8702d5160..6ba3a027b 100644
  	RDC_PDAPn(RDC_PDAP_UART1, D0R | D0W),
  
 diff --git a/plat/imx/imx8m/imx8mm/platform.mk b/plat/imx/imx8m/imx8mm/platform.mk
-index a24e41fd7..c061590c3 100644
+index 8cfcc007e..0dd9e2404 100644
 --- a/plat/imx/imx8m/imx8mm/platform.mk
 +++ b/plat/imx/imx8m/imx8mm/platform.mk
-@@ -153,7 +153,7 @@ $(eval $(call add_define,BL32_BASE))
+@@ -158,7 +158,7 @@ $(eval $(call add_define,BL32_BASE))
  BL32_SIZE		?=	0x2000000
  $(eval $(call add_define,BL32_SIZE))
  
@@ -34,7 +35,7 @@ index a24e41fd7..c061590c3 100644
 +IMX_BOOT_UART_BASE	?=	0x30880000
  $(eval $(call add_define,IMX_BOOT_UART_BASE))
  
- $(eval $(call add_define,IMX8M_DDR4_DVFS))
+ EL3_EXCEPTION_HANDLING := $(SDEI_SUPPORT)
 -- 
 2.30.2
 
