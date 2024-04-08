@@ -15,6 +15,7 @@ SRC_URI += " \
     file://0008-arm64-dts-iesy-am62x-add-support-for-USB2534-hub.patch \
     file://0009-arm64-dts-iesy-am62x-remove-audio-hdmi-nodes-add-lvd.patch \
     file://0010-arm64-dts-ti-iesy-am62x-add-touchscreen-support.patch \
+    file://0011-arm64-dts-ti-iesy-am62x-use-LVDS_BL_PWM-as-touchscre.patch \
 "
 KERNEL_CONFIG_FRAGMENTS:append = "\
     ${APPEND_DIR}/fragment.config \
