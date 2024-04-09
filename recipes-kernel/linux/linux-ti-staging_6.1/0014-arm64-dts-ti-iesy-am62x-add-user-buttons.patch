@@ -1,0 +1,65 @@
+From a9b5986ff1056d0d77239383935d92d7533114b3 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 9 Apr 2024 12:05:17 +0200
+Subject: [PATCH 14/14] arm64: dts: ti: iesy-am62x: add user buttons
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     | 27 +++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 403593bd6c39..fa88524784ff 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -8,6 +8,7 @@
+ /dts-v1/;
+ 
+ #include <dt-bindings/net/mscc-phy-vsc8531.h>
++#include <dt-bindings/input/linux-event-codes.h>
+ #include "iesy-am62xx-osm-lf.dtsi"
+ 
+ / {
+@@ -23,6 +24,25 @@ opp-1400000000 {
+ 		};
+ 	};
+ 
++	buttons {
++		compatible = "gpio-keys";
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&buttons_default_pins>;
++
++		user-button-1 {
++			label = "User Button 1";
++			gpios = <&main_gpio1 9 GPIO_ACTIVE_LOW>;
++			linux,code = <KEY_X>;
++		};
++
++		user-button-2 {
++			label = "User Button 2";
++			gpios = <&main_gpio1 10 GPIO_ACTIVE_LOW>;
++			linux,code = <KEY_Y>;
++		};
++	};
++
+ 	display {
+ 		compatible = "microtips,mf-101hiebcaf0";
+ 		/*
+@@ -158,6 +178,13 @@ vdd_core: regulator-8 {
+ };
+ 
+ &main_pmx0 {
++	buttons_default_pins: buttons-default-pins {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x019c, PIN_INPUT, 7) /* (B18) MCASP0_AXR1.GPIO1_9 */
++			AM62X_IOPAD(0x01a0, PIN_INPUT, 7) /* (E18) MCASP0_AXR0.GPIO1_10 */
++		>;
++	};
++
+ 	ospi0_pins_default: ospi0-pins-default {
+ 		pinctrl-single,pins = <
+ 			AM62X_IOPAD(0x000, PIN_OUTPUT, 0) /* (H24) OSPI0_CLK */
+-- 
+2.30.2
+
