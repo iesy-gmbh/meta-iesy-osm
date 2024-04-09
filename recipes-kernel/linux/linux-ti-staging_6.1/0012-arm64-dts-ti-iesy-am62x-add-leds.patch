@@ -1,0 +1,59 @@
+From 3528b8756d1f61c425cac7100062c0b8f93f241a Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 9 Apr 2024 08:35:50 +0200
+Subject: [PATCH 12/12] arm64: dts: ti: iesy-am62x: add leds
+
+add leds, configure mcu_gpio0 for userspace usage
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts | 16 ++++++++++++++++
+ arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi   |  4 ++--
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index b0bf422de436..403593bd6c39 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -48,6 +48,22 @@ lcd_in1: endpoint {
+ 		};
+ 	};
+ 
++	leds {
++		compatible = "gpio-leds";
++		
++		led@0 {
++			label = "USER_LED_00";
++			gpios = <&mcu_gpio0 19 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "heartbeat";
++		};
++
++		led@1 {
++			label = "USER_LED_01";
++			gpios = <&mcu_gpio0 20 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++	};
++
+ 	vmain_pd: regulator-0 {
+ 		/* TPS65988 PD CONTROLLER OUTPUT */
+ 		compatible = "regulator-fixed";
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 088fafe1358b..7af554d56ccd 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -607,9 +607,9 @@ oldi_out1: endpoint {
+ 
+ /* mcu_gpio0 and mcu_gpio_intr are reserved for mcu firmware usage */
+ &mcu_gpio0 {
+-	status = "reserved";
++	status = "okay";
+ };
+ 
+ &mcu_gpio_intr {
+-	status = "reserved";
++	status = "okay";
+ };
+-- 
+2.30.2
+
