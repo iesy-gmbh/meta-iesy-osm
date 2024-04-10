@@ -19,6 +19,7 @@ SRC_URI += " \
     file://0012-arm64-dts-ti-iesy-am62x-add-leds.patch \
     file://0013-arm64-dts-ti-iesy-am62x-support-USB0-dual-role-port.patch \
     file://0014-arm64-dts-ti-iesy-am62x-add-user-buttons.patch \
+    file://0015-arm64-dts-ti-iesy-am62x-add-Uart-A.patch \
 "
 KERNEL_CONFIG_FRAGMENTS:append = "\
     ${APPEND_DIR}/fragment.config \
