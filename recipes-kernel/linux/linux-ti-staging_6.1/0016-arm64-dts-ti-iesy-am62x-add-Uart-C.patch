@@ -1,0 +1,45 @@
+From 59e16eeff51f108959dd7b530719e6abe502f3d9 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 10 Apr 2024 10:36:41 +0200
+Subject: [PATCH 16/16] arm64: dts: ti: iesy-am62x: add Uart C
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index d40ea0d6f0e2..e74bd219c2c8 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -375,8 +375,9 @@ &main_uart6 {
+ };
+ 
+ &wkup_uart0 {
+-	/* WKUP UART0 is used by DM firmware */
+-	status = "reserved";
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&uartc_pins_default>;
+ };
+ 
+ &main_uart0 {
+@@ -484,6 +485,15 @@ &main_i2c3 {
+ 	clock-frequency = <100000>;
+ };
+ 
++&mcu_pmx0 {
++	uartc_pins_default: uartc-default-pins {
++		pinctrl-single,pins = <
++			AM62X_MCU_IOPAD(0x0024, PIN_INPUT, 0) /* (B4) WKUP_UART0_RXD */
++			AM62X_MCU_IOPAD(0x0028, PIN_OUTPUT, 0) /* (C5) WKUP_UART0_TXD */
++		>;
++	};
++};
++
+ &sdhci0 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+-- 
+2.30.2
+
