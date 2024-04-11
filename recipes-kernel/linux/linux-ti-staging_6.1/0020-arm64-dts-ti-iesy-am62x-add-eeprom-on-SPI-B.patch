@@ -1,0 +1,83 @@
+From 3c10b60a14c4654a4e4f4d2a91c49f3a55b5783d Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 11 Apr 2024 15:01:01 +0200
+Subject: [PATCH 20/20] arm64: dts: ti: iesy-am62x: add eeprom on SPI-B
+
+add eprom on Microbus Click 5 module
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts      | 13 +++++++++++++
+ arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 18 ++++++++++++++++++
+ 2 files changed, 31 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index c5ef102d8e5a..1e084a4f6e8d 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -299,6 +299,19 @@ AM62X_IOPAD(0x01a4, PIN_INPUT, 7) /* (B20) MCASP0_ACLKX.GPIO1_11 */
+ 	};
+ };
+ 
++&mcu_spi0 {
++	status = "okay";
++	
++	eeprom@0 {
++		compatible = "st,m95m04", "atmel,at25";
++		reg = <0>;
++		spi-max-frequency = <5000000>;
++		pagesize = <512>;
++		size = <524288>;
++		address-width = <24>;
++	};
++};
++
+ &sdhci1 {
+ 	vmmc-supply = <&reg_3v3_sd>;
+ };
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 10d3c31648e8..6f21e9a4a459 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -20,6 +20,7 @@ aliases {
+ 		mmc1 = &sdhci1;
+ 		mmc2 = &sdhci2;
+ 		spi0 = &ospi0;
++		spi1 = &mcu_spi0;
+ 		ethernet0 = &cpsw_port1;
+ 		ethernet1 = &cpsw_port2;
+ 		usb0 = &usb0;
+@@ -492,6 +493,15 @@ &main_i2c3 {
+ };
+ 
+ &mcu_pmx0 {
++	spib_pins_default: spib-default-pins {
++		pinctrl-single,pins = <
++			AM62X_MCU_IOPAD(0x0008, PIN_OUTPUT, 0) /* (A7) MCU_SPI0_CLK */
++			AM62X_MCU_IOPAD(0x000c, PIN_OUTPUT, 0) /* (D9) MCU_SPI0_D0 */
++			AM62X_MCU_IOPAD(0x0010, PIN_INPUT, 0) /* (C9) MCU_SPI0_D1 */
++			AM62X_MCU_IOPAD(0x0000, PIN_OUTPUT, 0) /* (E8) MCU_SPI0_CS0 */
++		>;
++	};
++
+ 	uartc_pins_default: uartc-default-pins {
+ 		pinctrl-single,pins = <
+ 			AM62X_MCU_IOPAD(0x0024, PIN_INPUT, 0) /* (B4) WKUP_UART0_RXD */
+@@ -500,6 +510,14 @@ AM62X_MCU_IOPAD(0x0028, PIN_OUTPUT, 0) /* (C5) WKUP_UART0_TXD */
+ 	};
+ };
+ 
++&mcu_spi0 {
++	status = "disabled";
++	pinctrl-names = "default";
++	pinctrl-0 = <&spib_pins_default>;
++
++	ti,pindir-d0-out-d1-in;
++};
++
+ &sdhci0 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+-- 
+2.30.2
+
