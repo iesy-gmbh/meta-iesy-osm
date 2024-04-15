@@ -1,0 +1,56 @@
+From 7ce2d332777a1d87cf4d06155681ad22aa0cfbaa Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 27 Mar 2024 09:47:46 +0100
+Subject: [PATCH 11/11] arm64: dts: ti: iesy-am62x: use LVDS_BL_PWM as
+ touchscreen interrupt
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts | 8 +++-----
+ arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi   | 4 ++--
+ 2 files changed, 5 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 17c67c090044..b0bf422de436 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -227,17 +227,15 @@ touchscreen@41 {
+ 		reg = <0x41>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&main_ts_pins_default>;
+-		interrupt-parent = <&mcu_gpio0>;
++		interrupt-parent = <&main_gpio1>;
+ 		interrupts = <11 IRQ_TYPE_EDGE_FALLING>;
+ 	};
+ };
+ 
+-&mcu_pmx0 {
+-	status = "okay";
+-
++&main_pmx0 {
+ 	main_ts_pins_default: main-ts-pins-default {
+ 		pinctrl-single,pins = <
+-			AM62X_MCU_IOPAD(0x002c, PIN_INPUT, 7) /* (C6) WKUP_UART0_CTSn.MCU_GPIO0_11 */
++		AM62X_IOPAD(0x01a4, PIN_INPUT, 7) /* (B20) MCASP0_ACLKX.GPIO1_11 */
+ 		>;
+ 	};
+ };
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 7af554d56ccd..088fafe1358b 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -607,9 +607,9 @@ oldi_out1: endpoint {
+ 
+ /* mcu_gpio0 and mcu_gpio_intr are reserved for mcu firmware usage */
+ &mcu_gpio0 {
+-	status = "okay";
++	status = "reserved";
+ };
+ 
+ &mcu_gpio_intr {
+-	status = "okay";
++	status = "reserved";
+ };
+-- 
+2.30.2
+
