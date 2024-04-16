@@ -1,0 +1,29 @@
+From 8893fc79ce0436ed1397ad2bc91036425cad5feb Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 10 Apr 2024 15:34:55 +0200
+Subject: [PATCH 19/19] arm64: dts: ti: iesy-am62x: add RTC
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index d984478d76d2..c5ef102d8e5a 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -229,6 +229,11 @@ AM62X_IOPAD(0x128, PIN_INPUT, 7) /* (B23) MMC2_SDWP.GPIO0_72 */
+ };
+ 
+ &main_i2c0 {
++	rtc@51 {
++		compatible = "nxp,pcf85263";
++		reg = <0x51>;
++	};
++	
+ 	eeprom@53 {
+ 		compatible = "atmel,24c64";
+ 		reg = <0x53>;
+-- 
+2.30.2
+
