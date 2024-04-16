@@ -1,0 +1,76 @@
+From c84d4420d00f36398baa70ba68c82c275bc6a914 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 10 Apr 2024 09:32:57 +0200
+Subject: [PATCH 15/15] arm64: dts: ti: iesy-am62x: add Uart A
+
+add uart a, remove used pins from ospi0
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     |  4 ----
+ .../arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 20 +++++++++++++++----
+ 2 files changed, 16 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index fa88524784ff..f2abcad640fc 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -193,10 +193,6 @@ AM62X_IOPAD(0x00c, PIN_INPUT, 0) /* (E25) OSPI0_D0 */
+ 			AM62X_IOPAD(0x010, PIN_INPUT, 0) /* (G24) OSPI0_D1 */
+ 			AM62X_IOPAD(0x014, PIN_INPUT, 0) /* (F25) OSPI0_D2 */
+ 			AM62X_IOPAD(0x018, PIN_INPUT, 0) /* (F24) OSPI0_D3 */
+-			AM62X_IOPAD(0x01c, PIN_INPUT, 0) /* (J23) OSPI0_D4 */
+-			AM62X_IOPAD(0x020, PIN_INPUT, 0) /* (J25) OSPI0_D5 */
+-			AM62X_IOPAD(0x024, PIN_INPUT, 0) /* (H25) OSPI0_D6 */
+-			AM62X_IOPAD(0x028, PIN_INPUT, 0) /* (J22) OSPI0_D7 */
+ 			AM62X_IOPAD(0x008, PIN_INPUT, 0) /* (J24) OSPI0_DQS */
+ 		>;
+ 	};
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 43d6e7298e67..d40ea0d6f0e2 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -15,6 +15,7 @@ aliases {
+ 		serial0 = &mcu_uart0;
+ 		serial1 = &wkup_uart0;
+ 		serial2 = &main_uart0;
++		serial3 = &main_uart6;
+ 		mmc0 = &sdhci0;
+ 		mmc1 = &sdhci1;
+ 		mmc2 = &sdhci2;
+@@ -272,10 +273,6 @@ AM62X_IOPAD(0x00c, PIN_INPUT, 0) /* (E25) OSPI0_D0 */
+ 			AM62X_IOPAD(0x010, PIN_INPUT, 0) /* (G24) OSPI0_D1 */
+ 			AM62X_IOPAD(0x014, PIN_INPUT, 0) /* (F25) OSPI0_D2 */
+ 			AM62X_IOPAD(0x018, PIN_INPUT, 0) /* (F24) OSPI0_D3 */
+-			AM62X_IOPAD(0x01c, PIN_INPUT, 0) /* (J23) OSPI0_D4 */
+-			AM62X_IOPAD(0x020, PIN_INPUT, 0) /* (J25) OSPI0_D5 */
+-			AM62X_IOPAD(0x024, PIN_INPUT, 0) /* (H25) OSPI0_D6 */
+-			AM62X_IOPAD(0x028, PIN_INPUT, 0) /* (J22) OSPI0_D7 */
+ 			AM62X_IOPAD(0x008, PIN_INPUT, 0) /* (J24) OSPI0_DQS */
+ 		>;
+ 	};
+@@ -360,6 +357,21 @@ AM62X_IOPAD(0x02a8, PIN_OUTPUT, 0) /* (AE4) OLDI0_CLK1N */
+ 			AM62X_IOPAD(0x02a4, PIN_OUTPUT, 0) /* (AD5) OLDI0_CLK1P */
+ 		>;
+ 	};
++
++	uarta_pins_default: uarta-default-pins {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x001c, PIN_INPUT, 3) /* (J23) OSPI0_D4.UART6_RXD */
++			AM62X_IOPAD(0x0020, PIN_OUTPUT, 3) /* (J25) OSPI0_D5.UART6_TXD */
++			AM62X_IOPAD(0x0028, PIN_INPUT, 3) /* (J22) OSPI0_D7.UART6_CTSn */
++			AM62X_IOPAD(0x0024, PIN_OUTPUT, 3) /* (H25) OSPI0_D6.UART6_RTSn */
++		>;
++	};
++};
++
++&main_uart6 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&uarta_pins_default>;
+ };
+ 
+ &wkup_uart0 {
+-- 
+2.30.2
+
