@@ -1,0 +1,52 @@
+From c2cc2bda069eebc23e88ac95f6fa4cdee7b945c4 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 9 Apr 2024 10:37:36 +0200
+Subject: [PATCH 13/13] arm64: dts: ti: iesy-am62x: support USB0 dual role port
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 7af554d56ccd..43d6e7298e67 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -287,9 +287,10 @@ AM62X_IOPAD(0x01d4, PIN_INPUT, 2) /* (B15) UART0_RTSn.I2C3_SDA */
+ 		>;
+ 	};
+ 
+-	main_usb1_pins_default: main-usb1-pins-default {
++	main_usb0_pins_default: main-usb0-pins-default {
+ 		pinctrl-single,pins = <
+-			AM62X_IOPAD(0x0258, PIN_OUTPUT, 0) /* (F18/E16) USB1_DRVVBUS */
++			AM62X_IOPAD(0x0254, PIN_OUTPUT, 0) /* (C20) USB0_DRVVBUS */
++			AM62X_IOPAD(0x0258, PIN_INPUT, 7) /* (F18) USB1_DRVVBUS.GPIO1_51 */
+ 		>;
+ 	};
+ 
+@@ -539,12 +540,19 @@ &usb0 {
+ 	#address-cells = <1>;
+ 	#size-cells = <0>;
+ 	usb-role-switch;
++	dr_mode = "otg";
++	pinctrl-names = "default";
++	pinctrl-0 = <&main_usb0_pins_default>;
++
++	connector {
++		compatible = "gpio-usb-b-connector", "usb-b-connector";
++		type = "micro";
++		id-gpios = <&main_gpio1 51 GPIO_ACTIVE_HIGH>;
++	};
+ };
+ 
+ &usb1 {
+ 	dr_mode = "host";
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&main_usb1_pins_default>;
+ };
+ 
+ &mcasp1 {
+-- 
+2.30.2
+

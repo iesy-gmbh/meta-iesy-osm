@@ -17,6 +17,7 @@ SRC_URI += " \
     file://0010-arm64-dts-ti-iesy-am62x-add-touchscreen-support.patch \
     file://0011-arm64-dts-ti-iesy-am62x-use-LVDS_BL_PWM-as-touchscre.patch \
     file://0012-arm64-dts-ti-iesy-am62x-add-leds.patch \
+    file://0013-arm64-dts-ti-iesy-am62x-support-USB0-dual-role-port.patch \
 "
 KERNEL_CONFIG_FRAGMENTS:append = "\
     ${APPEND_DIR}/fragment.config \
