@@ -1,0 +1,42 @@
+From 572d5c9953108873aa588e0578825342fa468390 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 10 Apr 2024 12:14:36 +0200
+Subject: [PATCH 18/18] arm64: dts: ti: iesy-am62x: add additional eeproms on
+ I2C-A
+
+add eeproms on Microbus Click module and baseboard
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index f2abcad640fc..d984478d76d2 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -228,6 +228,21 @@ AM62X_IOPAD(0x128, PIN_INPUT, 7) /* (B23) MMC2_SDWP.GPIO0_72 */
+ 	};
+ };
+ 
++&main_i2c0 {
++	eeprom@53 {
++		compatible = "atmel,24c64";
++		reg = <0x53>;
++		pagesize = <64>;
++	};
++
++	/* MicroBus EEPROM Click */
++	eeprom@54 {
++		compatible = "atmel,24c08";
++		reg = <0x54>;
++		pagesize = <8>;
++	};
++};
++
+ &main_i2c1 {
+ 	exp1: gpio@22 {
+ 		compatible = "ti,tca6424";
+-- 
+2.30.2
+
