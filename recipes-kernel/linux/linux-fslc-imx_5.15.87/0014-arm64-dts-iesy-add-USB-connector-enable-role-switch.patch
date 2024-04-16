@@ -1,0 +1,145 @@
+From 894eb3d4702fe260119335db320ea3ac6447d2e5 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 16 Apr 2024 14:09:17 +0200
+Subject: [PATCH 14/14] arm64: dts: iesy: add USB connector, enable role switch
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts   | 35 +++++++++++++++++-
+ .../boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi     | 36 ++++---------------
+ 2 files changed, 40 insertions(+), 31 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
+index d5abf7e68e73..2016419a7f4e 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
+@@ -13,7 +13,28 @@
+ 
+ / {
+ 	model = "iesy i.MX8MM EVA-MI V1.xx (Eval Kit)";
+-	compatible = "fsl,imx8mm-evk", "fsl,imx8mm";	
++	compatible = "fsl,imx8mm-evk", "fsl,imx8mm";
++
++	connector {
++		compatible = "gpio-usb-b-connector", "usb-b-connector";
++		type = "micro";
++		label = "USB_A";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_usb1_connector>;
++		id-gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				reg = <0>;
++				usb_dr_connector: endpoint {
++					remote-endpoint = <&usb1_drd_sw>;
++				};
++			};
++		};
++	};
+ 
+ 	leds {
+ 		compatible = "gpio-leds";
+@@ -257,6 +278,14 @@ &sai5 {
+ 	assigned-clock-rates = <24576000>;
+ };
+ 
++&usbotg1 {
++	port {
++		usb1_drd_sw: endpoint {
++			remote-endpoint = <&usb_dr_connector>;
++		};
++	};
++};
++
+ &iomuxc {
+ 	pinctrl_csi_pwn: csi_pwn_grp {
+ 		fsl,pins = <
+@@ -332,6 +361,10 @@ MX8MM_IOMUXC_SAI5_RXD1_SAI5_TX_SYNC		0x100
+ 			MX8MM_IOMUXC_SAI2_MCLK_SAI5_MCLK		0x100
+ 		>;
+ 	};
++
++	pinctrl_usb1_connector: usb1-connectorgrp {
++		fsl,pins = <MX8MM_IOMUXC_GPIO1_IO10_GPIO1_IO10		0x1c0>;
++	};
+ };
+ 
+ &lcdif {
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
+index d9d135253d60..aa238e2c3775 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
+@@ -49,16 +49,6 @@ reg_usdhc2_vmmc: regulator-usdhc2 {
+ 		enable-active-high;
+ 	};
+ 
+-	reg_usb_a_vbus: regulator@1 {
+-		compatible = "regulator-fixed";
+-		regulator-name = "USB_A_VBUS";
+-		regulator-min-microvolt = <5000000>;
+-		regulator-max-microvolt = <5000000>;
+-		gpio = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+-		off-on-delay = <20000>;
+-		enable-active-high;
+-    };
+-
+ 	reg_usb_b_vbus: regulator@2 {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "USB_B_VBUS";
+@@ -106,12 +96,11 @@ &uart4 { /* UART A */
+ };
+ 
+ &usbotg1 {
+-	vbus-supply = <&reg_usb_a_vbus>;
+ 	over-current-active-low;
+ 	dr_mode = "otg";
+-	pinctrl-names = "idle", "active";
+-	pinctrl-0 = <&pinctrl_usb1_idle>;
+-	pinctrl-1 = <&pinctrl_usb1_active>;
++	power-active-high;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usbotg1>;
+ 	status = "okay";
+ };
+ 
+@@ -125,10 +114,6 @@ &usbotg2 {
+ 	status = "okay";
+ };
+ 
+-&usbphynop1 {
+-	vcc-supply = <&reg_usb_a_vbus>;
+-};
+-
+ &usbphynop2 {
+ 	vcc-supply = <&reg_usb_b_vbus>;
+ };
+@@ -412,19 +397,10 @@ MX8MM_IOMUXC_ECSPI2_SS0_UART4_DCE_RTS_B		0x140
+ 		>;
+ 	};
+ 
+-    pinctrl_usb1_idle: usb1idl {
+-		fsl,pins = <
+-			MX8MM_IOMUXC_GPIO1_IO10_USB1_OTG_ID 0x140
+-			MX8MM_IOMUXC_GPIO1_IO12_GPIO1_IO12	0x0
+-			MX8MM_IOMUXC_GPIO1_IO13_GPIO1_IO13	0x140
+-		>;
+-	};
+-
+-	pinctrl_usb1_active: usb1act {
++	pinctrl_usbotg1: usbotg1grp {
+ 		fsl,pins = <
+-			MX8MM_IOMUXC_GPIO1_IO10_USB1_OTG_ID 0x140
+-			MX8MM_IOMUXC_GPIO1_IO12_GPIO1_IO12	0x0		/* PWR_EN */
+-			MX8MM_IOMUXC_GPIO1_IO13_USB1_OTG_OC	0x140
++			MX8MM_IOMUXC_GPIO1_IO12_USB1_OTG_PWR	0x84
++			MX8MM_IOMUXC_GPIO1_IO13_USB1_OTG_OC		0x84
+ 		>;
+ 	};
+ 
+-- 
+2.30.2
+
