@@ -24,6 +24,7 @@ SRC_URI += " \
     file://0017-arm64-dts-ti-iesy-am62x-add-eeprom-on-I2C-A.patch \
     file://0018-arm64-dts-ti-iesy-am62x-add-additional-eeproms-on-I2.patch \
     file://0019-arm64-dts-ti-iesy-am62x-add-RTC.patch \
+    file://0020-arm64-dts-ti-iesy-am62x-add-eeprom-on-SPI-B.patch \
 "
 KERNEL_CONFIG_FRAGMENTS:append = "\
     ${APPEND_DIR}/fragment.config \
