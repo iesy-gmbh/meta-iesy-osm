@@ -1,0 +1,42 @@
+From 6bb2100f16c366ac743dfbed955e2fb33be802b7 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 18 Apr 2024 15:17:49 +0200
+Subject: [PATCH 21/21] arm64: dts: ti: iesy-am62x: configure eth b
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 1e084a4f6e8d..a9054dd23c12 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -361,20 +361,21 @@ &cpsw_port2 {
+ 
+ &cpsw3g_mdio {
+ 	cpsw3g_phy0: ethernet-phy@0 {
++		compatible = "ethernet-phy-id0007.0770";
+ 		reg = <0>;
+-		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
+ 		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
+ 		ti,min-output-impedance;
+-		compatible = "ethernet-phy-id0007.0770";
+ 		vsc8531,led-0-mode = <VSC8531_LINK_1000_ACTIVITY>;
+ 		vsc8531,led-1-mode = <VSC8531_LINK_1000_ACTIVITY>;
+ 	};
+ 
+ 	cpsw3g_phy1: ethernet-phy@1 {
++		compatible = "ethernet-phy-id0007.0770";
+ 		reg = <1>;
+-		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
+ 		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
+ 		ti,min-output-impedance;
++		vsc8531,led-0-mode = <VSC8531_LINK_1000_ACTIVITY>;
++		vsc8531,led-1-mode = <VSC8531_LINK_1000_ACTIVITY>;
+ 	};
+ };
+ 
+-- 
+2.30.2
+
