@@ -1,0 +1,240 @@
+From 847e66477a8f899f51d451e5016b5f9e621a1935 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 16 Apr 2024 08:57:18 +0200
+Subject: [PATCH 21/21] WIP add audio codec
+
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     | 145 +++++++++---------
+ .../arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi |   6 -
+ 2 files changed, 72 insertions(+), 79 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 1e084a4f6e8d..9881307b3573 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -84,6 +84,36 @@ led@1 {
+ 		};
+ 	};
+ 
++	codec_audio: sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "MAX9867";
++		simple-audio-card,format = "i2s";
++
++		simple-audio-card,widgets = 
++			"Speaker", "Jack",
++			"Microphone", "Mic";
++		simple-audio-card,routing = 
++			"Jack", "LOUT",
++			"Jack", "ROUT",
++			"Mic", "DMICL",
++			"Mic", "DMICR";
++
++		simple-audio-card,frame-master = <&cpudai>;
++		simple-audio-card,bitclock-master = <&cpudai>;
++
++		cpudai: simple-audio-card,cpu {
++			sound-dai = <&mcasp2>;
++			system-clock-direction-out;
++			system-clock-frequency = <24576000>;
++		};
++
++		simple-audio-card,codec {
++			sound-dai = <&max9867>;
++			// clocks = <&k3_clks 192 4>;
++			clocks = <&audio_refclk1>;
++		};
++	};
++
+ 	vmain_pd: regulator-0 {
+ 		/* TPS65988 PD CONTROLLER OUTPUT */
+ 		compatible = "regulator-fixed";
+@@ -144,27 +174,6 @@ vcc_1v8: regulator-5 {
+ 		regulator-boot-on;
+ 	};
+ 
+-	wlan_lten: regulator-6 {
+-		compatible = "regulator-fixed";
+-		regulator-name = "wlan_lten";
+-		regulator-min-microvolt = <3300000>;
+-		regulator-max-microvolt = <3300000>;
+-		vin-supply = <&vcc_3v3_sys>;
+-		gpios = <&exp1 11 GPIO_ACTIVE_LOW>;
+-	};
+-
+-	wlan_en: regulator-7 {
+-		compatible = "regulator-fixed";
+-		regulator-name = "wlan_en";
+-		regulator-min-microvolt = <1800000>;
+-		regulator-max-microvolt = <1800000>;
+-		vin-supply = <&wlan_lten>;
+-		enable-active-high;
+-		gpios = <&main_gpio0 71 GPIO_ACTIVE_HIGH>;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&wlan_en_pins_default>;
+-	};
+-
+ 	vdd_core: regulator-8 {
+ 		/* output of TPS62826DMQ */
+ 		compatible = "regulator-fixed";
+@@ -177,6 +186,10 @@ vdd_core: regulator-8 {
+ 	};
+ };
+ 
++&audio_refclk1 {
++	assigned-clock-parents = <&k3_clks 157 16>;
++};
++
+ &main_pmx0 {
+ 	buttons_default_pins: buttons-default-pins {
+ 		pinctrl-single,pins = <
+@@ -185,6 +198,16 @@ AM62X_IOPAD(0x01a0, PIN_INPUT, 7) /* (E18) MCASP0_AXR0.GPIO1_10 */
+ 		>;
+ 	};
+ 
++	mcasp2_pins_default: mcasp2-pins-default {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x0078, PIN_INPUT, 3) /* (U24) GPMC0_AD15.MCASP2_ACLKR */
++			AM62X_IOPAD(0x0070, PIN_INPUT, 3) /* (T24) GPMC0_AD13.MCASP2_ACLKX */
++			AM62X_IOPAD(0x006c, PIN_INPUT, 3) /* (T22) GPMC0_AD12.MCASP2_AFSX */
++			AM62X_IOPAD(0x0064, PIN_INPUT, 3) /* (T25) GPMC0_AD10.MCASP2_AXR2 */
++			AM62X_IOPAD(0x0068, PIN_INPUT, 3) /* (R21) GPMC0_AD11.MCASP2_AXR3 */
++		>;
++	};
++
+ 	ospi0_pins_default: ospi0-pins-default {
+ 		pinctrl-single,pins = <
+ 			AM62X_IOPAD(0x000, PIN_OUTPUT, 0) /* (H24) OSPI0_CLK */
+@@ -197,12 +220,6 @@ AM62X_IOPAD(0x008, PIN_INPUT, 0) /* (J24) OSPI0_DQS */
+ 		>;
+ 	};
+ 
+-	main_gpio1_ioexp_intr_pins_default: main-gpio1-ioexp-intr-pins-default {
+-		pinctrl-single,pins = <
+-			AM62X_IOPAD(0x01d4, PIN_INPUT, 7) /* (B15) UART0_RTSn.GPIO1_23 */
+-		>;
+-	};
+-
+ 	wlan_en_pins_default: wlan-en-pins-default {
+ 		pinctrl-single,pins = <
+ 				AM62X_IOPAD(0x124, PIN_OUTPUT, 7) /* (A23) MMC2_SDCD.GPIO0_71 */
+@@ -249,31 +266,13 @@ eeprom@54 {
+ };
+ 
+ &main_i2c1 {
+-	exp1: gpio@22 {
+-		compatible = "ti,tca6424";
+-		reg = <0x22>;
+-		gpio-controller;
+-		#gpio-cells = <2>;
+-		gpio-line-names = "GPIO_CPSW2_RST", "GPIO_CPSW1_RST",
+-				   "PRU_DETECT", "MMC1_SD_EN",
+-				   "VPP_LDO_EN", "EXP_PS_3V3_En",
+-				   "EXP_PS_5V0_En", "EXP_HAT_DETECT",
+-				   "GPIO_AUD_RSTn", "GPIO_eMMC_RSTn",
+-				   "UART1_FET_BUF_EN", "WL_LT_EN",
+-				   "GPIO_HDMI_RSTn", "CSI_GPIO1",
+-				   "CSI_GPIO2", "PRU_3V3_EN",
+-				   "HDMI_INTn", "PD_I2C_IRQ",
+-				   "MCASP1_FET_EN", "MCASP1_BUF_BT_EN",
+-				   "MCASP1_FET_SEL", "UART1_FET_SEL",
+-				   "TSINT#", "IO_EXP_TEST_LED";
+-
+-		interrupt-parent = <&main_gpio1>;
+-		interrupts = <23 IRQ_TYPE_EDGE_FALLING>;
+-		interrupt-controller;
+-		#interrupt-cells = <2>;
+-
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&main_gpio1_ioexp_intr_pins_default>;
++	max9867: max9867@18 {
++		#sound-dai-cells = <0>;
++		compatible = "maxim,max9867";
++		reg = <0x18>;
++		// assigned-clocks = <&k3_clks 192 4>;
++		// assigned-clock-parents = <&k3_clks 192 4>;
++		// assigned-clock-rates = <50000000>;
+ 	};
+ };
+ 
+@@ -299,9 +298,28 @@ AM62X_IOPAD(0x01a4, PIN_INPUT, 7) /* (B20) MCASP0_ACLKX.GPIO1_11 */
+ 	};
+ };
+ 
++&mcasp1 {
++	status = "disabled";
++};
++
++&mcasp2 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&mcasp2_pins_default>;
++
++	#sound-dai-cells = <0>;
++	op-mode = <0>;
++	tdm-slots = <2>;
++
++	serial-dir = <0 0 1 2 0 0 0 0 0 0 0 0 0 0 0 0>;
++
++	tx-num-evt = <32>;
++	rx-num-evt = <32>;
++};
++
+ &mcu_spi0 {
+ 	status = "okay";
+-	
++
+ 	eeprom@0 {
+ 		compatible = "st,m95m04", "atmel,at25";
+ 		reg = <0>;
+@@ -317,29 +335,10 @@ &sdhci1 {
+ };
+ 
+ &sdhci2 {
+-	status = "okay";
+-	vmmc-supply = <&wlan_en>;
++	status = "disabled";
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&main_mmc2_pins_default>;
+ 	bus-width = <4>;
+-	non-removable;
+-	ti,fails-without-test-cd;
+-	cap-power-off-card;
+-	keep-power-in-suspend;
+-	ti,driver-strength-ohm = <50>;
+-	assigned-clocks = <&k3_clks 157 158>;
+-	assigned-clock-parents = <&k3_clks 157 160>;
+-
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+-	wlcore: wlcore@2 {
+-		compatible = "ti,wl1837";
+-		reg = <2>;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&main_wlirq_pins_default>;
+-		interrupt-parent = <&main_gpio0>;
+-		interrupts = <72 IRQ_TYPE_EDGE_RISING>;
+-	};
+ };
+ 
+ &cpsw3g {
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 6f21e9a4a459..a8f334b715dc 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -325,12 +325,6 @@ AM62X_IOPAD(0x00f0, PIN_OUTPUT, 0) /* (Y22) VOUT0_DATA14 */
+ 			AM62X_IOPAD(0x00f4, PIN_OUTPUT, 0) /* (AA21) VOUT0_DATA15 */
+ 			AM62X_IOPAD(0x005c, PIN_OUTPUT, 1) /* (R24) GPMC0_AD8.VOUT0_DATA16 */
+ 			AM62X_IOPAD(0x0060, PIN_OUTPUT, 1) /* (R25) GPMC0_AD9.VOUT0_DATA17 */
+-			AM62X_IOPAD(0x0064, PIN_OUTPUT, 1) /* (T25) GPMC0_AD10.VOUT0_DATA18 */
+-			AM62X_IOPAD(0x0068, PIN_OUTPUT, 1) /* (R21) GPMC0_AD11.VOUT0_DATA19 */
+-			AM62X_IOPAD(0x006c, PIN_OUTPUT, 1) /* (T22) GPMC0_AD12.VOUT0_DATA20 */
+-			AM62X_IOPAD(0x0070, PIN_OUTPUT, 1) /* (T24) GPMC0_AD13.VOUT0_DATA21 */
+-			AM62X_IOPAD(0x0074, PIN_OUTPUT, 1) /* (U25) GPMC0_AD14.VOUT0_DATA22 */
+-			AM62X_IOPAD(0x0078, PIN_OUTPUT, 1) /* (U24) GPMC0_AD15.VOUT0_DATA23 */
+ 		>;
+ 	};
+ 
+-- 
+2.30.2
+
