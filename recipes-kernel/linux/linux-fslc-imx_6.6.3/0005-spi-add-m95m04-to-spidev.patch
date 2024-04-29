@@ -1,0 +1,33 @@
+From ba4c58d94fc13336d9a80fc453286ffc24cbf799 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 24 Apr 2024 10:33:18 +0200
+Subject: [PATCH 5/5] spi: add m95m04 to spidev
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ drivers/spi/spidev.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/spi/spidev.c b/drivers/spi/spidev.c
+index d13dc15cc191..e96983f17d73 100644
+--- a/drivers/spi/spidev.c
++++ b/drivers/spi/spidev.c
+@@ -714,6 +714,7 @@ static const struct spi_device_id spidev_spi_ids[] = {
+ 	{ .name = "spi-authenta" },
+ 	{ .name = "em3581" },
+ 	{ .name = "si3210" },
++	{ .name = "m95m04" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(spi, spidev_spi_ids);
+@@ -742,6 +743,7 @@ static const struct of_device_id spidev_dt_ids[] = {
+ 	{ .compatible = "semtech,sx1301", .data = &spidev_of_check },
+ 	{ .compatible = "silabs,em3581", .data = &spidev_of_check },
+ 	{ .compatible = "silabs,si3210", .data = &spidev_of_check },
++	{ .compatible = "st,m95m04", .data = &spidev_of_check },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, spidev_dt_ids);
+-- 
+2.30.2
+

@@ -16,6 +16,3 @@ SRC_URI += " \
     file://0012-arm64-dts-iesy-move-i2c2-pinmux-to-module.patch \
     file://0013-arm64-dts-iesy-disable-critical-trip-point.patch \
 "
-
-
-unset KBUILD_DEFCONFIG
