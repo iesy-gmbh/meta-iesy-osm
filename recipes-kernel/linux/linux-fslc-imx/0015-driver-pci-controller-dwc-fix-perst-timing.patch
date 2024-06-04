@@ -1,0 +1,45 @@
+From c5dc5d55c5c5cb94e114d438f042f435694d6b80 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 3 Jun 2024 16:43:36 +0200
+Subject: [PATCH 15/15] driver: pci: controller: dwc: fix perst timing
+
+the PERST signal should be deasserted 100us after the clock is started. Move the PERST deassertation after the clock initialization. Add usleep to ensure the delay
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ drivers/pci/controller/dwc/pci-imx6.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/pci/controller/dwc/pci-imx6.c b/drivers/pci/controller/dwc/pci-imx6.c
+index 3a8350cad812..c34c0b663151 100644
+--- a/drivers/pci/controller/dwc/pci-imx6.c
++++ b/drivers/pci/controller/dwc/pci-imx6.c
+@@ -1181,9 +1181,6 @@ static void imx6_pcie_deassert_core_reset(struct imx6_pcie *imx6_pcie)
+ 	if (gpio_is_valid(imx6_pcie->reset_gpio)) {
+ 		gpio_set_value_cansleep(imx6_pcie->reset_gpio,
+ 					imx6_pcie->gpio_active_high);
+-		msleep(20);
+-		gpio_set_value_cansleep(imx6_pcie->reset_gpio,
+-					!imx6_pcie->gpio_active_high);
+ 	}
+ 
+ 	switch (imx6_pcie->drvdata->variant) {
+@@ -1343,6 +1340,15 @@ static void imx6_pcie_deassert_core_reset(struct imx6_pcie *imx6_pcie)
+ 		break;
+ 	}
+ 
++	/* Some boards don't have PCIe reset GPIO. */
++	if (gpio_is_valid(imx6_pcie->reset_gpio)) {
++		usleep_range(100, 200);
++		gpio_set_value_cansleep(imx6_pcie->reset_gpio,
++					!imx6_pcie->gpio_active_high);
++		/* Wait for 100ms after PERST# deassertion (PCIe r5.0, 6.6.1) */
++		msleep(100);
++	}
++
+ 	return;
+ }
+ 
+-- 
+2.30.2
+
