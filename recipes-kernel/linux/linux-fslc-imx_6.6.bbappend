@@ -15,4 +15,5 @@ SRC_URI += " \
     file://0011-arm64-dts-iesy-set-HW-revision-for-i.MX8-evaluation-.patch \
     file://0012-arm64-dts-iesy-move-i2c2-pinmux-to-module.patch \
     file://0013-arm64-dts-iesy-disable-critical-trip-point.patch \
+    file://0014-gpu-drm-bridge-revert-d89078c37b10f05fa4f4791b71db25.patch \
 "
