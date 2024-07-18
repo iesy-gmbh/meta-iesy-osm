@@ -1,7 +1,7 @@
-From ba4c58d94fc13336d9a80fc453286ffc24cbf799 Mon Sep 17 00:00:00 2001
+From 37b04c7b8b1703ba35f2af10e63eb175bc2778f2 Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
-Date: Wed, 24 Apr 2024 10:33:18 +0200
-Subject: [PATCH 5/5] spi: add m95m04 to spidev
+Date: Thu, 18 Jul 2024 10:52:35 +0200
+Subject: [PATCH 2/4] spi: add m95m04 to spidev
 
 Signed-off-by: Dominik Poggel <pog@iesy.com>
 ---

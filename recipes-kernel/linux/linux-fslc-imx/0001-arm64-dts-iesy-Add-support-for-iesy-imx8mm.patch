@@ -1,21 +1,23 @@
-From 41b1014a513731d0cdd486dbc17c3d0d2f6bd45b Mon Sep 17 00:00:00 2001
+From 40b60eccf4f3f0c2f837bed4fb937dc835972e99 Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
-Date: Fri, 28 Apr 2023 10:53:06 +0200
-Subject: [PATCH] arm64: dts: iesy: Add support for iesy-imx8mm
+Date: Thu, 18 Jul 2024 10:51:19 +0200
+Subject: [PATCH 1/4] arm64: dts: iesy: Add support for iesy-imx8mm
 
 Add support for iesy-imx8mm-osm-sf and evalboard iesy-imx8mm-eva-mi
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
 ---
  arch/arm64/boot/dts/Makefile                  |   1 +
  arch/arm64/boot/dts/iesy/Makefile             |   1 +
- .../boot/dts/iesy/iesy-imx8mm-eva-mi.dts      | 278 +++++++++
- .../boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi     | 579 ++++++++++++++++++
- 4 files changed, 859 insertions(+)
+ .../boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts   | 352 ++++++++++
+ .../boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi     | 605 ++++++++++++++++++
+ 4 files changed, 959 insertions(+)
  create mode 100644 arch/arm64/boot/dts/iesy/Makefile
- create mode 100644 arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
+ create mode 100644 arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
  create mode 100644 arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
 
 diff --git a/arch/arm64/boot/dts/Makefile b/arch/arm64/boot/dts/Makefile
-index 639e01a4d855..9a7093808167 100644
+index 30dd6347a929..519cc4f4ee42 100644
 --- a/arch/arm64/boot/dts/Makefile
 +++ b/arch/arm64/boot/dts/Makefile
 @@ -14,6 +14,7 @@ subdir-y += cavium
@@ -28,21 +30,20 @@ index 639e01a4d855..9a7093808167 100644
  subdir-y += marvell
 diff --git a/arch/arm64/boot/dts/iesy/Makefile b/arch/arm64/boot/dts/iesy/Makefile
 new file mode 100644
-index 000000000000..694bbd6781a2
+index 000000000000..7f4b43472f9d
 --- /dev/null
 +++ b/arch/arm64/boot/dts/iesy/Makefile
 @@ -0,0 +1 @@
-+dtb-$(CONFIG_ARCH_MXC) += iesy-imx8mm-eva-mi.dtb
-\ No newline at end of file
-diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
++dtb-$(CONFIG_ARCH_MXC) += iesy-imx8mm-eva-mi-v1.dtb
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
 new file mode 100644
-index 000000000000..adeeed1576d7
+index 000000000000..d5abf7e68e73
 --- /dev/null
-+++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi.dts
-@@ -0,0 +1,278 @@
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
+@@ -0,0 +1,352 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
-+ * Device Tree for iesy i.MX8MM EVA-MI (Eval Kit)
++ * Device Tree for iesy i.MX8MM EVA-MI V1.xx (Eval Kit)
 + *
 + * Copyright 2023 iesy GmbH
 + */
@@ -50,10 +51,11 @@ index 000000000000..adeeed1576d7
 +/dts-v1/;
 +
 +#include <dt-bindings/usb/pd.h>
++#include <dt-bindings/net/mscc-phy-vsc8531.h>
 +#include "iesy-imx8mm-osm-sf.dtsi"
 +
 +/ {
-+	model = "iesy i.MX8MM EVA-MI (Eval Kit)";
++	model = "iesy i.MX8MM EVA-MI V1.xx (Eval Kit)";
 +	compatible = "fsl,imx8mm-evk", "fsl,imx8mm";	
 +
 +	leds {
@@ -84,18 +86,62 @@ index 000000000000..adeeed1576d7
 +
 +		user-button-1 {
 +			label = "User Button 1";
-+			gpios = <&gpio1 8 GPIO_ACTIVE_LOW>;
++			gpios = <&gpio4 20 GPIO_ACTIVE_LOW>;
 +			linux,code = <KEY_X>;
 +		};
 +
 +		user-button-2 {
 +			label = "User Button 2";
-+			gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
++			gpios = <&gpio4 23 GPIO_ACTIVE_LOW>;
 +			linux,code = <KEY_Y>;
 +		};
 +	};
 +
-+    reg_1v8_carrier: 1v8_regulator {
++	sound-max9867 {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "MAX9867";
++		simple-audio-card,format = "i2s";
++
++		simple-audio-card,widgets =
++			"Speaker", "Jack",
++			"Microphone", "Mic";
++		simple-audio-card,routing =
++            "Jack", "LOUT",
++            "Jack", "ROUT",
++			"Mic", "DMICL",
++			"Mic", "DMICR";
++
++		simple-audio-card,frame-master = <&cpudai>;
++		simple-audio-card,bitclock-master = <&cpudai>;
++		
++		cpudai: simple-audio-card,cpu {
++			sound-dai = <&sai5>;
++			dai-tdm-slot-num = <2>;
++			dai-tdm-slot-width = <16>;
++		};
++
++		simple-audio-card,codec {
++			sound-dai = <&max9867>;
++			clocks = <&clk IMX8MM_CLK_SAI5_ROOT>;
++		};
++	};
++
++	hdmi-connector {
++		status = "okay";
++		compatible = "hdmi-connector";
++		label = "hdmi-connect";
++		type = "a";
++
++		ddc-i2c-bus = <&i2c2>;
++
++		port {
++			hdmi_connector_in: endpoint {
++				remote-endpoint = <&lt8912b_out>;
++			};
++		};
++	};
++
++	reg_1v8_carrier: 1v8_regulator {
 +		compatible = "regulator-fixed";
 +		regulator-name = "1V8_carrier_reg";
 +		regulator-min-microvolt = <1800000>;
@@ -111,11 +157,11 @@ index 000000000000..adeeed1576d7
 +		regulator-always-on;
 +	};
 +
-+	// pcie0_refclk: pcie0-refclk {
-+	// 	compatible = "fixed-clock";
-+	// 	#clock-cells = <0>;
-+	// 	clock-frequency = <100000000>;
-+	// };	
++	pcie0_refclk: pcie0-refclk {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <100000000>;
++	};
 +};
 +
 +&fec1 {
@@ -131,45 +177,47 @@ index 000000000000..adeeed1576d7
 +		#size-cells = <0>;
 +
 +		ethphy0: ethernet-phy@0 {
-+			compatible = "ethernet-phy-ieee802.3-c22";
++			compatible = "ethernet-phy-id0007.0770";
 +			reg = <0>;
-+			at803x,eee-disabled;
-+			at803x,vddio-1p8v;
++			vsc8531,led-0-mode = <VSC8531_LINK_1000_ACTIVITY>;
++			vsc8531,led-1-mode = <VSC8531_LINK_1000_ACTIVITY>;
 +		};
 +	};
 +};
 +
-+// &pcie0{
-+// 	pinctrl-names = "default";
-+// 	pinctrl-0 = <&pinctrl_pcie0>;
-+// 	disable-gpio = <&gpio1 5 GPIO_ACTIVE_LOW>;
-+// 	reset-gpio = <&gpio4 21 GPIO_ACTIVE_LOW>;
-+// 	clocks = <&clk IMX8MM_CLK_PCIE1_ROOT>,
-+// 		 <&clk IMX8MM_CLK_PCIE1_AUX>,
-+// 		 <&clk IMX8MM_CLK_PCIE1_PHY>,
-+// 		 <&pcie0_refclk>;
-+// 	clock-names = "pcie", "pcie_aux", "pcie_phy", "pcie_bus";
-+// 	ext_osc = <1>;
-+// 	reserved-region = <&rpmsg_reserved>;
-+// 	status = "okay";
-+// };
++&pcie0 {
++	clocks = <&clk IMX8MM_CLK_PCIE1_ROOT>, <&clk IMX8MM_CLK_PCIE1_AUX>,
++		<&clk IMX8MM_CLK_PCIE1_PHY>,
++		<&pcie0_refclk>;
++	clock-names = "pcie", "pcie_aux", "pcie_phy", "pcie_bus";
++	assigned-clocks = <&clk IMX8MM_CLK_PCIE1_AUX>,
++			  <&clk IMX8MM_CLK_PCIE1_PHY>,
++			  <&clk IMX8MM_CLK_PCIE1_CTRL>;
++	assigned-clock-rates = <10000000>, <100000000>, <250000000>;
++	assigned-clock-parents = <&clk IMX8MM_SYS_PLL2_50M>,
++				 <&clk IMX8MM_SYS_PLL2_100M>,
++				 <&clk IMX8MM_SYS_PLL2_250M>;
++	ext_osc = <0>;
++	status = "okay";
++};
++
++&usdhc1 {
++	bus-width = <4>;
++	status = "okay";
++};
 +
 +&snvs_pwrkey {
 +	status = "okay";
 +};
 +
++/* SPI B on EvalKit */
 +&ecspi1 {
-+	#address-cells = <1>;
-+	#size-cells = <0>;
-+	fsl,spi-num-chipselects = <1>;
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_ecspi1 &pinctrl_ecspi1_cs>;
-+	cs-gpios = <&gpio5 9 GPIO_ACTIVE_LOW>;
 +	status = "okay";
-+
++	
++	/* eeprom 5 click */
 +	spidev0: spi@0 {
 +		reg = <0>;
-+		compatible = "rohm,dh2228fv";
++		compatible = "st,m95m04";
 +		spi-max-frequency = <10000000>;
 +	};
 +};
@@ -190,24 +238,66 @@ index 000000000000..adeeed1576d7
 +        vs-supply = <&reg_3v3_carrier>;
 +	};
 +
-+	eeprom@51 {
-+		compatible = "atmel,24c64";
++	rtc@51 {
++		compatible = "nxp,pcf85263";
 +		reg = <0x51>;
++	};
++
++	eeprom@53 {
++		compatible = "atmel,24c64";
++		reg = <0x53>;
 +		pagesize = <64>;
 +        vcc-supply = <&reg_1v8_carrier>;
 +	};
 +};
 +
 +&i2c2 {
-+	clock-frequency = <400000>;
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_i2c2>;
 +	status = "okay";
 +
-+	audio_codec@18 {
-+		compatible = "ti,tlv320aic3253", "ti,tlv320aic3x";
++	max9867: audio_codec@18 {
++		#sound-dai-cells = <0>;
++		compatible = "maxim,max9867";
 +		reg = <0x18>;
 +	};
++
++	lontium_lt8912b@48 {
++		compatible = "lontium,lt8912b";
++		reg = <0x48>;
++		status = "okay";
++		interrupt-parent = <&gpio4>;
++		interrupts = <24>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;			
++
++			port@0 {
++				reg = <0>;
++
++				lt8912b_from_dsim: endpoint {
++					remote-endpoint = <&dsim_to_lt8912b>;
++					data-lanes = <0 1 2 3>;
++				};
++			};
++
++			port@1 {
++				reg = <1>;
++
++				lt8912b_out: endpoint {
++					remote-endpoint = <&hdmi_connector_in>;
++				};
++			};
++		};
++	};
++};
++
++&sai5 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_sai5>;
++	assigned-clocks = <&clk IMX8MM_CLK_SAI5>;
++	assigned-clock-parents = <&clk IMX8MM_AUDIO_PLL1_OUT>;
++	assigned-clock-rates = <24576000>;
 +};
 +
 +&iomuxc {
@@ -240,18 +330,6 @@ index 000000000000..adeeed1576d7
 +			MX8MM_IOMUXC_ENET_RXC_ENET1_RGMII_RXC		0x91
 +			MX8MM_IOMUXC_ENET_RX_CTL_ENET1_RGMII_RX_CTL	0x91
 +			MX8MM_IOMUXC_ENET_TX_CTL_ENET1_RGMII_TX_CTL	0x1f
-+			MX8MM_IOMUXC_SAI2_RXC_GPIO4_IO22		0x19
-+		>;
-+	};
-+
-+	pinctrl_flexspi0: flexspi0grp {
-+		fsl,pins = <
-+			MX8MM_IOMUXC_NAND_ALE_QSPI_A_SCLK               0x1c2
-+			MX8MM_IOMUXC_NAND_CE0_B_QSPI_A_SS0_B            0x82
-+			MX8MM_IOMUXC_NAND_DATA00_QSPI_A_DATA0           0x82
-+			MX8MM_IOMUXC_NAND_DATA01_QSPI_A_DATA1           0x82
-+			MX8MM_IOMUXC_NAND_DATA02_QSPI_A_DATA2           0x82
-+			MX8MM_IOMUXC_NAND_DATA03_QSPI_A_DATA3           0x82
 +		>;
 +	};
 +
@@ -264,15 +342,8 @@ index 000000000000..adeeed1576d7
 +
 +	pinctrl_buttons: gpiobuttongrp {
 +		fsl,pins = <
-+			MX8MM_IOMUXC_GPIO1_IO08_GPIO1_IO8	0x156
-+			MX8MM_IOMUXC_GPIO1_IO09_GPIO1_IO9	0x156
-+		>;
-+	};
-+
-+	pinctrl_i2c2: i2c2grp {
-+		fsl,pins = <
-+			MX8MM_IOMUXC_I2C2_SCL_I2C2_SCL			0x400001c3
-+			MX8MM_IOMUXC_I2C2_SDA_I2C2_SDA			0x400001c3
++			MX8MM_IOMUXC_SAI1_MCLK_GPIO4_IO20	0x156
++			MX8MM_IOMUXC_SAI2_RXD0_GPIO4_IO23	0x156
 +		>;
 +	};
 +
@@ -295,35 +366,39 @@ index 000000000000..adeeed1576d7
 +		>;
 +	};
 +
-+	// pinctrl_pcie0: pcie0grp {
-+	// 	fsl,pins = <
-+	// 		MX8MM_IOMUXC_I2C4_SCL_PCIE1_CLKREQ_B	0x61 /* open drain, pull up */
-+	// 		MX8MM_IOMUXC_GPIO1_IO05_GPIO1_IO5	0x41
-+	// 		MX8MM_IOMUXC_SAI2_RXFS_GPIO4_IO21	0x41
-+	// 	>;
-+	// };	
++	pinctrl_sai5: sai5grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SAI3_RXD_SAI5_RX_DATA0		0x0
++			MX8MM_IOMUXC_SAI5_RXD3_SAI5_TX_DATA0	0x100
++			MX8MM_IOMUXC_SAI2_RXC_SAI5_TX_BCLK		0x100
++			MX8MM_IOMUXC_SAI5_RXD1_SAI5_TX_SYNC		0x100
++			MX8MM_IOMUXC_SAI2_MCLK_SAI5_MCLK		0x100
++		>;
++	};
 +};
 +
-+// &lcdif {
-+// 	status = "okay";
-+// };
++&lcdif {
++	status = "okay";
++};
 +
-+// &mipi_dsi {
-+// 	status = "okay";
++&mipi_dsi {
++	status = "okay";
++	#address-cells = <1>;
++	#size-cells = <0>;
 +
-+// 	port@1 {
-+// 		dsim_to_adv7535: endpoint {
-+// 			remote-endpoint = <&adv7535_from_dsim>;
-+// 			attach-bridge;
-+// 		};
-+// 	};
-+// };
++	mipi_dsi_disp0: port@1 {
++		dsim_to_lt8912b: endpoint {
++			remote-endpoint = <&lt8912b_from_dsim>;
++			attach-bridge;
++		};
++	};
++};
 diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
 new file mode 100644
-index 000000000000..99fc7b3a57f2
+index 000000000000..d9d135253d60
 --- /dev/null
 +++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
-@@ -0,0 +1,579 @@
+@@ -0,0 +1,605 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Device Tree for iesy i.MX8MM OSM-SF
@@ -354,9 +429,9 @@ index 000000000000..99fc7b3a57f2
 +
 +    reg_sd1_vmmc: sd1_regulator {
 +		compatible = "regulator-fixed";
-+		regulator-name = "1V8_IO_reg";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
++		regulator-name = "VCC_SDIO_B_reg";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
 +		gpio = <&gpio2 10 GPIO_ACTIVE_HIGH>; /* NC */
 +		off-on-delay-us = <20000>;
 +		startup-delay-us = <100>;
@@ -396,6 +471,8 @@ index 000000000000..99fc7b3a57f2
 +    };
 +};
 +
++/delete-node/ &cpu_crit0;
++
 +&A53_0 {
 +	cpu-supply = <&vdd_arm_0v9>;
 +};
@@ -412,7 +489,6 @@ index 000000000000..99fc7b3a57f2
 +	status = "okay";
 +	cts-gpios = <&gpio5 28 GPIO_ACTIVE_LOW>;
 +	rts-gpios = <&gpio5 29 GPIO_ACTIVE_LOW>;
-+	uart-has-rtscts;
 +};
 +
 +&uart3 { /* UART Console */
@@ -468,7 +544,7 @@ index 000000000000..99fc7b3a57f2
 +	pm-ignore-notify;
 +	keep-power-in-suspend;
 +	non-removable;
-+	status = "okay";
++	status = "disabled";
 +};
 +
 +&usdhc2 { /* SD-Card */
@@ -501,6 +577,17 @@ index 000000000000..99fc7b3a57f2
 +	pinctrl-0 = <&pinctrl_wdog>;
 +	fsl,ext-reset-output;
 +	status = "okay";
++};
++
++/* SPI B */
++&ecspi1 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	fsl,spi-num-chipselects = <1>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_ecspi1 &pinctrl_ecspi1_cs>;
++	cs-gpios = <&gpio5 9 GPIO_ACTIVE_LOW>;
++	status = "disabled";
 +};
 +
 +&i2c1 {
@@ -621,6 +708,13 @@ index 000000000000..99fc7b3a57f2
 +	};
 +};
 +
++&i2c2 {
++	clock-frequency = <400000>;
++	status = "disabled";
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c2>;
++};
++
 +&pwm1 {
 +	status = "okay";
 +	pinctrl-names = "default";
@@ -668,6 +762,13 @@ index 000000000000..99fc7b3a57f2
 +		>;
 +	};
 +
++	pinctrl_i2c2: i2c2grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_I2C2_SCL_I2C2_SCL			0x400001c3
++			MX8MM_IOMUXC_I2C2_SDA_I2C2_SDA			0x400001c3
++		>;
++	};
++
 +    pinctrl_pmic: pmicirq {
 +		fsl,pins = <
 +			MX8MM_IOMUXC_GPIO1_IO03_GPIO1_IO3		0x41
@@ -691,8 +792,8 @@ index 000000000000..99fc7b3a57f2
 +		fsl,pins = <
 +			MX8MM_IOMUXC_UART2_RXD_UART2_DCE_RX		0x140
 +			MX8MM_IOMUXC_UART2_TXD_UART2_DCE_TX		0x140
-+			MX8MM_IOMUXC_UART4_RXD_UART2_DCE_CTS_B	0x140
-+			MX8MM_IOMUXC_UART4_TXD_UART2_DCE_RTS_B	0x140
++			MX8MM_IOMUXC_UART4_RXD_GPIO5_IO28		0x140
++			MX8MM_IOMUXC_UART4_TXD_GPIO5_IO29		0x140
 +		>;
 +	};
 +
