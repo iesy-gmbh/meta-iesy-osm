@@ -1,0 +1,42 @@
+From fa696465f9494dca5c8b9e6733f270464d4c0db8 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 18 Jul 2024 10:54:25 +0200
+Subject: [PATCH 4/4] gpu: drm: bridge: revert 
+ d89078c37b10f05fa4f4791b71db2572db361b68
+
+Move the lt8912_attach_dsi call back to the lt8912_attach_bridge function. When called from the probe function, the dsi device is not necessarily registered yet.
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ drivers/gpu/drm/bridge/lontium-lt8912b.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/gpu/drm/bridge/lontium-lt8912b.c b/drivers/gpu/drm/bridge/lontium-lt8912b.c
+index e5839c89a355..dc70659c24ac 100644
+--- a/drivers/gpu/drm/bridge/lontium-lt8912b.c
++++ b/drivers/gpu/drm/bridge/lontium-lt8912b.c
+@@ -571,6 +571,10 @@ static int lt8912_bridge_attach(struct drm_bridge *bridge,
+ 		}
+ 	}
+ 
++	ret = lt8912_attach_dsi(lt);
++	if (ret)
++		goto error;
++
+ 	ret = lt8912_hard_power_on(lt);
+ 	if (ret)
+ 		return ret;
+@@ -728,10 +732,6 @@ static int lt8912_probe(struct i2c_client *client)
+ 
+ 	drm_bridge_add(&lt->bridge);
+ 
+-	ret = lt8912_attach_dsi(lt);
+-	if (ret)
+-		goto err_attach;
+-
+ 	return 0;
+ 
+ err_attach:
+-- 
+2.30.2
+

@@ -1,15 +1,16 @@
-From bffaf80a4e3eeb69a08acc1cbe8f9329032f2eea Mon Sep 17 00:00:00 2001
+From cf86e2cd0518f41071763f2deb5cd7452555f32a Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
-Date: Wed, 21 Jun 2023 16:46:23 +0200
-Subject: [PATCH 14/14] drivers: net: phy: config eth-phy led behavior
+Date: Thu, 18 Jul 2024 10:53:19 +0200
+Subject: [PATCH 3/4] driver: net: phy: config eth-phy behavior
 
+Signed-off-by: Dominik Poggel <pog@iesy.com>
 ---
  drivers/net/phy/mscc/mscc.h      |  2 ++
- drivers/net/phy/mscc/mscc_main.c | 12 ++++++++++++
- 2 files changed, 14 insertions(+)
+ drivers/net/phy/mscc/mscc_main.c | 11 +++++++++++
+ 2 files changed, 13 insertions(+)
 
 diff --git a/drivers/net/phy/mscc/mscc.h b/drivers/net/phy/mscc/mscc.h
-index a50235fdf7d9..f9fc9dfccae8 100644
+index e71b5302828b..90431ea621e6 100644
 --- a/drivers/net/phy/mscc/mscc.h
 +++ b/drivers/net/phy/mscc/mscc.h
 @@ -85,6 +85,8 @@ enum rgmii_clock_delay {
@@ -22,22 +23,21 @@ index a50235fdf7d9..f9fc9dfccae8 100644
  #define MSCC_EXT_PAGE_CSR_CNTL_18	  18
  
 diff --git a/drivers/net/phy/mscc/mscc_main.c b/drivers/net/phy/mscc/mscc_main.c
-index f778e4f8b508..33c1b0e725ff 100644
+index 20c33c1a84c2..5bc9592e951d 100644
 --- a/drivers/net/phy/mscc/mscc_main.c
 +++ b/drivers/net/phy/mscc/mscc_main.c
-@@ -181,6 +181,18 @@ static int vsc85xx_led_cntl_set(struct phy_device *phydev,
+@@ -184,6 +184,17 @@ static int vsc85xx_led_cntl_set(struct phy_device *phydev,
  	reg_val &= ~LED_MODE_SEL_MASK(led_num);
  	reg_val |= LED_MODE_SEL(led_num, (u16)mode);
  	rc = phy_write(phydev, MSCC_PHY_LED_MODE_SEL, reg_val);
 +	if(rc)
 +		goto led_cntl_set_cleanup;
-+	
-+	
++
 +	if (led_num) {
 +		reg_val = phy_read(phydev, MSCC_PHY_LED_MODE_BEH);
 +		reg_val |= 0x0002;
 +		rc = phy_write(phydev, MSCC_PHY_LED_MODE_BEH, reg_val);
-+	} 
++	}
 +
 +
 +led_cntl_set_cleanup:

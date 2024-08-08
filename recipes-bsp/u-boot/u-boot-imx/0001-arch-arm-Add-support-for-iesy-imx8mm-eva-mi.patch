@@ -1,27 +1,28 @@
-From c553ab3c462c52f2f386c79eccf92ec7564f1a74 Mon Sep 17 00:00:00 2001
+From 98216869c37bcefe0070a3eea4ae658815d5bf10 Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
-Date: Tue, 30 Jan 2024 13:43:21 +0100
+Date: Thu, 21 Mar 2024 13:38:38 +0100
 Subject: [PATCH] arch: arm: Add support for iesy-imx8mm-eva-mi
 
+Signed-off-by: Dominik Poggel <pog@iesy.com>
 ---
  arch/arm/dts/Makefile                         |    1 +
  arch/arm/dts/iesy-imx8mm-eva-mi-u-boot.dtsi   |  184 ++
- arch/arm/dts/iesy-imx8mm-eva-mi.dts           |  132 ++
- arch/arm/dts/iesy-imx8mm-osm-sf.dtsi          |  628 ++++++
- arch/arm/mach-imx/imx8m/Kconfig               |   12 +
- board/iesy/iesy_imx8mm_eva_mi/Kconfig         |   20 +
+ arch/arm/dts/iesy-imx8mm-eva-mi.dts           |   51 +
+ arch/arm/dts/iesy-imx8mm-osm-sf.dtsi          |  708 +++++++
+ arch/arm/mach-imx/imx8m/Kconfig               |   11 +
+ board/iesy/iesy_imx8mm_eva_mi/Kconfig         |   18 +
  board/iesy/iesy_imx8mm_eva_mi/MAINTAINERS     |    6 +
  board/iesy/iesy_imx8mm_eva_mi/Makefile        |   17 +
  board/iesy/iesy_imx8mm_eva_mi/ddr4_timing.c   | 1265 +++++++++++
- .../iesy_imx8mm_eva_mi/iesy_imx8mm_eva_mi.c   |  403 ++++
+ .../iesy_imx8mm_eva_mi/iesy_imx8mm_eva_mi.c   |  391 ++++
  .../iesy_imx8mm_eva_mi/imximage-8mm-fspi.cfg  |    7 +
  .../iesy/iesy_imx8mm_eva_mi/imximage-8mm.cfg  |    8 +
  board/iesy/iesy_imx8mm_eva_mi/lpddr4_timing.c | 1853 +++++++++++++++++
  .../iesy_imx8mm_eva_mi/lpddr4_timing_4g.c     | 1842 ++++++++++++++++
  board/iesy/iesy_imx8mm_eva_mi/spl.c           |  328 +++
- configs/iesy_imx8mm_eva_mi_defconfig          |  208 ++
- include/configs/iesy_imx8mm_eva_mi.h          |  263 +++
- 17 files changed, 7177 insertions(+)
+ configs/iesy_imx8mm_eva_mi_v1_defconfig       |  230 ++
+ include/configs/iesy_imx8mm_eva_mi.h          |  193 ++
+ 17 files changed, 7113 insertions(+)
  create mode 100644 arch/arm/dts/iesy-imx8mm-eva-mi-u-boot.dtsi
  create mode 100644 arch/arm/dts/iesy-imx8mm-eva-mi.dts
  create mode 100644 arch/arm/dts/iesy-imx8mm-osm-sf.dtsi
@@ -35,21 +36,21 @@ Subject: [PATCH] arch: arm: Add support for iesy-imx8mm-eva-mi
  create mode 100644 board/iesy/iesy_imx8mm_eva_mi/lpddr4_timing.c
  create mode 100755 board/iesy/iesy_imx8mm_eva_mi/lpddr4_timing_4g.c
  create mode 100644 board/iesy/iesy_imx8mm_eva_mi/spl.c
- create mode 100644 configs/iesy_imx8mm_eva_mi_defconfig
+ create mode 100644 configs/iesy_imx8mm_eva_mi_v1_defconfig
  create mode 100644 include/configs/iesy_imx8mm_eva_mi.h
 
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 709fdaecd7..9c1f7d58f8 100644
+index ceec5c074a..8aab6abdbc 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -964,6 +964,7 @@ dtb-$(CONFIG_ARCH_IMX8ULP) += \
+@@ -1030,6 +1030,7 @@ dtb-$(CONFIG_ARCH_IMX8ULP) += \
  	imx8ulp-watch.dtb
  
  dtb-$(CONFIG_ARCH_IMX8M) += \
 +	iesy-imx8mm-eva-mi.dtb \
+ 	imx8mm-data-modul-edm-sbc.dtb \
  	imx8mm-ddr4-evk.dtb \
  	imx8mm-ddr4-ab2.dtb \
- 	imx8mm-ddr3l-val.dtb \
 diff --git a/arch/arm/dts/iesy-imx8mm-eva-mi-u-boot.dtsi b/arch/arm/dts/iesy-imx8mm-eva-mi-u-boot.dtsi
 new file mode 100644
 index 0000000000..0d6c2ee8dd
@@ -242,10 +243,10 @@ index 0000000000..0d6c2ee8dd
 +};
 diff --git a/arch/arm/dts/iesy-imx8mm-eva-mi.dts b/arch/arm/dts/iesy-imx8mm-eva-mi.dts
 new file mode 100644
-index 0000000000..3c49a93a2b
+index 0000000000..c6137b2cea
 --- /dev/null
 +++ b/arch/arm/dts/iesy-imx8mm-eva-mi.dts
-@@ -0,0 +1,132 @@
+@@ -0,0 +1,51 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright 2019-2020 NXP
@@ -269,26 +270,6 @@ index 0000000000..3c49a93a2b
 +	};
 +};
 +
-+&ddrc {
-+	operating-points-v2 = <&ddrc_opp_table>;
-+
-+	ddrc_opp_table: opp-table {
-+		compatible = "operating-points-v2";
-+
-+		opp-25M {
-+			opp-hz = /bits/ 64 <25000000>;
-+		};
-+
-+		opp-100M {
-+			opp-hz = /bits/ 64 <100000000>;
-+		};
-+
-+		opp-750M {
-+			opp-hz = /bits/ 64 <750000000>;
-+		};
-+	};
-+};
-+
 +&flexspi {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_flexspi>;
@@ -305,18 +286,6 @@ index 0000000000..3c49a93a2b
 +	};
 +};
 +
-+&usdhc3 {
-+	assigned-clocks = <&clk IMX8MM_CLK_USDHC3_ROOT>;
-+	assigned-clock-rates = <400000000>;
-+	pinctrl-names = "default", "state_100mhz", "state_200mhz";
-+	pinctrl-0 = <&pinctrl_usdhc3>;
-+	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
-+	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
-+	bus-width = <8>;
-+	non-removable;
-+	status = "okay";
-+};
-+
 +&iomuxc {
 +	pinctrl_flexspi: flexspigrp {
 +		fsl,pins = <
@@ -328,62 +297,13 @@ index 0000000000..3c49a93a2b
 +			MX8MM_IOMUXC_NAND_DATA03_QSPI_A_DATA3           0x82
 +		>;
 +	};
-+
-+	pinctrl_usdhc3: usdhc3grp {
-+		fsl,pins = <
-+			MX8MM_IOMUXC_NAND_WE_B_USDHC3_CLK               0x190
-+			MX8MM_IOMUXC_NAND_WP_B_USDHC3_CMD               0x1d0
-+			MX8MM_IOMUXC_NAND_DATA04_USDHC3_DATA0           0x1d0
-+			MX8MM_IOMUXC_NAND_DATA05_USDHC3_DATA1           0x1d0
-+			MX8MM_IOMUXC_NAND_DATA06_USDHC3_DATA2           0x1d0
-+			MX8MM_IOMUXC_NAND_DATA06_USDHC3_DATA2           0x1d0
-+			MX8MM_IOMUXC_NAND_DATA07_USDHC3_DATA3           0x1d0
-+			MX8MM_IOMUXC_NAND_RE_B_USDHC3_DATA4             0x1d0
-+			MX8MM_IOMUXC_NAND_CE2_B_USDHC3_DATA5            0x1d0
-+			MX8MM_IOMUXC_NAND_CE3_B_USDHC3_DATA6            0x1d0
-+			MX8MM_IOMUXC_NAND_CLE_USDHC3_DATA7              0x1d0
-+			MX8MM_IOMUXC_NAND_CE1_B_USDHC3_STROBE           0x190
-+		>;
-+	};
-+
-+	pinctrl_usdhc3_100mhz: usdhc3-100mhzgrp {
-+		fsl,pins = <
-+			MX8MM_IOMUXC_NAND_WE_B_USDHC3_CLK               0x194
-+			MX8MM_IOMUXC_NAND_WP_B_USDHC3_CMD               0x1d4
-+			MX8MM_IOMUXC_NAND_DATA04_USDHC3_DATA0           0x1d4
-+			MX8MM_IOMUXC_NAND_DATA05_USDHC3_DATA1           0x1d4
-+			MX8MM_IOMUXC_NAND_DATA06_USDHC3_DATA2           0x1d4
-+			MX8MM_IOMUXC_NAND_DATA07_USDHC3_DATA3           0x1d4
-+			MX8MM_IOMUXC_NAND_RE_B_USDHC3_DATA4             0x1d4
-+			MX8MM_IOMUXC_NAND_CE2_B_USDHC3_DATA5            0x1d4
-+			MX8MM_IOMUXC_NAND_CE3_B_USDHC3_DATA6            0x1d4
-+			MX8MM_IOMUXC_NAND_CLE_USDHC3_DATA7              0x1d4
-+			MX8MM_IOMUXC_NAND_CE1_B_USDHC3_STROBE           0x194
-+		>;
-+	};
-+
-+	pinctrl_usdhc3_200mhz: usdhc3-200mhzgrp {
-+		fsl,pins = <
-+			MX8MM_IOMUXC_NAND_WE_B_USDHC3_CLK               0x196
-+			MX8MM_IOMUXC_NAND_WP_B_USDHC3_CMD               0x1d6
-+			MX8MM_IOMUXC_NAND_DATA04_USDHC3_DATA0           0x1d6
-+			MX8MM_IOMUXC_NAND_DATA05_USDHC3_DATA1           0x1d6
-+			MX8MM_IOMUXC_NAND_DATA06_USDHC3_DATA2           0x1d6
-+			MX8MM_IOMUXC_NAND_DATA07_USDHC3_DATA3           0x1d6
-+			MX8MM_IOMUXC_NAND_RE_B_USDHC3_DATA4             0x1d6
-+			MX8MM_IOMUXC_NAND_CE2_B_USDHC3_DATA5            0x1d6
-+			MX8MM_IOMUXC_NAND_CE3_B_USDHC3_DATA6            0x1d6
-+			MX8MM_IOMUXC_NAND_CLE_USDHC3_DATA7              0x1d6
-+			MX8MM_IOMUXC_NAND_CE1_B_USDHC3_STROBE           0x196
-+		>;
-+	};
 +};
 diff --git a/arch/arm/dts/iesy-imx8mm-osm-sf.dtsi b/arch/arm/dts/iesy-imx8mm-osm-sf.dtsi
 new file mode 100644
-index 0000000000..ca5789976e
+index 0000000000..f01c077fae
 --- /dev/null
 +++ b/arch/arm/dts/iesy-imx8mm-osm-sf.dtsi
-@@ -0,0 +1,628 @@
+@@ -0,0 +1,708 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright 2020 NXP
@@ -511,6 +431,25 @@ index 0000000000..ca5789976e
 +	cpu-supply = <&buck2_reg>;
 +};
 +
++&ddrc {
++	operating-points-v2 = <&ddrc_opp_table>;
++
++	ddrc_opp_table: opp-table {
++		compatible = "operating-points-v2";
++
++		opp-25M {
++			opp-hz = /bits/ 64 <25000000>;
++		};
++
++		opp-100M {
++			opp-hz = /bits/ 64 <100000000>;
++		};
++
++		opp-750M {
++			opp-hz = /bits/ 64 <750000000>;
++		};
++	};
++};
 +
 +&ecspi2 {
 +	#address-cells = <1>;
@@ -796,6 +735,18 @@ index 0000000000..ca5789976e
 +	status = "okay";
 +};
 +
++&usdhc3 {
++	assigned-clocks = <&clk IMX8MM_CLK_USDHC3_ROOT>;
++	assigned-clock-rates = <400000000>;
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
++	pinctrl-0 = <&pinctrl_usdhc3>;
++	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
++	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
++	bus-width = <8>;
++	non-removable;
++	status = "okay";
++};
++
 +&wdog1 {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_wdog>;
@@ -1000,6 +951,55 @@ index 0000000000..ca5789976e
 +		>;
 +	};
 +
++	pinctrl_usdhc3: usdhc3grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_NAND_WE_B_USDHC3_CLK               0x190
++			MX8MM_IOMUXC_NAND_WP_B_USDHC3_CMD               0x1d0
++			MX8MM_IOMUXC_NAND_DATA04_USDHC3_DATA0           0x1d0
++			MX8MM_IOMUXC_NAND_DATA05_USDHC3_DATA1           0x1d0
++			MX8MM_IOMUXC_NAND_DATA06_USDHC3_DATA2           0x1d0
++			MX8MM_IOMUXC_NAND_DATA06_USDHC3_DATA2           0x1d0
++			MX8MM_IOMUXC_NAND_DATA07_USDHC3_DATA3           0x1d0
++			MX8MM_IOMUXC_NAND_RE_B_USDHC3_DATA4             0x1d0
++			MX8MM_IOMUXC_NAND_CE2_B_USDHC3_DATA5            0x1d0
++			MX8MM_IOMUXC_NAND_CE3_B_USDHC3_DATA6            0x1d0
++			MX8MM_IOMUXC_NAND_CLE_USDHC3_DATA7              0x1d0
++			MX8MM_IOMUXC_NAND_CE1_B_USDHC3_STROBE           0x190
++		>;
++	};
++
++	pinctrl_usdhc3_100mhz: usdhc3-100mhzgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_NAND_WE_B_USDHC3_CLK               0x194
++			MX8MM_IOMUXC_NAND_WP_B_USDHC3_CMD               0x1d4
++			MX8MM_IOMUXC_NAND_DATA04_USDHC3_DATA0           0x1d4
++			MX8MM_IOMUXC_NAND_DATA05_USDHC3_DATA1           0x1d4
++			MX8MM_IOMUXC_NAND_DATA06_USDHC3_DATA2           0x1d4
++			MX8MM_IOMUXC_NAND_DATA07_USDHC3_DATA3           0x1d4
++			MX8MM_IOMUXC_NAND_RE_B_USDHC3_DATA4             0x1d4
++			MX8MM_IOMUXC_NAND_CE2_B_USDHC3_DATA5            0x1d4
++			MX8MM_IOMUXC_NAND_CE3_B_USDHC3_DATA6            0x1d4
++			MX8MM_IOMUXC_NAND_CLE_USDHC3_DATA7              0x1d4
++			MX8MM_IOMUXC_NAND_CE1_B_USDHC3_STROBE           0x194
++		>;
++	};
++
++	pinctrl_usdhc3_200mhz: usdhc3-200mhzgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_NAND_WE_B_USDHC3_CLK               0x196
++			MX8MM_IOMUXC_NAND_WP_B_USDHC3_CMD               0x1d6
++			MX8MM_IOMUXC_NAND_DATA04_USDHC3_DATA0           0x1d6
++			MX8MM_IOMUXC_NAND_DATA05_USDHC3_DATA1           0x1d6
++			MX8MM_IOMUXC_NAND_DATA06_USDHC3_DATA2           0x1d6
++			MX8MM_IOMUXC_NAND_DATA07_USDHC3_DATA3           0x1d6
++			MX8MM_IOMUXC_NAND_RE_B_USDHC3_DATA4             0x1d6
++			MX8MM_IOMUXC_NAND_CE2_B_USDHC3_DATA5            0x1d6
++			MX8MM_IOMUXC_NAND_CE3_B_USDHC3_DATA6            0x1d6
++			MX8MM_IOMUXC_NAND_CLE_USDHC3_DATA7              0x1d6
++			MX8MM_IOMUXC_NAND_CE1_B_USDHC3_STROBE           0x196
++		>;
++	};
++
 +	pinctrl_wdog: wdoggrp {
 +		fsl,pins = <
 +			MX8MM_IOMUXC_GPIO1_IO02_WDOG1_WDOG_B	0xc6
@@ -1013,14 +1013,13 @@ index 0000000000..ca5789976e
 +	};
 +};
 diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
-index a225a9784f..add8f90c84 100644
+index b124027910..0f0e1260ac 100644
 --- a/arch/arm/mach-imx/imx8m/Kconfig
 +++ b/arch/arm/mach-imx/imx8m/Kconfig
-@@ -341,6 +341,17 @@ config TARGET_IMX8MP_RSB3720A1_6G
- 	select IMX8MP
+@@ -448,6 +448,16 @@ config TARGET_LIBREM5
  	select SUPPORT_SPL
  	select IMX8M_LPDDR4
-+
+ 
 +config TARGET_IESY_IMX8MM_EVA_MI
 +	bool "iesy i.MX8MM EVA MI"
 +	select IMX8MM
@@ -1034,20 +1033,20 @@ index a225a9784f..add8f90c84 100644
  endchoice
  
  source "board/advantech/imx8mp_rsb3720a1/Kconfig"
-@@ -357,6 +368,7 @@ source "board/freescale/imx8mn_evk/Kconfig"
+@@ -469,6 +479,7 @@ source "board/freescale/imx8mn_evk/Kconfig"
  source "board/freescale/imx8mp_evk/Kconfig"
  source "board/gateworks/venice/Kconfig"
  source "board/google/imx8mq_phanbell/Kconfig"
 +source "board/iesy/iesy_imx8mm_eva_mi/Kconfig"
  source "board/kontron/pitx_imx8m/Kconfig"
  source "board/kontron/sl-mx8mm/Kconfig"
- source "board/phytec/phycore_imx8mm/Kconfig"
+ source "board/menlo/mx8menlo/Kconfig"
 diff --git a/board/iesy/iesy_imx8mm_eva_mi/Kconfig b/board/iesy/iesy_imx8mm_eva_mi/Kconfig
 new file mode 100644
-index 0000000000..7ea8045ab6
+index 0000000000..f0eaf3da2a
 --- /dev/null
 +++ b/board/iesy/iesy_imx8mm_eva_mi/Kconfig
-@@ -0,0 +1,20 @@
+@@ -0,0 +1,18 @@
 +if TARGET_IESY_IMX8MM_EVA_MI
 +
 +config SYS_BOARD
@@ -1064,8 +1063,6 @@ index 0000000000..7ea8045ab6
 +
 +config IMX8M_1G_MEMORY
 +	bool "imx8m 1GB memory size"
-+
-+source "board/freescale/common/Kconfig"
 +
 +endif
 diff --git a/board/iesy/iesy_imx8mm_eva_mi/MAINTAINERS b/board/iesy/iesy_imx8mm_eva_mi/MAINTAINERS
@@ -2376,10 +2373,10 @@ index 0000000000..2f80b9832b
 +};
 diff --git a/board/iesy/iesy_imx8mm_eva_mi/iesy_imx8mm_eva_mi.c b/board/iesy/iesy_imx8mm_eva_mi/iesy_imx8mm_eva_mi.c
 new file mode 100644
-index 0000000000..d6c7aa73c3
+index 0000000000..fd3f4ce8af
 --- /dev/null
 +++ b/board/iesy/iesy_imx8mm_eva_mi/iesy_imx8mm_eva_mi.c
-@@ -0,0 +1,403 @@
+@@ -0,0 +1,391 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * Copyright 2018 NXP
@@ -2402,8 +2399,6 @@ index 0000000000..d6c7aa73c3
 +#include <asm/io.h>
 +#include "../../freescale/common/tcpc.h"
 +#include <usb.h>
-+#include <imx_sip.h>
-+#include <linux/arm-smccc.h>
 +
 +DECLARE_GLOBAL_DATA_PTR;
 +
@@ -2695,24 +2690,14 @@ index 0000000000..d6c7aa73c3
 +
 +#endif
 +
-+#define DISPMIX				9
-+#define MIPI				10
-+
 +int board_init(void)
 +{
-+	struct arm_smccc_res res;
-+
 +#ifdef CONFIG_USB_TCPC
 +	setup_typec();
 +#endif
 +
 +	if (IS_ENABLED(CONFIG_FEC_MXC))
 +		setup_fec();
-+
-+	arm_smccc_smc(IMX_SIP_GPC, IMX_SIP_GPC_PM_DOMAIN,
-+		      DISPMIX, true, 0, 0, 0, 0, &res);
-+	arm_smccc_smc(IMX_SIP_GPC, IMX_SIP_GPC_PM_DOMAIN,
-+		      MIPI, true, 0, 0, 0, 0, &res);
 +
 +	return 0;
 +}
@@ -6519,7 +6504,7 @@ index 0000000000..d32ecbf905
 +
 diff --git a/board/iesy/iesy_imx8mm_eva_mi/spl.c b/board/iesy/iesy_imx8mm_eva_mi/spl.c
 new file mode 100644
-index 0000000000..c93fbd42ed
+index 0000000000..6380b34bd2
 --- /dev/null
 +++ b/board/iesy/iesy_imx8mm_eva_mi/spl.c
 @@ -0,0 +1,328 @@
@@ -6656,7 +6641,7 @@ index 0000000000..c93fbd42ed
 +	 * mmc0                    USDHC1
 +	 * mmc1                    USDHC2
 +	 */
-+	for (i = 0; i < CONFIG_SYS_FSL_USDHC_NUM; i++) {
++	for (i = 0; i < CFG_SYS_FSL_USDHC_NUM; i++) {
 +		switch (i) {
 +		case 0:
 +			init_clk_usdhc(1);
@@ -6851,22 +6836,22 @@ index 0000000000..c93fbd42ed
 +
 +	board_init_r(NULL, 0);
 +}
-diff --git a/configs/iesy_imx8mm_eva_mi_defconfig b/configs/iesy_imx8mm_eva_mi_defconfig
+diff --git a/configs/iesy_imx8mm_eva_mi_v1_defconfig b/configs/iesy_imx8mm_eva_mi_v1_defconfig
 new file mode 100644
-index 0000000000..b6cdacfb7c
+index 0000000000..fa10552a24
 --- /dev/null
-+++ b/configs/iesy_imx8mm_eva_mi_defconfig
-@@ -0,0 +1,208 @@
++++ b/configs/iesy_imx8mm_eva_mi_v1_defconfig
+@@ -0,0 +1,230 @@
 +CONFIG_ARM=y
 +CONFIG_ARCH_IMX8M=y
-+CONFIG_SYS_TEXT_BASE=0x40200000
++CONFIG_TEXT_BASE=0x40200000
 +CONFIG_SYS_MALLOC_LEN=0x2000000
 +CONFIG_SYS_MALLOC_F_LEN=0x10000
 +CONFIG_SPL_GPIO=y
 +CONFIG_SPL_LIBCOMMON_SUPPORT=y
 +CONFIG_SPL_LIBGENERIC_SUPPORT=y
 +CONFIG_ENV_SIZE=0x4000
-+CONFIG_ENV_OFFSET=0x400000
++CONFIG_ENV_OFFSET=0x700000
 +CONFIG_SYS_MEMTEST_START=0x40000000
 +CONFIG_SYS_MEMTEST_END=0x80000000
 +CONFIG_SYS_I2C_MXC_I2C1=y
@@ -6875,32 +6860,47 @@ index 0000000000..b6cdacfb7c
 +CONFIG_DM_GPIO=y
 +CONFIG_SPL_TEXT_BASE=0x7E1000
 +CONFIG_TARGET_IESY_IMX8MM_EVA_MI=y
++CONFIG_SYS_PROMPT="u-boot=> "
 +CONFIG_ARCH_MISC_INIT=y
 +CONFIG_SPL_MMC=y
 +CONFIG_SPL_SERIAL=y
 +CONFIG_SPL_DRIVERS_MISC=y
++CONFIG_SPL_STACK=0x920000
 +CONFIG_SPL=y
 +CONFIG_DEFAULT_DEVICE_TREE="iesy-imx8mm-eva-mi"
 +CONFIG_CSF_SIZE=0x2000
++CONFIG_SYS_LOAD_ADDR=0x40400000
++CONFIG_LTO=y
 +CONFIG_DISTRO_DEFAULTS=y
 +CONFIG_BOOTCOMMAND="run distro_bootcmd;run bsp_bootcmd"
-+CONFIG_SYS_LOAD_ADDR=0x40400000
++CONFIG_SYS_MONITOR_LEN=524288
 +CONFIG_FIT=y
 +CONFIG_FIT_EXTERNAL_OFFSET=0x3000
 +CONFIG_SPL_LOAD_FIT=y
-+# CONFIG_USE_SPL_FIT_GENERATOR is not set
 +CONFIG_OF_SYSTEM_SETUP=y
 +CONFIG_BOARD_LATE_INIT=y
++CONFIG_SPL_HAS_BSS_LINKER_SECTION=y
++CONFIG_SPL_BSS_START_ADDR=0x910000
++CONFIG_SPL_BSS_MAX_SIZE=0x2000
 +CONFIG_BOARD_EARLY_INIT_F=y
 +CONFIG_SPL_BOARD_INIT=y
-+CONFIG_SPL_SEPARATE_BSS=y
++# CONFIG_SPL_SHARES_INIT_SP_ADDR is not set
++CONFIG_SYS_SPL_MALLOC=y
++CONFIG_HAS_CUSTOM_SPL_MALLOC_START=y
++CONFIG_CUSTOM_SYS_SPL_MALLOC_ADDR=0x42200000
++CONFIG_SYS_SPL_MALLOC_SIZE=0x80000
 +CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR=y
 +CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x300
 +CONFIG_SPL_I2C=y
 +CONFIG_SPL_POWER=y
++CONFIG_SPL_USB_HOST=y
++CONFIG_SPL_USB_GADGET=y
++CONFIG_SPL_USB_SDP_SUPPORT=y
 +CONFIG_SPL_WATCHDOG=y
++CONFIG_SYS_MAXARGS=64
++CONFIG_SYS_CBSIZE=2048
++CONFIG_SYS_PBSIZE=2074
 +CONFIG_NR_DRAM_BANKS=2
-+CONFIG_SYS_PROMPT="u-boot=> "
 +# CONFIG_CMD_EXPORTENV is not set
 +# CONFIG_CMD_IMPORTENV is not set
 +CONFIG_CMD_CRC32=y
@@ -6914,6 +6914,8 @@ index 0000000000..b6cdacfb7c
 +CONFIG_CMD_GPT=y
 +CONFIG_CMD_I2C=y
 +CONFIG_CMD_MMC=y
++CONFIG_CMD_USB_SDP=y
++CONFIG_CMD_USB_MASS_STORAGE=y
 +CONFIG_CMD_POWEROFF=y
 +CONFIG_CMD_PART=y
 +CONFIG_CMD_DHCP=y
@@ -6936,14 +6938,15 @@ index 0000000000..b6cdacfb7c
 +CONFIG_CMD_SF=y
 +CONFIG_CMD_FS_GENERIC=y
 +CONFIG_CMD_USB=y
-+CONFIG_CMD_USB_MASS_STORAGE=y
 +CONFIG_OF_CONTROL=y
 +CONFIG_ENV_OVERWRITE=y
-+CONFIG_DEFAULT_FDT_FILE="iesy-imx8mm-eva-mi.dtb"
++CONFIG_DEFAULT_FDT_FILE="iesy-imx8mm-eva-mi-v1.dtb"
 +CONFIG_ENV_IS_IN_MMC=y
 +CONFIG_SYS_RELOC_GD_ENV_ADDR=y
 +CONFIG_SYS_MMC_ENV_DEV=1
 +CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG=y
++CONFIG_USE_ETHPRIME=y
++CONFIG_ETHPRIME="FEC"
 +CONFIG_NET_RANDOM_ETHADDR=y
 +CONFIG_CLK_COMPOSITE_CCF=y
 +CONFIG_CLK_IMX8MM=y
@@ -6994,24 +6997,28 @@ index 0000000000..b6cdacfb7c
 +CONFIG_MII=y
 +CONFIG_PINCTRL=y
 +CONFIG_PINCTRL_IMX8M=y
++CONFIG_POWER_DOMAIN=y
++CONFIG_IMX8M_POWER_DOMAIN=y
 +CONFIG_SPL_POWER_LEGACY=y
 +CONFIG_DM_REGULATOR=y
 +CONFIG_DM_REGULATOR_FIXED=y
 +CONFIG_DM_REGULATOR_GPIO=y
 +CONFIG_SPL_POWER_I2C=y
++CONFIG_POWER_PCA9450=y
++CONFIG_DM_PWM=y
++CONFIG_PWM_IMX=y
++CONFIG_DM_SERIAL=y
 +CONFIG_DM_RTC=y
 +CONFIG_RTC_EMULATION=y
 +CONFIG_MXC_UART=y
 +CONFIG_SYSRESET=y
 +CONFIG_SYSRESET_PSCI=y
 +CONFIG_DM_THERMAL=y
-+CONFIG_IMX_TMU=y
 +CONFIG_USB=y
-+CONFIG_USB_GADGET=y
-+CONFIG_USB_STORAGE=y
-+CONFIG_DM_USB=y
-+CONFIG_CI_UDC=y
 +CONFIG_USB_EHCI_HCD=y
++CONFIG_MXC_USB_OTG_HACTIVE=y
++CONFIG_USB_STORAGE=y
++CONFIG_USB_GADGET=y
 +CONFIG_USB_HOST_ETHER=y
 +CONFIG_USB_ETHER_ASIX=y
 +CONFIG_USB_ETHER_RTL8152=y
@@ -7019,20 +7026,18 @@ index 0000000000..b6cdacfb7c
 +CONFIG_USB_GADGET_MANUFACTURER="FSL"
 +CONFIG_USB_GADGET_VENDOR_NUM=0x1fc9
 +CONFIG_USB_GADGET_PRODUCT_NUM=0x0152
-+
-+CONFIG_SPL_USB_HOST=y
-+CONFIG_SPL_USB_GADGET=y
-+CONFIG_SPL_USB_SDP_SUPPORT=y
++CONFIG_CI_UDC=y
 +CONFIG_SDP_LOADADDR=0x40400000
++CONFIG_USB_GADGET_DOWNLOAD=y
++CONFIG_USB_MAX_CONTROLLER_COUNT=2
++CONFIG_IMX_BOOTAUX=y
++CONFIG_IMX_TMU=y
 +
 +CONFIG_OF_LIBFDT_OVERLAY=y
 +
-+CONFIG_REGMAP=y
-+CONFIG_SYSCON=y
-+CONFIG_DM_RESET=y
-+CONFIG_RESET_DISPMIX=y
++CONFIG_IMX8M_BLK_CTRL=y
 +CONFIG_VIDEO_IMX_SEC_DSI=y
-+CONFIG_DM_VIDEO=y
++CONFIG_VIDEO=y
 +CONFIG_BMP_16BPP=y
 +CONFIG_BMP_24BPP=y
 +CONFIG_BMP_32BPP=y
@@ -7065,12 +7070,14 @@ index 0000000000..b6cdacfb7c
 +CONFIG_EFI_ESRT=y
 +CONFIG_EFI_HAVE_CAPSULE_UPDATE=y
 +CONFIG_FIT_SIGNATURE=y
++CONFIG_DM_RNG=y
++CONFIG_KASLR=y
 diff --git a/include/configs/iesy_imx8mm_eva_mi.h b/include/configs/iesy_imx8mm_eva_mi.h
 new file mode 100644
-index 0000000000..7b598f76e7
+index 0000000000..0989857397
 --- /dev/null
 +++ b/include/configs/iesy_imx8mm_eva_mi.h
-@@ -0,0 +1,263 @@
+@@ -0,0 +1,193 @@
 +/* SPDX-License-Identifier: GPL-2.0+ */
 +/*
 + * Copyright 2019 NXP
@@ -7084,59 +7091,29 @@ index 0000000000..7b598f76e7
 +#include <asm/arch/imx-regs.h>
 +#include "imx_env.h"
 +
-+#define CONFIG_SYS_BOOTM_LEN		(64 * SZ_1M)
-+#define CONFIG_SPL_MAX_SIZE		(148 * 1024)
-+#define CONFIG_SYS_MONITOR_LEN		SZ_512K
-+#define CONFIG_SYS_UBOOT_BASE	\
++#define UBOOT_ITB_OFFSET			0x57C00
++#define FSPI_CONF_BLOCK_SIZE		0x1000
++#define UBOOT_ITB_OFFSET_FSPI  \
++	(UBOOT_ITB_OFFSET + FSPI_CONF_BLOCK_SIZE)
++#ifdef CONFIG_FSPI_CONF_HEADER
++#define CFG_SYS_UBOOT_BASE  \
++	(QSPI0_AMBA_BASE + UBOOT_ITB_OFFSET_FSPI)
++#else
++#define CFG_SYS_UBOOT_BASE	\
 +	(QSPI0_AMBA_BASE + CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR * 512)
++#endif
 +
 +#ifdef CONFIG_SPL_BUILD
-+#define CONFIG_SPL_STACK		0x920000
-+#define CONFIG_SPL_BSS_START_ADDR	0x910000
-+#define CONFIG_SPL_BSS_MAX_SIZE		SZ_8K	/* 8 KB */
-+#define CONFIG_SYS_SPL_MALLOC_START	0x42200000
-+#define CONFIG_SYS_SPL_MALLOC_SIZE	SZ_512K	/* 512 KB */
-+
 +/* malloc f used before GD_FLG_FULL_MALLOC_INIT set */
-+#define CONFIG_MALLOC_F_ADDR		0x930000
++#define CFG_MALLOC_F_ADDR		0x930000
 +/* For RAW image gives a error info not panic */
-+#define CONFIG_SPL_ABORT_ON_RAW_IMAGE
-+
-+#if defined(CONFIG_IMX8M_LPDDR4) && defined(CONFIG_TARGET_IMX8MM_EVK)
-+#define CONFIG_POWER_PCA9450
-+#else
-+#define CONFIG_POWER_BD71837
-+#endif
-+
-+#define CONFIG_SPL_NAND_BASE
-+#define CONFIG_SPL_NAND_IDENT
-+#define CONFIG_SYS_NAND_U_BOOT_OFFS 	0x4000000 /* Put the FIT out of first 64MB boot area */
-+
-+/* Set a redundant offset in nand FIT mtdpart. The new uuu will burn full boot image (not only FIT part) to the mtdpart, so we check both two offsets */
-+#define CONFIG_SYS_NAND_U_BOOT_OFFS_REDUND \
-+	(CONFIG_SYS_NAND_U_BOOT_OFFS + CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR * 512 - 0x8400)
 +
 +#endif
 +
-+#define CONFIG_CMD_READ
-+#define CONFIG_SERIAL_TAG
-+#define CONFIG_FASTBOOT_USB_DEV 0
-+
-+#define CONFIG_REMAKE_ELF
-+/* ENET Config */
-+/* ENET1 */
-+#if defined(CONFIG_FEC_MXC)
-+#define CONFIG_ETHPRIME                 "FEC"
 +#define PHY_ANEG_TIMEOUT 20000
 +
-+#define CONFIG_FEC_XCV_TYPE             RGMII
-+#define CONFIG_FEC_MXC_PHYADDR          0
-+
-+#define IMX_FEC_BASE			0x30BE0000
-+#endif
-+
 +#ifdef CONFIG_NAND_BOOT
-+#define MFG_NAND_PARTITION "mtdparts=gpmi-nand:64m(nandboot),16m(nandfit),32m(nandkernel),16m(nanddtb),8m(nandtee),-(nandrootfs)"
++#define MFG_NAND_PARTITION "mtdparts=gpmi-nand:64m(nandboot),16m(nandfit),64m(nandkernel),16m(nanddtb),8m(nandtee),-(nandrootfs)"
 +#endif
 +
 +#ifdef CONFIG_DISTRO_DEFAULTS
@@ -7166,8 +7143,8 @@ index 0000000000..7b598f76e7
 +			   "else run jh_netboot; fi; \0" \
 +	"jh_netboot=mw 0x303d0518 0xff; setenv fdtfile ${jh_root_dtb}; setenv jh_clk clk_ignore_unused mem=1212MB; run netboot; \0 "
 +
-+#define CONFIG_MFG_ENV_SETTINGS \
-+	CONFIG_MFG_ENV_SETTINGS_DEFAULT \
++#define CFG_MFG_ENV_SETTINGS \
++	CFG_MFG_ENV_SETTINGS_DEFAULT \
 +	"initrd_addr=0x43800000\0" \
 +	"initrd_high=0xffffffffffffffff\0" \
 +	"emmc_dev=2\0"\
@@ -7175,8 +7152,8 @@ index 0000000000..7b598f76e7
 +
 +/* Initial environment variables */
 +#if defined(CONFIG_NAND_BOOT)
-+#define CONFIG_EXTRA_ENV_SETTINGS \
-+	CONFIG_MFG_ENV_SETTINGS \
++#define CFG_EXTRA_ENV_SETTINGS		\
++	CFG_MFG_ENV_SETTINGS \
 +	"splashimage=0x50000000\0" \
 +	"fdt_addr_r=0x43000000\0"			\
 +	"fdt_addr=0x43000000\0"			\
@@ -7187,13 +7164,13 @@ index 0000000000..7b598f76e7
 +		"root=ubi0:nandrootfs rootfstype=ubifs "		     \
 +		MFG_NAND_PARTITION \
 +		"\0" \
-+	"bootcmd=nand read ${loadaddr} 0x5000000 0x2000000;"\
-+		"nand read ${fdt_addr_r} 0x7000000 0x100000;"\
++	"bootcmd=nand read ${loadaddr} 0x5000000 0x4000000;"\
++		"nand read ${fdt_addr_r} 0x9000000 0x100000;"\
 +		"booti ${loadaddr} - ${fdt_addr_r}"
 +
 +#else
-+#define CONFIG_EXTRA_ENV_SETTINGS		\
-+	CONFIG_MFG_ENV_SETTINGS \
++#define CFG_EXTRA_ENV_SETTINGS		\
++	CFG_MFG_ENV_SETTINGS \
 +	BOOTENV \
 +	JAILHOUSE_ENV \
 +	"prepare_mcore=setenv mcore_clk clk-imx8mm.mcore_booted;\0" \
@@ -7211,9 +7188,9 @@ index 0000000000..7b598f76e7
 +	"bootm_size=0x10000000\0" \
 +	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
 +	"mmcpart=1\0" \
-+	"mmcroot=" CONFIG_MMCROOT " rootwait rw\0" \
++	"mmcroot=/dev/mmcblk1p2 rootwait rw\0" \
 +	"mmcautodetect=yes\0" \
-+	"mmcargs=setenv bootargs ${jh_clk} ${mcore_clk} console=${console} root=${mmcroot}\0 " \
++	"mmcargs=setenv bootargs ${jh_clk} ${mcore_clk} console=${console} earlycon=ec_imx6q,0x30880000,115200 root=${mmcroot}\0 " \
 +	"loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${bsp_script};\0" \
 +	"bootscript=echo Running bootscript from mmc ...; " \
 +		"source\0" \
@@ -7265,69 +7242,29 @@ index 0000000000..7b598f76e7
 +
 +/* Link Definitions */
 +
-+#define CONFIG_SYS_INIT_RAM_ADDR        0x40000000
-+#define CONFIG_SYS_INIT_RAM_SIZE        0x200000
-+#define CONFIG_SYS_INIT_SP_OFFSET \
-+	(CONFIG_SYS_INIT_RAM_SIZE - GENERATED_GBL_DATA_SIZE)
-+#define CONFIG_SYS_INIT_SP_ADDR \
-+	(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET)
++#define CFG_SYS_INIT_RAM_ADDR        0x40000000
++#define CFG_SYS_INIT_RAM_SIZE        0x200000
 +
-+#define CONFIG_SYS_MMC_ENV_DEV		1   /* USDHC2 */
-+#define CONFIG_MMCROOT			"/dev/mmcblk1p2"  /* USDHC2 */
-+
-+#define CONFIG_SYS_SDRAM_BASE           0x40000000
++#define CFG_SYS_SDRAM_BASE           0x40000000
 +#define PHYS_SDRAM                      0x40000000
 +#define PHYS_SDRAM_SIZE			0x40000000 /* 1GB DDR */
 +
-+#define CONFIG_MXC_UART_BASE		UART3_BASE_ADDR
++#define CFG_FEC_MXC_PHYADDR          0
 +
-+/* Monitor Command Prompt */
-+#define CONFIG_SYS_CBSIZE		2048
-+#define CONFIG_SYS_MAXARGS		64
-+#define CONFIG_SYS_BARGSIZE		CONFIG_SYS_CBSIZE
-+#define CONFIG_SYS_PBSIZE		(CONFIG_SYS_CBSIZE + \
-+					sizeof(CONFIG_SYS_PROMPT) + 16)
-+
-+#define CONFIG_IMX_BOOTAUX
-+
-+/* USDHC */
++#define CFG_MXC_UART_BASE		UART_BASE_ADDR(3)
 +
 +#ifdef CONFIG_TARGET_IMX8MM_DDR4_EVK
-+#define CONFIG_SYS_FSL_USDHC_NUM	1
++#define CFG_SYS_FSL_USDHC_NUM	1
 +#else
-+#define CONFIG_SYS_FSL_USDHC_NUM	2
++#define CFG_SYS_FSL_USDHC_NUM	2
 +#endif
-+#define CONFIG_SYS_FSL_ESDHC_ADDR       0
++#define CFG_SYS_FSL_ESDHC_ADDR	0
 +
-+#ifdef CONFIG_FSL_FSPI
-+#define FSL_FSPI_FLASH_SIZE		SZ_32M
-+#define FSL_FSPI_FLASH_NUM		1
-+#define FSPI0_BASE_ADDR			0x30bb0000
-+#define FSPI0_AMBA_BASE			0x0
-+#define CONFIG_FSPI_QUAD_SUPPORT
++#define CFG_SYS_NAND_BASE           0x20000000
 +
-+#define CONFIG_SYS_FSL_FSPI_AHB
++#ifdef CONFIG_IMX_MATTER_TRUSTY
++#define NS_ARCH_ARM64 1
 +#endif
-+
-+#ifdef CONFIG_NAND_MXS
-+#define CONFIG_CMD_NAND_TRIMFFS
-+
-+/* NAND stuff */
-+#define CONFIG_SYS_MAX_NAND_DEVICE     1
-+#define CONFIG_SYS_NAND_BASE           0x20000000
-+#define CONFIG_SYS_NAND_USE_FLASH_BBT
-+#endif /* CONFIG_NAND_MXS */
-+
-+/* USB configs */
-+#ifndef CONFIG_SPL_BUILD
-+#define CONFIG_USBD_HS
-+
-+#endif
-+
-+#define CONFIG_USB_GADGET_VBUS_DRAW 2
-+
-+#define CONFIG_MXC_USB_PORTSC  (PORT_PTS_UTMI | PORT_PTS_PTW)
-+#define CONFIG_USB_MAX_CONTROLLER_COUNT         2
 +
 +#ifdef CONFIG_ANDROID_SUPPORT
 +#include "imx8mm_evk_android.h"
