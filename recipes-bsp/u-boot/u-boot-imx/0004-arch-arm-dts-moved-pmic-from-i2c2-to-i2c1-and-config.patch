@@ -1,0 +1,170 @@
+From cd2252476a9d05fe4d7a5453d1573537be8f1393 Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Mon, 12 Aug 2024 10:57:14 +0200
+Subject: [PATCH 4/4] arch: arm: dts: moved pmic from i2c2 to i2c1 and
+ configured voltages
+
+Signed-off-by: EliaFunk <eli@iesy.com>
+---
+ arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi |  4 +-
+ arch/arm/dts/iesy-imx93-eva-mi.dts         | 73 +++++++++++-----------
+ 2 files changed, 39 insertions(+), 38 deletions(-)
+
+diff --git a/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi b/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi
+index d85e6d69b41..3256a77cbd9 100644
+--- a/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi
++++ b/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi
+@@ -125,11 +125,11 @@
+ 	u-boot,dm-spl;
+ };
+ 
+-&{/soc@0/bus@44000000/i2c@44350000/pmic@25} {
++&{/soc@0/bus@44000000/i2c@44340000/pmic@25} {
+ 	u-boot,dm-spl;
+ };
+ 
+-&{/soc@0/bus@44000000/i2c@44350000/pmic@25/regulators} {
++&{/soc@0/bus@44000000/i2c@44340000/pmic@25/regulators} {
+ 	u-boot,dm-spl;
+ };
+ 
+diff --git a/arch/arm/dts/iesy-imx93-eva-mi.dts b/arch/arm/dts/iesy-imx93-eva-mi.dts
+index fb1b32c474a..ab1e869a510 100644
+--- a/arch/arm/dts/iesy-imx93-eva-mi.dts
++++ b/arch/arm/dts/iesy-imx93-eva-mi.dts
+@@ -179,30 +179,6 @@ dsi_host: dsi-host {
+ 	pinctrl-1 = <&pinctrl_lpi2c1>;
+ 	status = "okay";
+ 
+-	adv7535: hdmi@3d {
+-		compatible = "adi,adv7535";
+-		reg = <0x3d>;
+-		adi,addr-cec = <0x3c>;
+-		adi,dsi-lanes = <4>;
+-		status = "okay";
+-
+-		port {
+-			adv7535_to_dsi: endpoint {
+-				remote-endpoint = <&dsi_to_adv7535>;
+-			};
+-		};
+-	};
+-};
+-
+-&lpi2c2 {
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+-	clock-frequency = <400000>;
+-	pinctrl-names = "default", "sleep";
+-	pinctrl-0 = <&pinctrl_lpi2c2>;
+-	pinctrl-1 = <&pinctrl_lpi2c2>;
+-	status = "okay";
+-
+ 	pmic@25 {
+ 		compatible = "nxp,pca9451a";
+ 		reg = <0x25>;
+@@ -212,8 +188,8 @@ dsi_host: dsi-host {
+ 		regulators {
+ 			buck1: BUCK1 {
+ 				regulator-name = "BUCK1";
+-				regulator-min-microvolt = <650000>;
+-				regulator-max-microvolt = <2237500>;
++				regulator-min-microvolt = <850000>;
++				regulator-max-microvolt = <850000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 				regulator-ramp-delay = <3125>;
+@@ -222,7 +198,7 @@ dsi_host: dsi-host {
+ 			buck2: BUCK2 {
+ 				regulator-name = "BUCK2";
+ 				regulator-min-microvolt = <600000>;
+-				regulator-max-microvolt = <2187500>;
++				regulator-max-microvolt = <600000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 				regulator-ramp-delay = <3125>;
+@@ -230,32 +206,32 @@ dsi_host: dsi-host {
+ 
+ 			buck4: BUCK4{
+ 				regulator-name = "BUCK4";
+-				regulator-min-microvolt = <600000>;
+-				regulator-max-microvolt = <3400000>;
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+ 			buck5: BUCK5{
+ 				regulator-name = "BUCK5";
+-				regulator-min-microvolt = <600000>;
+-				regulator-max-microvolt = <3400000>;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+ 			buck6: BUCK6 {
+ 				regulator-name = "BUCK6";
+-				regulator-min-microvolt = <600000>;
+-				regulator-max-microvolt = <3400000>;
++				regulator-min-microvolt = <1100000>;
++				regulator-max-microvolt = <1100000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+ 
+ 			ldo1: LDO1 {
+ 				regulator-name = "LDO1";
+-				regulator-min-microvolt = <1600000>;
+-				regulator-max-microvolt = <3300000>;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -263,7 +239,7 @@ dsi_host: dsi-host {
+ 			ldo4: LDO4 {
+ 				regulator-name = "LDO4";
+ 				regulator-min-microvolt = <800000>;
+-				regulator-max-microvolt = <3300000>;
++				regulator-max-microvolt = <800000>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -278,6 +254,31 @@ dsi_host: dsi-host {
+ 		};
+ 	};
+ 
++
++	adv7535: hdmi@3d {
++		compatible = "adi,adv7535";
++		reg = <0x3d>;
++		adi,addr-cec = <0x3c>;
++		adi,dsi-lanes = <4>;
++		status = "okay";
++
++		port {
++			adv7535_to_dsi: endpoint {
++				remote-endpoint = <&dsi_to_adv7535>;
++			};
++		};
++	};
++};
++
++&lpi2c2 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	clock-frequency = <400000>;
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&pinctrl_lpi2c2>;
++	pinctrl-1 = <&pinctrl_lpi2c2>;
++	status = "okay";
++
+ 	pcal6524: gpio@22 {
+ 		compatible = "nxp,pcal6524";
+ 		pinctrl-names = "default";
+-- 
+2.30.2
+
