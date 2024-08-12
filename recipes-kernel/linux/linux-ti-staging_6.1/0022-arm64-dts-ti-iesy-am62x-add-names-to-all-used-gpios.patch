@@ -1,0 +1,55 @@
+From af9c392f6be6dde38f29d447b4422c8e33487191 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Tue, 9 Jul 2024 15:54:49 +0200
+Subject: [PATCH 1/1] arm64: dts: ti: iesy-am62x: add names to all used gpios
+
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     | 35 +++++++++++++++++++
+ 1 file changed, 35 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index a9054dd23c12..8c7a8aa361ca 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -461,3 +461,38 @@ K3_TS_OFFSET(12, 17)
+ 			>;
+ 	};
+ };
++
++/* Define 24 pin names of MCU GPIOs (gpiochip 0) */
++&mcu_gpio0 {
++	gpio-line-names = "", "", "", "", "", "", "", "",
++					  "", "", "", "GPIO_A_0", "GPIO_A_!", "", "" ,"GPIO_A_2",
++					  "GPIO_A_3", "GPIO_A_4", "GPIO_A_5", "GPIO_B_0", "GPIO_B_1", "", "", "";
++};
++
++/* Define 92 pin names of MAIN GPIO0 (gpiochip 1) */
++&main_gpio0 {
++	gpio-line-names = "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "GPIO_C_0",
++					  "GPIO_C_1", "GPIO_C_2", "GPIO_D_0", "GPIO_D_1", "GPIO_D_2", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "GPIO_D_3", "", "", "", "GPIO_D_4", "GPIO_D_5", "", "GPIO_D_6",
++					  "GPIO_E_0", "GPIO_E_1", "GPIO_E_2", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "", "", "";
++};
++
++/* Define 52 pin names of MAIN GPIO1 (gpiochip 2) */
++&main_gpio1 {
++	gpio-line-names = "", "", "", "", "", "", "", "GPIO_C_4",
++					  "GPIO_C_5", "GPIO_B_2", "GPIO_B_3", "GPIO_B_4", "GPIO_B_5", "GPIO_B_6", "GPIO_B_7", "",
++					  "GPIO_D_7", "", "", "", "", "", "", "",
++					  "", "", "", "", "", "", "", "",
++					  "", "GPIO_C_6", "GPIO_C_7", "GPIO_C_3", "", "", "", "",
++					  "", "", "", "";	
++};
++
++
+-- 
+2.30.2
+
