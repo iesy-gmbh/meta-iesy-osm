@@ -1,0 +1,58 @@
+From 61ed2367d3b01866cb5c6b28dbee8b0b5bc5ca1c Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Mon, 12 Aug 2024 10:53:26 +0200
+Subject: [PATCH 3/4] Include: configs modify boot command
+
+Signed-off-by: EliaFunk <eli@iesy.com>
+---
+ configs/iesy_imx93_eva_mi_defconfig |  2 +-
+ include/configs/iesy_imx93_eva_mi.h | 20 +++-----------------
+ 2 files changed, 4 insertions(+), 18 deletions(-)
+
+diff --git a/configs/iesy_imx93_eva_mi_defconfig b/configs/iesy_imx93_eva_mi_defconfig
+index bc23d9bbaf7..73c19b451c4 100644
+--- a/configs/iesy_imx93_eva_mi_defconfig
++++ b/configs/iesy_imx93_eva_mi_defconfig
+@@ -30,7 +30,7 @@ CONFIG_FIT_SIGNATURE=y
+ CONFIG_OF_SYSTEM_SETUP=y
+ CONFIG_DISTRO_DEFAULTS=y
+ CONFIG_BOOTCOMMAND="run sr_ir_v2_cmd;run distro_bootcmd;run bsp_bootcmd"
+-CONFIG_DEFAULT_FDT_FILE="iesy-imx93-eva-mi.dtb"
++CONFIG_DEFAULT_FDT_FILE="iesy-imx93-eva-mi-v1.dtb"
+ CONFIG_ARCH_MISC_INIT=y
+ CONFIG_BOARD_EARLY_INIT_F=y
+ CONFIG_BOARD_LATE_INIT=y
+diff --git a/include/configs/iesy_imx93_eva_mi.h b/include/configs/iesy_imx93_eva_mi.h
+index 218b8a9dfe6..abf36863355 100644
+--- a/include/configs/iesy_imx93_eva_mi.h
++++ b/include/configs/iesy_imx93_eva_mi.h
+@@ -93,23 +93,9 @@
+ 	"boot_os=booti ${loadaddr} - ${fdt_addr_r};\0" \
+ 	"mmcboot=echo Booting from mmc ...; " \
+ 		"run mmcargs; " \
+-		"if test ${sec_boot} = yes; then " \
+-			"if run auth_os; then " \
+-				"run boot_os; " \
+-			"else " \
+-				"echo ERR: failed to authenticate; " \
+-			"fi; " \
+-		"else " \
+-			"if test ${boot_fit} = yes || test ${boot_fit} = try; then " \
+-				"bootm ${loadaddr}; " \
+-			"else " \
+-				"if run loadfdt; then " \
+-					"run boot_os; " \
+-				"else " \
+-					"echo WARN: Cannot load the DT; " \
+-				"fi; " \
+-			"fi;" \
+-		"fi;\0" \
++		"run loadfdt; " \
++		"run loadimage; " \
++		"run boot_os;\0" \
+ 	"netargs=setenv bootargs ${jh_clk} ${mcore_clk} console=${console} " \
+ 		"root=/dev/nfs " \
+ 		"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
+-- 
+2.30.2
+
