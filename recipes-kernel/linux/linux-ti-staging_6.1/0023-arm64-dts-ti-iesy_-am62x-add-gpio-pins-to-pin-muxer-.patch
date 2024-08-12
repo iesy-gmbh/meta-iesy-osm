@@ -1,0 +1,99 @@
+From ac0e277180807fbb2df9a453cae49d10a3c916c8 Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Mon, 12 Aug 2024 13:52:14 +0200
+Subject: [PATCH 1/1] arm64: dts: ti: iesy_ am62x: add gpio pins to pin muxer
+ configuration
+
+---
+ .../boot/dts/ti/iesy-am62xx-eva-mi-v1.dts     |  6 ++--
+ .../arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi | 35 +++++++++++++++++++
+ 2 files changed, 38 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 8c7a8aa361ca..4170b5bb93e8 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -464,15 +464,15 @@ K3_TS_OFFSET(12, 17)
+ 
+ /* Define 24 pin names of MCU GPIOs (gpiochip 0) */
+ &mcu_gpio0 {
+-	gpio-line-names = "", "", "", "", "", "", "", "",
+-					  "", "", "", "GPIO_A_0", "GPIO_A_!", "", "" ,"GPIO_A_2",
++	gpio-line-names = "", "GPIO_A_7", "", "", "", "", "", "",
++					  "", "", "", "GPIO_A_0", "GPIO_A_1", "", "" ,"GPIO_A_2",
+ 					  "GPIO_A_3", "GPIO_A_4", "GPIO_A_5", "GPIO_B_0", "GPIO_B_1", "", "", "";
+ };
+ 
+ /* Define 92 pin names of MAIN GPIO0 (gpiochip 1) */
+ &main_gpio0 {
+ 	gpio-line-names = "", "", "", "", "", "", "", "",
+-					  "", "", "", "", "", "", "", "GPIO_C_0",
++					  "", "", "", "", "", "GPIO_A_6", "", "GPIO_C_0",
+ 					  "GPIO_C_1", "GPIO_C_2", "GPIO_D_0", "GPIO_D_1", "GPIO_D_2", "", "", "",
+ 					  "", "", "", "", "", "", "", "",
+ 					  "GPIO_D_3", "", "", "", "GPIO_D_4", "GPIO_D_5", "", "GPIO_D_6",
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+index 6f21e9a4a459..e9cd46468d9b 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-osm-lf.dtsi
+@@ -367,6 +367,19 @@ AM62X_IOPAD(0x0028, PIN_INPUT, 3) /* (J22) OSPI0_D7.UART6_CTSn */
+ 			AM62X_IOPAD(0x0024, PIN_OUTPUT, 3) /* (H25) OSPI0_D6.UART6_RTSn */
+ 		>;
+ 	};
++
++	gpio0_pins_default: gpio0-default-pins {
++		pinctrl-single,pins = <
++			AM62X_IOPAD(0x0004, PIN_INPUT, 7) /* (G25) OSPI0_LBCLKO.GPIO0_1 */
++			AM62X_IOPAD(0x0034, PIN_INPUT, 7) /* (H21) OSPI0_CSn2.GPIO0_13 */
++			AM62X_IOPAD(0x0038, PIN_INPUT, 7) /* (E24) OSPI0_CSn3.GPIO0_14 */
++			AM62X_IOPAD(0x0088, PIN_INPUT, 7) /* (L24) GPMC0_OEn_REn.GPIO0_33 */
++			AM62X_IOPAD(0x008c, PIN_INPUT, 7) /* (L25) GPMC0_WEn.GPIO0_34 */
++			AM62X_IOPAD(0x0090, PIN_INPUT, 7) /* (M24) GPMC0_BE0n_CLE.GPIO0_35 */
++			AM62X_IOPAD(0x009c, PIN_INPUT, 7) /* (V25) GPMC0_WAIT1.GPIO0_38 */
++		>;
++	};
++
+ };
+ 
+ &main_uart6 {
+@@ -508,6 +521,20 @@ AM62X_MCU_IOPAD(0x0024, PIN_INPUT, 0) /* (B4) WKUP_UART0_RXD */
+ 			AM62X_MCU_IOPAD(0x0028, PIN_OUTPUT, 0) /* (C5) WKUP_UART0_TXD */
+ 		>;
+ 	};
++
++	mcugpio_pins_default: mcugpio-default-pins {
++		pinctrl-single,pins = <
++			AM62X_MCU_IOPAD(0x0004, PIN_INPUT, 7) /* (B8) MCU_SPI0_CS1.MCU_GPIO0_1 */
++			AM62X_MCU_IOPAD(0x002c, PIN_INPUT, 7) /* (C6) WKUP_UART0_CTSn.MCU_GPIO0_11 */
++			AM62X_MCU_IOPAD(0x0030, PIN_INPUT, 7) /* (A4) WKUP_UART0_RTSn.MCU_GPIO0_12 */
++			AM62X_MCU_IOPAD(0x003c, PIN_INPUT, 7) /* (E5) MCU_MCAN1_TX.MCU_GPIO0_15 */
++			AM62X_MCU_IOPAD(0x0040, PIN_INPUT, 7) /* (D4) MCU_MCAN1_RX.MCU_GPIO0_16 */
++			AM62X_MCU_IOPAD(0x0044, PIN_INPUT, 7) /* (A8) MCU_I2C0_SCL.MCU_GPIO0_17 */
++			AM62X_MCU_IOPAD(0x0048, PIN_INPUT, 7) /* (D10) MCU_I2C0_SDA.MCU_GPIO0_18 */
++			AM62X_MCU_IOPAD(0x004c, PIN_INPUT, 7) /* (B9) WKUP_I2C0_SCL.MCU_GPIO0_19 */
++			AM62X_MCU_IOPAD(0x0050, PIN_INPUT, 7) /* (A9) WKUP_I2C0_SDA.MCU_GPIO0_20 */
++		>;
++	};
+ };
+ 
+ &mcu_spi0 {
+@@ -659,8 +686,16 @@ oldi_out1: endpoint {
+ 	};
+ };
+ 
++&main_gpio0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&gpio0_pins_default>;
++	status = "okay";
++};
++
+ /* mcu_gpio0 and mcu_gpio_intr are reserved for mcu firmware usage */
+ &mcu_gpio0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&mcugpio_pins_default>;
+ 	status = "okay";
+ };
+ 
+-- 
+2.30.2
+
