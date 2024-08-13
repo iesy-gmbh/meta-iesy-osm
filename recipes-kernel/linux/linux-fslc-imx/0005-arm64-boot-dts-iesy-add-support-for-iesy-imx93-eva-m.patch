@@ -1,7 +1,7 @@
-From 9d6412a127a957e42e48868ee980a23702c38a87 Mon Sep 17 00:00:00 2001
+From 7b5bfdf509f847d172b335ed5885f4ea5b67b3c9 Mon Sep 17 00:00:00 2001
 From: EliaFunk <eli@iesy.com>
 Date: Mon, 12 Aug 2024 14:51:39 +0200
-Subject: [PATCH] arm64: boot: dts: iesy: add support for iesy-imx93-eva-mi
+Subject: [PATCH 5/5] arm64: boot: dts: iesy: add support for iesy-imx93-eva-mi
 
 Add devicetree for iesy-imx93-eva-mi and include devictree into makefile
 ---
@@ -11,13 +11,12 @@ Add devicetree for iesy-imx93-eva-mi and include devictree into makefile
  create mode 100644 arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
 
 diff --git a/arch/arm64/boot/dts/iesy/Makefile b/arch/arm64/boot/dts/iesy/Makefile
-index 3cd5a23e9b9e..bb12d1144247 100644
+index 6197560970f4..eebbbe167c4c 100644
 --- a/arch/arm64/boot/dts/iesy/Makefile
 +++ b/arch/arm64/boot/dts/iesy/Makefile
-@@ -1,2 +1,3 @@
+@@ -1 +1,2 @@
  dtb-$(CONFIG_ARCH_MXC) += iesy-imx8mm-eva-mi-v1.dtb
 +dtb-$(CONFIG_ARCH_MXC) += iesy-imx93-eva-mi-v1.dtb
- dtb-$(CONFIG_ARCH_MXC) += tb002-cm0007c-r1.dtb
 \ No newline at end of file
 diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
 new file mode 100644
