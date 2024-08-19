@@ -28,6 +28,7 @@ SRC_URI += " \
     file://0021-arm64-dts-ti-iesy-am62x-configure-eth-b.patch \
     file://0022-arm64-dts-ti-iesy-am62x-add-names-to-all-used-gpios.patch \
     file://0023-arm64-dts-ti-iesy_-am62x-add-gpio-pins-to-pin-muxer-.patch \
+    file://0024-arm64-dts-ti-iesy-am62x-add-LM75-on-I2C-A.patch \
 "
 KERNEL_CONFIG_FRAGMENTS:append = "\
     ${APPEND_DIR}/fragment.config \
