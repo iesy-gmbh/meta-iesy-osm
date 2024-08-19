@@ -1,0 +1,28 @@
+From 9a317a7647334908cfe5a5b40388df769e98949e Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Mon, 19 Aug 2024 08:38:34 +0200
+Subject: [PATCH 1/1] arm64: dts: ti: iesy: am62x: add LM75 on I2C-A
+
+---
+ arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+index 4170b5bb93e8..582fba8496d2 100644
+--- a/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/ti/iesy-am62xx-eva-mi-v1.dts
+@@ -229,6 +229,11 @@ AM62X_IOPAD(0x128, PIN_INPUT, 7) /* (B23) MMC2_SDWP.GPIO0_72 */
+ };
+ 
+ &main_i2c0 {
++	sensor@4e {
++		compatible = "lm75";
++		reg = <0x4e>;
++	};
++
+ 	rtc@51 {
+ 		compatible = "nxp,pcf85263";
+ 		reg = <0x51>;
+-- 
+2.30.2
+
