@@ -1,0 +1,56 @@
+From b9474094b43375b218fd69be019ffa4815df5336 Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Wed, 21 Aug 2024 16:32:04 +0200
+Subject: [PATCH 7/7] arm64: boot: dts: iesy: add user buttons for
+ iesy-imx93-eva-mi
+
+---
+ .../boot/dts/iesy/iesy-imx93-eva-mi-v1.dts    | 25 +++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index e1afa52c18d8..e86a1fc00803 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -288,6 +288,24 @@ cpu {
+ 			};
+ 		};
+ 	};
++
++	user-buttons {
++		compatible = "gpio-keys";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_buttons>;
++
++		user-button-1 {
++			label = "User Button 1";
++			gpios = <&gpio2 22 GPIO_ACTIVE_LOW>;
++			linux,code = <KEY_X>;
++		};
++
++		user-button-2 {
++			label = "User Button 2";
++			gpios = <&gpio3 27 GPIO_ACTIVE_LOW>;
++			linux,code = <KEY_Y>;
++		};
++	};
+ };
+ 
+ &sai1 {
+@@ -832,6 +850,13 @@ &wdog3 {
+ };
+ 
+ &iomuxc {
++	pinctrl_buttons: gpiobuttongrp {
++		fsl,pins = <
++			MX93_PAD_GPIO_IO22__GPIO2_IO22		0x11E
++			MX93_PAD_CCM_CLKO2__GPIO3_IO27		0x11E
++		>;
++	};
++
+ 	pinctrl_eqos: eqosgrp {
+ 		fsl,pins = <
+ 			MX93_PAD_ENET1_MDC__ENET_QOS_MDC			0x57e
+-- 
+2.30.2
+
