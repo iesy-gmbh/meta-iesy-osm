@@ -1,0 +1,191 @@
+From 26e292cdf2b156383297e96074b3d22d6a70757a Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Fri, 23 Aug 2024 11:11:45 +0200
+Subject: [PATCH 8/8] arm64: boot: dts: iesy: add usb-a functionality for
+ iesy-imx93-eva-mi
+
+---
+ .../boot/dts/iesy/iesy-imx93-eva-mi-v1.dts    | 129 +++---------------
+ 1 file changed, 18 insertions(+), 111 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index e86a1fc00803..1617c7b9d799 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -111,6 +111,15 @@ reg_can2_stby: regulator-can2-stby {
+ 		enable-active-low;
+ 	};
+ 
++	reg_usb_otg_vbus: regulator-usb-otg-vbus {
++		compatible = "regulator-fixed";
++		regulator-name = "USB_A_VBUS";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		gpio = <&gpio1 10 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
+ 	reg_vref_1v8: regulator-adc-vref {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vref_1v8";
+@@ -331,17 +340,6 @@ &sai3 {
+ 	status = "okay";
+ };
+ 
+-&micfil {
+-	#sound-dai-cells = <0>;
+-	pinctrl-names = "default", "sleep";
+-	pinctrl-0 = <&pinctrl_pdm>;
+-	pinctrl-1 = <&pinctrl_pdm_sleep>;
+-	assigned-clocks = <&clk IMX93_CLK_PDM>;
+-	assigned-clock-parents = <&clk IMX93_CLK_AUDIO_PLL>;
+-	assigned-clock-rates = <49152000>;
+-	status = "okay";
+-};
+-
+ &xcvr {
+ 	#sound-dai-cells = <0>;
+ 	pinctrl-names = "default", "sleep";
+@@ -649,60 +647,6 @@ pcf2131: rtc@53 {
+ 			status = "okay";
+ 	};
+ 
+-	ptn5110: tcpc@50 {
+-		compatible = "nxp,ptn5110";
+-		reg = <0x50>;
+-		interrupt-parent = <&gpio3>;
+-		interrupts = <27 IRQ_TYPE_LEVEL_LOW>;
+-		status = "okay";
+-
+-		port {
+-			typec1_dr_sw: endpoint {
+-				remote-endpoint = <&usb1_drd_sw>;
+-			};
+-		};
+-
+-		typec1_con: connector {
+-			compatible = "usb-c-connector";
+-			label = "USB-C";
+-			power-role = "dual";
+-			data-role = "dual";
+-			try-power-role = "sink";
+-			source-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)>;
+-			sink-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)
+-				     PDO_VAR(5000, 20000, 3000)>;
+-			op-sink-microwatt = <15000000>;
+-			self-powered;
+-		};
+-	};
+-
+-	ptn5110_2: tcpc@51 {
+-		compatible = "nxp,ptn5110";
+-		reg = <0x51>;
+-		interrupt-parent = <&gpio3>;
+-		interrupts = <27 IRQ_TYPE_LEVEL_LOW>;
+-		status = "okay";
+-
+-		port {
+-			typec2_dr_sw: endpoint {
+-				remote-endpoint = <&usb2_drd_sw>;
+-			};
+-		};
+-
+-		typec2_con: connector {
+-			compatible = "usb-c-connector";
+-			label = "USB-C";
+-			power-role = "dual";
+-			data-role = "dual";
+-			try-power-role = "sink";
+-			source-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)>;
+-			sink-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)
+-				     PDO_VAR(5000, 20000, 3000)>;
+-			op-sink-microwatt = <15000000>;
+-			self-powered;
+-		};
+-	};
+-
+ 	adp5585_isp: mfd-isp@34 {
+ 		compatible = "adi,adp5585";
+ 		reg = <0x34>;
+@@ -761,39 +705,12 @@ &media_blk_ctrl {
+ };
+ 
+ &usbotg1 {
++	vbus-supply = <&reg_usb_otg_vbus>;
+ 	dr_mode = "otg";
+-	hnp-disable;
+-	srp-disable;
+-	adp-disable;
+-	usb-role-switch;
+ 	disable-over-current;
+-	samsung,picophy-pre-emp-curr-control = <3>;
+-	samsung,picophy-dc-vol-level-adjust = <7>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usb1>;
+ 	status = "okay";
+-
+-	port {
+-		usb1_drd_sw: endpoint {
+-			remote-endpoint = <&typec1_dr_sw>;
+-		};
+-	};
+-};
+-
+-&usbotg2 {
+-	dr_mode = "otg";
+-	hnp-disable;
+-	srp-disable;
+-	adp-disable;
+-	usb-role-switch;
+-	disable-over-current;
+-	samsung,picophy-pre-emp-curr-control = <3>;
+-	samsung,picophy-dc-vol-level-adjust = <7>;
+-	status = "okay";
+-
+-	port {
+-		usb2_drd_sw: endpoint {
+-			remote-endpoint = <&typec2_dr_sw>;
+-		};
+-	};
+ };
+ 
+ &usdhc1 {
+@@ -996,6 +913,12 @@ MX93_PAD_DAP_TCLK_SWCLK__LPUART5_CTS_B	0x31e
+ 		>;
+ 	};
+ 
++	pinctrl_usb1: usb1grp {
++		fsl,pins = <
++			MX93_PAD_PDM_BIT_STREAM1__GPIO1_IO10	0x51e
++		>;
++	};
++
+ 	/* need to config the SION for data and cmd pad, refer to ERR052021 */
+ 	pinctrl_usdhc1: usdhc1grp {
+ 		fsl,pins = <
+@@ -1207,22 +1130,6 @@ MX93_PAD_GPIO_IO20__GPIO2_IO20			0x51e
+ 		>;
+ 	};
+ 
+-	pinctrl_pdm: pdmgrp {
+-		fsl,pins = <
+-			MX93_PAD_PDM_CLK__PDM_CLK			0x31e
+-			MX93_PAD_PDM_BIT_STREAM0__PDM_BIT_STREAM00	0x31e
+-			MX93_PAD_PDM_BIT_STREAM1__PDM_BIT_STREAM01	0x31e
+-		>;
+-	};
+-
+-	pinctrl_pdm_sleep: pdmgrpsleep {
+-		fsl,pins = <
+-			MX93_PAD_PDM_CLK__GPIO1_IO08			0x31e
+-			MX93_PAD_PDM_BIT_STREAM0__GPIO1_IO09		0x31e
+-			MX93_PAD_PDM_BIT_STREAM1__GPIO1_IO10		0x31e
+-		>;
+-	};
+-
+ 	pinctrl_spdif: spdifgrp {
+ 		fsl,pins = <
+ 			MX93_PAD_GPIO_IO22__SPDIF_IN		0x31e
+-- 
+2.30.2
+
