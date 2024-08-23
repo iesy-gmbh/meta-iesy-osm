@@ -1,0 +1,45 @@
+From 42304007d40fff99b9bc5a6b4dfb49e621341ada Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Fri, 23 Aug 2024 14:58:57 +0200
+Subject: [PATCH 9/9] arm64: boot: dts: iesy: add ti lm75 for iesy-imx93-eva-mi
+
+add functionality for ti lm75bim-3 temperture sensor with needed 3V3 regulator for carrier board
+---
+ arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index 1617c7b9d799..d24d7cc5fa2c 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -102,6 +102,14 @@ ele_reserved: ele-reserved@a4120000 {
+ 		power-domains = <&mlmix>;
+ 	};*/
+ 
++	reg_3v3_carrier: 3v3_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "3V3_carrier_reg";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-always-on;
++	};
++
+ 	reg_can2_stby: regulator-can2-stby {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "can2-stby";
+@@ -585,6 +593,12 @@ adv7535_to_dsi: endpoint {
+ 		};
+ 	};
+ 
++	sensor@4e {
++		compatible = "ti,tmp75b";
++		reg = <0x4e>;
++		vs-supply = <&reg_3v3_carrier>;
++	};
++
+ 	lsm6dsm@6a {
+ 		compatible = "st,lsm6dso";
+ 		reg = <0x6a>;
+-- 
+2.30.2
+
