@@ -1,0 +1,49 @@
+From 2421d2a621250e586319b1c8644a31f4759ba222 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 28 Aug 2024 16:02:21 +0200
+Subject: [PATCH 10/11] arm64: boot: dts: iesy: add ethernet a phy
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index d24d7cc5fa2c..d4fff1d670fd 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -5,6 +5,7 @@
+ 
+ /dts-v1/;
+ 
++#include <dt-bindings/net/mscc-phy-vsc8531.h>
+ #include <dt-bindings/usb/pd.h>
+ #include "../freescale/imx93.dtsi"
+ 
+@@ -422,7 +423,7 @@ &eqos {
+ 	pinctrl-0 = <&pinctrl_eqos>;
+ 	pinctrl-1 = <&pinctrl_eqos_sleep>;
+ 	phy-mode = "rgmii-id";
+-	phy-handle = <&ethphy1>;
++	phy-handle = <&ethphy0>;
+ 	status = "okay";
+ 
+ 	mdio {
+@@ -431,9 +432,11 @@ mdio {
+ 		#size-cells = <0>;
+ 		clock-frequency = <5000000>;
+ 
+-		ethphy1: ethernet-phy@1 {
+-			reg = <1>;
+-			eee-broken-1000t;
++		ethphy0: ethernet-phy@0 {
++			compatible = "ethernet-phy-id0007.0770";
++			reg = <0>;
++			vsc8531,led-0-mode = <VSC8531_LINK_1000_ACTIVITY>;
++			vsc8531,led-1-mode = <VSC8531_LINK_1000_ACTIVITY>;
+ 		};
+ 	};
+ };
+-- 
+2.30.2
+
