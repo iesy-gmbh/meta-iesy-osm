@@ -1,0 +1,36 @@
+From 4b0b7b1dce0421158422e07710826b3b765bad72 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 29 Aug 2024 14:06:23 +0200
+Subject: [PATCH 14/14] arm64: boot: dts: iesy: add line names to gpio A
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index 4424aa0b1f5d..a500a627d65a 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -418,6 +418,18 @@ &flexcan2 {
+ 	status = "okay";
+ };
+ 
++&gpio1 {
++	gpio-line-names = "", "", "", "", "", "", "", "",
++		"", "", "", "GPIO_A_0",	"", "", "GPIO_A_1", "";
++};
++
++&gpio2 {
++	gpio-line-names = "", "", "", "", "", "", "", "",
++		"GPIO_A_2", "GPIO_A_3", "GPIO_A_4", "GPIO_A_5", "", "GPIO_A_7", "", "",
++		"", "", "", "", "", "", "", "",
++		"GPIO_A_6", "", "", "", "", "", "", "";
++};
++
+ &mu1 {
+ 	status = "okay";
+ };
+-- 
+2.30.2
+
