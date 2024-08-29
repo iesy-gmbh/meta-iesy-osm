@@ -1,0 +1,55 @@
+From bb40753d0a21ce105849ecce2c23d84daa8eb295 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 28 Aug 2024 16:19:06 +0200
+Subject: [PATCH 11/11] arm64: boot: dts: iesy: add ethernet b phy
+
+the phy is connected to the same mdio bus as the ethernet a phy, so the mdio node in &fec can be removed
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/iesy/iesy-imx93-eva-mi-v1.dts    | 20 ++++++++-----------
+ 1 file changed, 8 insertions(+), 12 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index d4fff1d670fd..1e90667918af 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -438,6 +438,13 @@ ethphy0: ethernet-phy@0 {
+ 			vsc8531,led-0-mode = <VSC8531_LINK_1000_ACTIVITY>;
+ 			vsc8531,led-1-mode = <VSC8531_LINK_1000_ACTIVITY>;
+ 		};
++
++		ethphy1: ethernet-phy@1 {
++			compatible = "ethernet-phy-id0007.0770";
++			reg = <1>;
++			vsc8531,led-0-mode = <VSC8531_LINK_1000_ACTIVITY>;
++			vsc8531,led-1-mode = <VSC8531_LINK_1000_ACTIVITY>;
++		};
+ 	};
+ };
+ 
+@@ -446,20 +453,9 @@ &fec {
+ 	pinctrl-0 = <&pinctrl_fec>;
+ 	pinctrl-1 = <&pinctrl_fec_sleep>;
+ 	phy-mode = "rgmii-id";
+-	phy-handle = <&ethphy2>;
++	phy-handle = <&ethphy1>;
+ 	fsl,magic-packet;
+ 	status = "okay";
+-
+-	mdio {
+-		#address-cells = <1>;
+-		#size-cells = <0>;
+-		clock-frequency = <5000000>;
+-
+-		ethphy2: ethernet-phy@2 {
+-			reg = <2>;
+-			eee-broken-1000t;
+-		};
+-	};
+ };
+ 
+ &lcdif {
+-- 
+2.30.2
+

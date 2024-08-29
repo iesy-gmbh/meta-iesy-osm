@@ -12,4 +12,5 @@ SRC_URI += " \
     file://0008-arm64-boot-dts-iesy-add-usb-a-functionality-for-iesy.patch \
     file://0009-arm64-boot-dts-iesy-add-ti-lm75-for-iesy-imx93-eva-m.patch \
     file://0010-arm64-boot-dts-iesy-add-ethernet-a-phy.patch \
+    file://0011-arm64-boot-dts-iesy-add-ethernet-b-phy.patch \
 "
