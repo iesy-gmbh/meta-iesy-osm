@@ -1,0 +1,58 @@
+From f000325abc2274a0a0593d00293212ec7690c25f Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Thu, 29 Aug 2024 12:25:47 +0200
+Subject: [PATCH] arm64: boot: dts: iesy: add eeproms for iesy-imx93-eva-mi and
+  carrier
+
+add eeprom@50 of osm module and eeprom@53 of carrier board together with needed 1V8 regulator for carrier board
+---
+ .../boot/dts/iesy/iesy-imx93-eva-mi-v1.dts    | 21 +++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index 0c03e1873695..4424aa0b1f5d 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -103,6 +103,14 @@ ele_reserved: ele-reserved@a4120000 {
+ 		power-domains = <&mlmix>;
+ 	};*/
+ 
++	reg_1v8_carrier: 1v8_regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "1V8_carrier_reg";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++	};
++
+ 	reg_3v3_carrier: 3v3_regulator {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "3V3_carrier_reg";
+@@ -598,11 +606,24 @@ sensor@4e {
+ 		vs-supply = <&reg_3v3_carrier>;
+ 	};
+ 
++	eeprom@50 {
++		compatible = "onsemi,24c32", "atmel,24c32";
++		reg = <0x50>;
++		pagesize = <32>;
++	};
++
+ 	rtc@51 {
+ 		compatible = "nxp,pcf85263";
+ 		reg = <0x51>;
+ 	};
+ 
++	eeprom@53 {
++		compatible = "atmel,24c64";
++		reg = <0x53>;
++		pagesize = <64>;
++		vcc-supply = <&reg_1v8_carrier>;
++	};
++
+ 	lsm6dsm@6a {
+ 		compatible = "st,lsm6dso";
+ 		reg = <0x6a>;
+-- 
+2.30.2
+

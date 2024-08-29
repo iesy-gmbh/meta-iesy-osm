@@ -14,4 +14,5 @@ SRC_URI += " \
     file://0010-arm64-boot-dts-iesy-add-ethernet-a-phy.patch \
     file://0011-arm64-boot-dts-iesy-add-ethernet-b-phy.patch \
     file://0012-arm64-boot-dts-iesy-add-rtc-for-iesy-imx93-eva-mi.patch \
+    file://0013-arm64-boot-dts-iesy-add-eeproms-for-iesy-imx93-eva-m.patch \
 "
