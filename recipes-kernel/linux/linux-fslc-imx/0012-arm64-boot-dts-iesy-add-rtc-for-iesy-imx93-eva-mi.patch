@@ -1,0 +1,29 @@
+From 82ac36d45fb86b60c04af7ad8a418001ed786ae3 Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Fri, 23 Aug 2024 16:06:12 +0200
+Subject: [PATCH 1/2] arm64: boot: dts: iesy: add rtc for iesy-imx93-eva-mi
+
+add support for rtc of carrier board to iesy i.mx93 module
+---
+ arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index d24d7cc5fa2c..24079f1b4a14 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -599,6 +599,11 @@ sensor@4e {
+ 		vs-supply = <&reg_3v3_carrier>;
+ 	};
+ 
++	rtc@51 {
++		compatible = "nxp,pcf85263";
++		reg = <0x51>;
++	};
++
+ 	lsm6dsm@6a {
+ 		compatible = "st,lsm6dso";
+ 		reg = <0x6a>;
+-- 
+2.30.2
+
