@@ -1,0 +1,95 @@
+From dceeed340a1d0ce94da67e2cce385b177009ab33 Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Thu, 29 Aug 2024 17:11:58 +0200
+Subject: [PATCH] arm64: boot: dts: iesy: add uart-a and move uart1 to som
+ devicetree
+
+add support for uart-a with flowcontrol capabilities and move uart 1 (console) to som devicetree. change uart 1 pinctrl to reflect no pull ups or pull downs
+---
+ .../boot/dts/iesy/iesy-imx93-eva-mi-v1.dts    | 13 --------
+ .../boot/dts/iesy/iesy-imx93-osm-mf.dtsi      | 31 +++++++++++++++++++
+ 2 files changed, 31 insertions(+), 13 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index 7c6cab14d0e3..c39c1f103b33 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -544,12 +544,6 @@ ar1302_mipi_ep: endpoint {
+ 	};
+ };
+ 
+-&lpuart1 { /* console */
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_uart1>;
+-	status = "okay";
+-};
+-
+ &lpuart5 {
+ 	/* BT */
+ 	pinctrl-names = "default";
+@@ -633,13 +627,6 @@ MX93_PAD_CCM_CLKO2__GPIO3_IO27			0x31e
+ 		>;
+ 	};
+ 
+-	pinctrl_uart1: uart1grp {
+-		fsl,pins = <
+-			MX93_PAD_UART1_RXD__LPUART1_RX			0x31e
+-			MX93_PAD_UART1_TXD__LPUART1_TX			0x31e
+-		>;
+-	};
+-
+ 	pinctrl_uart5: uart5grp {
+ 		fsl,pins = <
+ 			MX93_PAD_DAP_TDO_TRACESWO__LPUART5_TX	0x31e
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+index 1172e25e7a98..e5de70a0a114 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+@@ -192,6 +192,22 @@ MX93_PAD_GPIO_IO29__LPI2C3_SCL			0x40000b9e
+ 		>;
+ 	};
+ 
++    pinctrl_uart1: uart1grp {
++		fsl,pins = <
++			MX93_PAD_UART1_RXD__LPUART1_RX			0x11e
++			MX93_PAD_UART1_TXD__LPUART1_TX			0x11e
++		>;
++	};
++
++    pinctrl_uart2: uart2grp {
++		fsl,pins = <
++			MX93_PAD_UART2_TXD__LPUART2_TX			0x11e
++			MX93_PAD_UART2_RXD__LPUART2_RX			0x11e
++			MX93_PAD_SAI1_TXC__LPUART2_CTS_B		0x11e
++			MX93_PAD_SAI1_TXD0__LPUART2_RTS_B		0x11e
++		>;
++	};
++
+     pinctrl_usb1: usb1grp {
+ 		fsl,pins = <
+ 			MX93_PAD_PDM_BIT_STREAM1__GPIO1_IO10	0x51e
+@@ -422,6 +438,21 @@ &lpi2c3 {
+ 	pinctrl-1 = <&pinctrl_lpi2c3>;
+ };
+ 
++&lpuart1 { /* Console */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart1>;
++	status = "okay";
++};
++
++&lpuart2 { /* UART A */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart2>;
++	status = "okay";
++	cts-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
++	rts-gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
++	uart-has-rtscts;
++};
++
+ &usbotg1 {
+ 	dr_mode = "otg";
+ 	disable-over-current;
+-- 
+2.30.2
+
