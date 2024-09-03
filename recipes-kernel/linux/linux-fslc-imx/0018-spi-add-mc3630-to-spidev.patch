@@ -1,0 +1,33 @@
+From f04db08990e620d1a9931d6890bc68b8df7650b4 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 3 Sep 2024 11:15:51 +0200
+Subject: [PATCH 18/19] spi: add mc3630 to spidev
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ drivers/spi/spidev.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/spi/spidev.c b/drivers/spi/spidev.c
+index e96983f17d73..a552eee7eaa4 100644
+--- a/drivers/spi/spidev.c
++++ b/drivers/spi/spidev.c
+@@ -709,6 +709,7 @@ static const struct spi_device_id spidev_spi_ids[] = {
+ 	{ .name = "sx1301" },
+ 	{ .name = "bk4" },
+ 	{ .name = "dhcom-board" },
++	{ .name = "mc3630"},
+ 	{ .name = "m53cpld" },
+ 	{ .name = "spi-petra" },
+ 	{ .name = "spi-authenta" },
+@@ -737,6 +738,7 @@ static const struct of_device_id spidev_dt_ids[] = {
+ 	{ .compatible = "dh,dhcom-board", .data = &spidev_of_check },
+ 	{ .compatible = "lineartechnology,ltc2488", .data = &spidev_of_check },
+ 	{ .compatible = "lwn,bk4", .data = &spidev_of_check },
++	{ .compatible = "memsic,mc3630", .data = &spidev_of_check },
+ 	{ .compatible = "menlo,m53cpld", .data = &spidev_of_check },
+ 	{ .compatible = "micron,spi-authenta", .data = &spidev_of_check },
+ 	{ .compatible = "rohm,dh2228fv", .data = &spidev_of_check },
+-- 
+2.30.2
+

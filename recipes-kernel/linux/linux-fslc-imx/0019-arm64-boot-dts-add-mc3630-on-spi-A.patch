@@ -1,0 +1,71 @@
+From 69033ce3c387febab5b25745e600949b079e14c9 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 3 Sep 2024 11:36:06 +0200
+Subject: [PATCH 19/19] arm64: boot: dts: add mc3630 on spi A
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/iesy/iesy-imx93-eva-mi-v1.dts    |  9 +++++++++
+ .../boot/dts/iesy/iesy-imx93-osm-mf.dtsi      | 19 +++++++++++++++++++
+ 2 files changed, 28 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index 3c5f01e0481f..37ecf485ca1a 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -525,6 +525,15 @@ ar1302_mipi_ep: endpoint {
+ 	};
+ };
+ 
++&lpspi6 {
++	status = "okay";
++
++	spidev0: spi@0 {
++		reg = <0>;
++		compatible = "memsic,mc3630";
++	};
++};
++
+ &lpuart5 {
+ 	/* BT */
+ 	pinctrl-names = "default";
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+index 290bb8124f7f..662e712d11fb 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+@@ -232,6 +232,15 @@ MX93_PAD_SAI1_TXD0__LPUART2_RTS_B		0x11e
+ 		>;
+ 	};
+ 
++	pinctrl_lpspi6: lpspi6grp {
++		fsl,pins = <
++			MX93_PAD_GPIO_IO00__GPIO2_IO00				0x3fe
++			MX93_PAD_GPIO_IO01__LPSPI6_SIN				0x3fe
++			MX93_PAD_GPIO_IO02__LPSPI6_SOUT				0x3fe
++			MX93_PAD_GPIO_IO03__LPSPI6_SCK				0x3fe
++		>;
++	};
++
+     pinctrl_usb1: usb1grp {
+ 		fsl,pins = <
+ 			MX93_PAD_PDM_BIT_STREAM1__GPIO1_IO10	0x51e
+@@ -462,6 +471,16 @@ &lpi2c3 {
+ 	pinctrl-1 = <&pinctrl_lpi2c3>;
+ };
+ 
++/* SPI A */
++&lpspi6 {
++	fsl,spi-num-chipselects = <1>;
++	num-cs = <1>;
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&pinctrl_lpspi6>;
++	pinctrl-1 = <&pinctrl_lpspi6>;
++	cs-gpios = <&gpio2 0 GPIO_ACTIVE_LOW>;
++};
++
+ &lpuart1 { /* Console */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart1>;
+-- 
+2.30.2
+
