@@ -18,4 +18,5 @@ SRC_URI += " \
     file://0014-arm64-boot-dts-iesy-add-line-names-to-gpio-A.patch \
     file://0015-arm64-boot-dts-iesy-split-eval-kit-into-baseboard-an.patch \
     file://0016-arm64-boot-dts-iesy-add-uart-a-and-move-uart1-to-som.patch \
+    file://0017-arm64-boot-dts-iesy-add-pwm-functionality-for-iesy-i.patch \
 "

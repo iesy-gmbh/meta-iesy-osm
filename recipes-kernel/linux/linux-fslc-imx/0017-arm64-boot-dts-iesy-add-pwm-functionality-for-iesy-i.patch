@@ -1,0 +1,132 @@
+From 2518b2130bbe6235d2428bcf1c83d20f2006128b Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Tue, 3 Sep 2024 10:28:59 +0200
+Subject: [PATCH] arm64: boot: dts: iesy: add pwm functionality for
+ iesy-imx93-eva-mi
+
+add pwm functionality and remove not used node for iesy i.mx93 module
+---
+ .../boot/dts/iesy/iesy-imx93-eva-mi-v1.dts    | 33 -------------
+ .../boot/dts/iesy/iesy-imx93-osm-mf.dtsi      | 48 +++++++++++++++++++
+ 2 files changed, 48 insertions(+), 33 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index c39c1f103b33..3c5f01e0481f 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -290,25 +290,6 @@ &sai3 {
+ 	status = "okay";
+ };
+ 
+-&xcvr {
+-	#sound-dai-cells = <0>;
+-	pinctrl-names = "default", "sleep";
+-	pinctrl-0 = <&pinctrl_spdif>;
+-	pinctrl-1 = <&pinctrl_spdif_sleep>;
+-	clocks = <&clk IMX93_CLK_BUS_WAKEUP>,
+-		<&clk IMX93_CLK_SPDIF_GATE>,
+-		<&clk IMX93_CLK_DUMMY>,
+-		<&clk IMX93_CLK_AUD_XCVR_GATE>,
+-		<&clk IMX93_CLK_AUDIO_PLL>;
+-	clock-names = "ipg", "phy", "spba", "pll_ipg", "pll8k";
+-	assigned-clocks = <&clk IMX93_CLK_SPDIF>,
+-			 <&clk IMX93_CLK_AUDIO_XCVR>;
+-	assigned-clock-parents = <&clk IMX93_CLK_AUDIO_PLL>,
+-			 <&clk IMX93_CLK_SYS_PLL_PFD1_DIV2>;
+-	assigned-clock-rates = <12288000>, <200000000>;
+-	status = "okay";
+-};
+-	
+ &adc1 {
+ 	vref-supply = <&reg_vref_1v8>;
+ 	status = "okay";
+@@ -732,20 +713,6 @@ MX93_PAD_GPIO_IO19__GPIO2_IO19			0x51e
+ 			MX93_PAD_GPIO_IO20__GPIO2_IO20			0x51e
+ 		>;
+ 	};
+-
+-	pinctrl_spdif: spdifgrp {
+-		fsl,pins = <
+-			MX93_PAD_GPIO_IO22__SPDIF_IN		0x31e
+-			MX93_PAD_GPIO_IO23__SPDIF_OUT		0x31e
+-		>;
+-	};
+-
+-	pinctrl_spdif_sleep: spdifgrpsleep {
+-		fsl,pins = <
+-			MX93_PAD_GPIO_IO22__GPIO2_IO22		0x31e
+-			MX93_PAD_GPIO_IO23__GPIO2_IO23		0x31e
+-		>;
+-	};
+ };
+ 
+ &epxp {
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+index e5de70a0a114..290bb8124f7f 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+@@ -192,6 +192,30 @@ MX93_PAD_GPIO_IO29__LPI2C3_SCL			0x40000b9e
+ 		>;
+ 	};
+ 
++	pinctrl_tpm3: tpm3grp {
++		fsl,pins = <
++			MX93_PAD_GPIO_IO12__TPM3_CH2			0x11e
++		>;
++	};
++
++	pinctrl_tpm4: tpm4grp {
++		fsl,pins = <
++			MX93_PAD_GPIO_IO21__TPM4_CH1			0x11e
++		>;
++	};
++
++	pinctrl_tpm5: tpm5grp {
++		fsl,pins = <
++			MX93_PAD_GPIO_IO18__TPM5_CH2			0x11e
++		>;
++	};
++
++	pinctrl_tpm6: tpm6grp {
++		fsl,pins = <
++			MX93_PAD_GPIO_IO23__TPM6_CH1			0x11e
++		>;
++	};
++
+     pinctrl_uart1: uart1grp {
+ 		fsl,pins = <
+ 			MX93_PAD_UART1_RXD__LPUART1_RX			0x11e
+@@ -453,6 +477,30 @@ &lpuart2 { /* UART A */
+ 	uart-has-rtscts;
+ };
+ 
++&tpm3 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_tpm3>;
++	status = "okay";
++};
++
++&tpm4 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_tpm4>;
++	status = "okay";
++};
++
++&tpm5 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_tpm5>;
++	status = "okay";
++};
++
++&tpm6 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_tpm6>;
++	status = "okay";
++};
++
+ &usbotg1 {
+ 	dr_mode = "otg";
+ 	disable-over-current;
+-- 
+2.30.2
+
