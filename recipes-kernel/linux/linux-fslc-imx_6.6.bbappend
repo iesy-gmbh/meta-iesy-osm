@@ -21,4 +21,5 @@ SRC_URI += " \
     file://0017-arm64-boot-dts-iesy-add-pwm-functionality-for-iesy-i.patch \
     file://0018-spi-add-mc3630-to-spidev.patch \
     file://0019-arm64-boot-dts-add-mc3630-on-spi-A.patch \
+    file://0020-arm64-boot-dts-iesy-move-adc-node-and-regulator-to-s.patch \
 "
