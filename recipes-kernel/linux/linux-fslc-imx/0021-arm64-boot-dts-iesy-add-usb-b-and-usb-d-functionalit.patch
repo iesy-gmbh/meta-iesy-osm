@@ -1,0 +1,30 @@
+From 9936b73dd74d329d7db3ff72c28bc683a8964a7c Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Wed, 4 Sep 2024 15:36:45 +0200
+Subject: [PATCH 21/21] arm64: boot: dts: iesy: add usb-b and usb-d
+ functionality
+
+add support for the usb ports connected to the usb hub of the osm module
+---
+ arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+index 54d9ccbf15d7..fe9ec2dd3acb 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+@@ -539,6 +539,11 @@ &usbotg1 {
+ 	pinctrl-0 = <&pinctrl_usb1>;
+ };
+ 
++&usbotg2 {
++	dr_mode = "host";
++	status = "okay";
++};
++
+ &usdhc1 {
+ 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+ 	pinctrl-0 = <&pinctrl_usdhc1>;
+-- 
+2.30.2
+
