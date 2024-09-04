@@ -1,0 +1,75 @@
+From a9bbf7b3bd1bb95b083e4af9c33ec9aa4fa24503 Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Wed, 4 Sep 2024 09:09:33 +0200
+Subject: [PATCH 20/20] arm64: boot: dts: iesy: move adc node and regulator to
+ som devicetree
+
+Move the adc node and its needed regulator to the devictree of the module and remove it from the devicetree of the carrier board
+---
+ arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts | 12 ------------
+ arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi   | 12 ++++++++++++
+ 2 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index 37ecf485ca1a..4f8b8d0b6fb9 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -70,13 +70,6 @@ reg_usb_otg_vbus: regulator-usb-otg-vbus {
+ 		enable-active-high;
+ 	};
+ 
+-	reg_vref_1v8: regulator-adc-vref {
+-		compatible = "regulator-fixed";
+-		regulator-name = "vref_1v8";
+-		regulator-min-microvolt = <1800000>;
+-		regulator-max-microvolt = <1800000>;
+-	};
+-
+ 	reg_usdhc2_vmmc: regulator-usdhc2 {
+ 		compatible = "regulator-fixed";
+ 		pinctrl-names = "default";
+@@ -290,11 +283,6 @@ &sai3 {
+ 	status = "okay";
+ };
+ 
+-&adc1 {
+-	vref-supply = <&reg_vref_1v8>;
+-	status = "okay";
+-};
+-
+ &cm33 {
+ 	mbox-names = "tx", "rx", "rxdb";
+ 	mboxes = <&mu1 0 1>,
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+index 662e712d11fb..54d9ccbf15d7 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+@@ -15,6 +15,13 @@ chosen {
+ 		stdout-path = &lpuart1;
+ 	};
+ 
++	reg_vref_1v8: regulator-adc-vref {
++		compatible = "regulator-fixed";
++		regulator-name = "vref_1v8";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
+     reserved-memory {
+ 		#address-cells = <2>;
+ 		#size-cells = <2>;
+@@ -67,6 +74,11 @@ ele_reserved: ele-reserved@a4120000 {
+ 	};
+ };
+ 
++&adc1 {
++	vref-supply = <&reg_vref_1v8>;
++	status = "okay";
++};
++
+ &eqos {
+ 	pinctrl-names = "default", "sleep";
+ 	pinctrl-0 = <&pinctrl_eqos>;
+-- 
+2.30.2
+
