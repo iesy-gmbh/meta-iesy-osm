@@ -1,0 +1,31 @@
+From 7d3248a59b78ea7b7bbfafc87ccbbf5d37dac794 Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Tue, 10 Sep 2024 11:13:51 +0200
+Subject: [PATCH 22/22] arm64: boot: dts: iesy: add click eeprom on I2C-A
+
+add MikroBus click module eeprom on I2C-A
+---
+ arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index 4f8b8d0b6fb9..b522a3268d17 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -428,6 +428,13 @@ eeprom@53 {
+ 		vcc-supply = <&reg_1v8_carrier>;
+ 	};
+ 
++	/* MikroBus EEPROM Click */
++	eeprom@54 {
++		compatible = "atmel,24c08";
++		reg = <0x54>;
++		pagesize = <8>;
++	};
++
+ 	lsm6dsm@6a {
+ 		compatible = "st,lsm6dso";
+ 		reg = <0x6a>;
+-- 
+2.30.2
+
