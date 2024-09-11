@@ -24,4 +24,5 @@ SRC_URI += " \
     file://0020-arm64-boot-dts-iesy-move-adc-node-and-regulator-to-s.patch \
     file://0021-arm64-boot-dts-iesy-add-usb-b-and-usb-d-functionalit.patch \
     file://0022-arm64-boot-dts-iesy-add-click-eeprom-on-I2C-A.patch \
+    file://0023-arm64-boot-dts-iesy-add-support-for-audio-input-and-.patch \
 "

@@ -1,0 +1,232 @@
+From b4b278523e106aafdefc921aaca3ce88ad4016b5 Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Wed, 11 Sep 2024 14:51:40 +0200
+Subject: [PATCH 23/23] arm64: boot: dts: iesy: add support for audio input and
+ output
+
+add support for max9867 audio codec on i2c2@18 and add simple audio card. remove other audio related entries in the dt that are not needed
+---
+ .../boot/dts/iesy/iesy-imx93-eva-mi-v1.dts    | 157 ++++--------------
+ 1 file changed, 29 insertions(+), 128 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index b522a3268d17..bc94ce3e39df 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -112,16 +112,6 @@ usdhc3_pwrseq: usdhc3_pwrseq {
+ 		reset-gpios = <&pcal6524 12 GPIO_ACTIVE_LOW>;
+ 	};
+ 
+-	reg_audio_pwr: regulator-audio-pwr {
+-		compatible = "regulator-fixed";
+-		regulator-name = "audio-pwr";
+-		regulator-min-microvolt = <3300000>;
+-		regulator-max-microvolt = <3300000>;
+-		gpio = <&adp5585gpio 1 GPIO_ACTIVE_HIGH>;
+-		enable-active-high;
+-		regulator-always-on;
+-	};
+-
+ 	reg_dvdd_sel: regulator-dvdd_sel {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "DVDD_SEL";
+@@ -178,66 +168,32 @@ reg_avdd_2v8: regulator-avdd {
+ 		vin-supply = <&reg_vaa_sel>;
+ 	};
+ 
+-	sound-wm8962 {
+-		compatible = "fsl,imx-audio-wm8962";
+-		model = "wm8962-audio";
+-		audio-cpu = <&sai3>;
+-		audio-codec = <&codec>;
+-		hp-det-gpio = <&pcal6524 4 GPIO_ACTIVE_HIGH>;
+-		audio-routing =
+-			"Headphone Jack", "HPOUTL",
+-			"Headphone Jack", "HPOUTR",
+-			"Ext Spk", "SPKOUTL",
+-			"Ext Spk", "SPKOUTR",
+-			"AMIC", "MICBIAS",
+-			"IN3R", "AMIC",
+-			"IN1R", "AMIC";
+-	};
+-
+-	sound-micfil {
+-		compatible = "fsl,imx-audio-card";
+-		model = "micfil-audio";
+-		pri-dai-link {
+-			link-name = "micfil hifi";
+-			format = "i2s";
+-			cpu {
+-				sound-dai = <&micfil>;
+-			};
+-		};
+-	};
+-
+-	bt_sco_codec: bt_sco_codec {
+-		#sound-dai-cells = <1>;
+-		compatible = "linux,bt-sco";
+-	};
+-
+-	sound-bt-sco {
++	sound-max9867 {
+ 		compatible = "simple-audio-card";
+-		simple-audio-card,name = "bt-sco-audio";
+-		simple-audio-card,format = "dsp_a";
+-		simple-audio-card,bitclock-inversion;
+-		simple-audio-card,frame-master = <&btcpu>;
+-		simple-audio-card,bitclock-master = <&btcpu>;
+-
+-		btcpu: simple-audio-card,cpu {
+-			sound-dai = <&sai1>;
++		simple-audio-card,name = "MAX9867";
++		simple-audio-card,format = "i2s";
++
++		simple-audio-card,widgets =
++			"Speaker", "Jack",
++			"Microphone", "Mic";
++		simple-audio-card,routing =
++			"Jack", "LOUT",
++			"Jack", "ROUT",
++			"Mic", "DMICL",
++			"Mic", "DMICR";
++
++		simple-audio-card,frame-master = <&cpudai>;
++		simple-audio-card,bitclock-master = <&cpudai>;
++		
++		cpudai: simple-audio-card,cpu {
++			sound-dai = <&sai3>;
+ 			dai-tdm-slot-num = <2>;
+ 			dai-tdm-slot-width = <16>;
+ 		};
+ 
+ 		simple-audio-card,codec {
+-			sound-dai = <&bt_sco_codec 1>;
+-		};
+-	};
+-
+-	sound-xcvr {
+-		compatible = "fsl,imx-audio-card";
+-		model = "imx-audio-xcvr";
+-		pri-dai-link {
+-			link-name = "XCVR PCM";
+-			cpu {
+-				sound-dai = <&xcvr>;
+-			};
++			sound-dai = <&max9867>;
++			clocks = <&clk IMX93_CLK_SAI3>;
+ 		};
+ 	};
+ 
+@@ -260,22 +216,10 @@ user-button-2 {
+ 	};
+ };
+ 
+-&sai1 {
+-	#sound-dai-cells = <0>;
+-	pinctrl-names = "default", "sleep";
+-	pinctrl-0 = <&pinctrl_sai1>;
+-	pinctrl-1 = <&pinctrl_sai1_sleep>;
+-	assigned-clocks = <&clk IMX93_CLK_SAI1>;
+-	assigned-clock-parents = <&clk IMX93_CLK_AUDIO_PLL>;
+-	assigned-clock-rates = <12288000>;
+-	fsl,sai-mclk-direction-output;
+-	status = "okay";
+-};
+-
+ &sai3 {
+-	pinctrl-names = "default", "sleep";
++	#sound-dai-cells = <0>;
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_sai3>;
+-	pinctrl-1 = <&pinctrl_sai3_sleep>;
+ 	assigned-clocks = <&clk IMX93_CLK_SAI3>;
+ 	assigned-clock-parents = <&clk IMX93_CLK_AUDIO_PLL>;
+ 	assigned-clock-rates = <12288000>;
+@@ -374,28 +318,6 @@ &lpm {
+  * please synchronize the changes to the &i3c1 bus in imx93-11x11-evk-i3c.dts.
+  */
+ &lpi2c1 {
+-	codec: wm8962@1a {
+-		compatible = "wlf,wm8962";
+-		reg = <0x1a>;
+-		clocks = <&clk IMX93_CLK_SAI3_GATE>;
+-		DCVDD-supply = <&reg_audio_pwr>;
+-		DBVDD-supply = <&reg_audio_pwr>;
+-		AVDD-supply = <&reg_audio_pwr>;
+-		CPVDD-supply = <&reg_audio_pwr>;
+-		MICVDD-supply = <&reg_audio_pwr>;
+-		PLLVDD-supply = <&reg_audio_pwr>;
+-		SPKVDD1-supply = <&reg_audio_pwr>;
+-		SPKVDD2-supply = <&reg_audio_pwr>;
+-		gpio-cfg = <
+-			0x0000 /* 0:Default */
+-			0x0000 /* 1:Default */
+-			0x0000 /* 2:FN_DMICCLK */
+-			0x0000 /* 3:Default */
+-			0x0000 /* 4:FN_DMICCDAT */
+-			0x0000 /* 5:Default */
+-		>;
+-	};
+-
+ 	adv7535: hdmi@3d {
+ 		compatible = "adi,adv7535";
+ 		reg = <0x3d>;
+@@ -444,6 +366,13 @@ lsm6dsm@6a {
+ &lpi2c2 {
+ 	status = "okay";
+ 
++	max9867: audio_codec@18 {
++		compatible = "maxim,max9867";
++		#sound-dai-cells = <0>;
++		reg = <0x18>;
++		clocks = <&clk IMX93_CLK_SAI3_GATE>;
++	};
++
+ 	pcal6524: gpio@22 {
+ 		compatible = "nxp,pcal6524";
+ 		pinctrl-names = "default";
+@@ -680,24 +609,6 @@ MX93_PAD_CCM_CLKO1__GPIO3_IO26		0x31e
+ 		>;
+ 	};
+ 
+-	pinctrl_sai1: sai1grp {
+-		fsl,pins = <
+-			MX93_PAD_SAI1_TXC__SAI1_TX_BCLK			0x31e
+-			MX93_PAD_SAI1_TXFS__SAI1_TX_SYNC		0x31e
+-			MX93_PAD_SAI1_TXD0__SAI1_TX_DATA00		0x31e
+-			MX93_PAD_SAI1_RXD0__SAI1_RX_DATA00		0x31e
+-		>;
+-	};
+-
+-	pinctrl_sai1_sleep: sai1grpsleep {
+-		fsl,pins = <
+-			MX93_PAD_SAI1_TXC__GPIO1_IO12                   0x51e
+-			MX93_PAD_SAI1_TXFS__GPIO1_IO11			0x51e
+-			MX93_PAD_SAI1_TXD0__GPIO1_IO13			0x51e
+-			MX93_PAD_SAI1_RXD0__GPIO1_IO14			0x51e
+-		>;
+-	};
+-
+ 	pinctrl_sai3: sai3grp {
+ 		fsl,pins = <
+ 			MX93_PAD_GPIO_IO26__SAI3_TX_SYNC		0x31e
+@@ -707,16 +618,6 @@ MX93_PAD_GPIO_IO19__SAI3_TX_DATA00		0x31e
+ 			MX93_PAD_GPIO_IO20__SAI3_RX_DATA00		0x31e
+ 		>;
+ 	};
+-
+-	pinctrl_sai3_sleep: sai3grpsleep {
+-		fsl,pins = <
+-			MX93_PAD_GPIO_IO26__GPIO2_IO26			0x51e
+-			MX93_PAD_GPIO_IO16__GPIO2_IO16			0x51e
+-			MX93_PAD_GPIO_IO17__GPIO2_IO17			0x51e
+-			MX93_PAD_GPIO_IO19__GPIO2_IO19			0x51e
+-			MX93_PAD_GPIO_IO20__GPIO2_IO20			0x51e
+-		>;
+-	};
+ };
+ 
+ &epxp {
+-- 
+2.30.2
+
