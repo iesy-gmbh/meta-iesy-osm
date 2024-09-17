@@ -1,0 +1,93 @@
+From a1b9ae688ab3f49a96e00525a41af31df2ec8930 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 4 Sep 2024 15:19:24 +0200
+Subject: [PATCH 6/9] arm64: dts iesy: add csi nodes
+
+add csi & mipi csi nodes, use drivers from media/platform/nxp
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+
+patch
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi     | 49 +++++++++++++++++++
+ 1 file changed, 49 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
+index d9d135253d60..5ad7b4f8cb8a 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-osm-sf.dtsi
+@@ -76,6 +76,41 @@ &A53_0 {
+ 	cpu-supply = <&vdd_arm_0v9>;
+ };
+ 
++&csi1_bridge {
++	compatible = "fsl,imx8mm-csi", "fsl,imx7-csi";
++	clocks = <&clk IMX8MM_CLK_CSI1_ROOT>;
++	clock-names = "mclk";
++
++	port {
++		csi_in: endpoint {
++			remote-endpoint = <&imx8mm_mipi_csi_out>;
++		};
++	};
++};
++
++&mipi_csi_1 {
++	compatible = "fsl,imx8mm-mipi-csi2";
++	clock-frequency = <333000000>;
++	clocks = <&clk IMX8MM_CLK_CSI1_CORE>,
++			<&clk IMX8MM_CLK_CSI1_ROOT>,
++			<&clk IMX8MM_CLK_CSI1_PHY_REF>,
++			<&clk IMX8MM_CLK_DISP_AXI_ROOT>;
++	clock-names = "pclk", "wrap", "phy", "axi";
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@1 {
++			reg = <1>;
++
++			imx8mm_mipi_csi_out: endpoint {
++				remote-endpoint = <&csi_in>;
++			};
++		};
++	};
++};
++
+ &uart1 { /* UART C */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart1>;
+@@ -314,6 +349,13 @@ &i2c2 {
+ 	pinctrl-0 = <&pinctrl_i2c2>;
+ };
+ 
++&i2c3 {
++	clock-frequency = <400000>;
++	status = "disabled";
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c3>;
++};
++
+ &pwm1 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+@@ -368,6 +410,13 @@ MX8MM_IOMUXC_I2C2_SDA_I2C2_SDA			0x400001c3
+ 		>;
+ 	};
+ 
++	pinctrl_i2c3: i2c3grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_I2C3_SCL_I2C3_SCL			0x400001c3
++			MX8MM_IOMUXC_I2C3_SDA_I2C3_SDA			0x400001c3
++		>;
++	};
++
+     pinctrl_pmic: pmicirq {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_GPIO1_IO03_GPIO1_IO3		0x41
+-- 
+2.30.2
+
