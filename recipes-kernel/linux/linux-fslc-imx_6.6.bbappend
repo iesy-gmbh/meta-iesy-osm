@@ -26,4 +26,5 @@ SRC_URI += " \
     file://0022-arm64-boot-dts-iesy-add-click-eeprom-on-I2C-A.patch \
     file://0023-arm64-boot-dts-iesy-add-support-for-audio-input-and-.patch \
     file://0024-arm64-dts-iesy-add-csi-nodes.patch \
+    file://0025-arm64-dts-iesy-add-support-for-dsi-functionality.patch \
 "

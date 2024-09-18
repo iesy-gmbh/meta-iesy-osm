@@ -1,0 +1,107 @@
+From 790b8ab5b838e775ccf50a16d3b81e9463fc5bf9 Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Wed, 18 Sep 2024 09:48:50 +0200
+Subject: [PATCH 24/24] arm64: dts: iesy: add support for dsi functionality
+
+add support for hdmi output by adding lontium dsi bridge to devicetree and removing not used node
+---
+ .../boot/dts/iesy/iesy-imx93-eva-mi-v1.dts    | 62 ++++++++++++++-----
+ 1 file changed, 46 insertions(+), 16 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+index bc94ce3e39df..231a8b140f63 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-eva-mi-v1.dts
+@@ -18,6 +18,21 @@ / {
+ 	model = "iesy i.MX93 EVA-MI V1.xx (Eval Kit)";
+ 	compatible = "fsl,imx93-11x11-evk", "fsl,imx93";
+ 
++	hdmi-connector {
++		status = "okay";
++		compatible = "hdmi-connector";
++		label = "hdmi-connect";
++		type = "a";
++
++		ddc-i2c-bus = <&lpi2c2>;
++
++		port {
++			hdmi_connector_in: endpoint {
++				remote-endpoint = <&lt8912b_out>;
++			};
++		};
++	};
++
+ 	leds {
+ 		compatible = "gpio-leds";
+ 		pinctrl-names = "default";
+@@ -249,8 +264,9 @@ ports {
+ 		port@1 {
+ 			reg = <1>;
+ 
+-			dsi_to_adv7535: endpoint {
+-				remote-endpoint = <&adv7535_to_dsi>;
++			dsi_to_lt8912b: endpoint {
++				remote-endpoint = <&lt8912b_from_dsi>;
++				attach-bridge;
+ 			};
+ 		};
+ 	};
+@@ -318,20 +334,6 @@ &lpm {
+  * please synchronize the changes to the &i3c1 bus in imx93-11x11-evk-i3c.dts.
+  */
+ &lpi2c1 {
+-	adv7535: hdmi@3d {
+-		compatible = "adi,adv7535";
+-		reg = <0x3d>;
+-		adi,addr-cec = <0x3b>;
+-		adi,dsi-lanes = <4>;
+-		status = "okay";
+-
+-		port {
+-			adv7535_to_dsi: endpoint {
+-				remote-endpoint = <&dsi_to_adv7535>;
+-			};
+-		};
+-	};
+-
+ 	sensor@4e {
+ 		compatible = "ti,tmp75b";
+ 		reg = <0x4e>;
+@@ -401,6 +403,34 @@ adp5585pwm: pwm-adp5585 {
+ 			#pwm-cells = <3>;
+ 		};
+ 	};
++
++	lontium_lt8912b@48 {
++		compatible = "lontium,lt8912b";
++		reg = <0x48>;
++		status = "okay";
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				reg = <0>;
++
++				lt8912b_from_dsi: endpoint {
++					remote-endpoint = <&dsi_to_lt8912b>;
++					data-lanes = <0 1 2 3>;
++				};
++			};
++
++			port@1 {
++				reg = <1>;
++
++				lt8912b_out: endpoint {
++					remote-endpoint = <&hdmi_connector_in>;
++				};
++			};
++		};
++	};
+ };
+ 
+ &lpi2c3 {
+-- 
+2.30.2
+
