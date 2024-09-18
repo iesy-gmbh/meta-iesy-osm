@@ -1,0 +1,41 @@
+From 2a0d01cfdd2098d501c29944786c6db8e09a44fd Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Wed, 18 Sep 2024 10:02:47 +0200
+Subject: [PATCH] arm64: imx8mm: add Uart 3,4 to RDC, change Uart Base Addr
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c | 3 ++-
+ plat/imx/imx8m/imx8mm/platform.mk         | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+index 179b6226f..5b4907a61 100644
+--- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+@@ -70,7 +70,8 @@ static const struct imx_rdc_cfg rdc[] = {
+ 	RDC_MDAn(RDC_MDA_M4, DID1),
+ 
+ 	/* peripherals domain permission */
+-	RDC_PDAPn(RDC_PDAP_UART4, D1R | D1W),
++	RDC_PDAPn(RDC_PDAP_UART4, D0R | D0W),
++	RDC_PDAPn(RDC_PDAP_UART3, D0R | D0W),
+ 	RDC_PDAPn(RDC_PDAP_UART2, D0R | D0W),
+ 	RDC_PDAPn(RDC_PDAP_UART1, D0R | D0W),
+ 
+diff --git a/plat/imx/imx8m/imx8mm/platform.mk b/plat/imx/imx8m/imx8mm/platform.mk
+index 0a8f12a26..db653aa58 100644
+--- a/plat/imx/imx8m/imx8mm/platform.mk
++++ b/plat/imx/imx8m/imx8mm/platform.mk
+@@ -159,7 +159,7 @@ $(eval $(call add_define,BL32_BASE))
+ BL32_SIZE		?=	0x2000000
+ $(eval $(call add_define,BL32_SIZE))
+ 
+-IMX_BOOT_UART_BASE	?=	0x30890000
++IMX_BOOT_UART_BASE	?=	0x30880000
+ ifeq (${IMX_BOOT_UART_BASE},auto)
+     override IMX_BOOT_UART_BASE	:=	0
+ endif
+-- 
+2.30.2
+
