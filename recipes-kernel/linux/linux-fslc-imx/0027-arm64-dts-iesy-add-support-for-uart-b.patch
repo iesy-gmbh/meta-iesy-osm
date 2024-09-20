@@ -1,0 +1,49 @@
+From 18684d14848e9cbc5b377df5356e5969493585e4 Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Fri, 20 Sep 2024 14:29:13 +0200
+Subject: [PATCH 27/27] arm64: dts: iesy: add support for uart-b
+
+add support for UART-B to i.mx93 module
+---
+ .../arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+index ba7c10f1f4fc..7f24426c49f3 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+@@ -258,6 +258,15 @@ MX93_PAD_SAI1_TXD0__LPUART2_RTS_B		0x11e
+ 		>;
+ 	};
+ 
++	pinctrl_uart6: uart6grp {
++		fsl,pins = <
++			MX93_PAD_GPIO_IO04__LPUART6_TX			0x11e
++			MX93_PAD_GPIO_IO05__LPUART6_RX			0x11e
++			MX93_PAD_GPIO_IO06__LPUART6_CTS_B		0x11e
++			MX93_PAD_GPIO_IO07__LPUART6_RTS_B		0x11e
++		>;
++	};
++
+ 	pinctrl_lpspi6: lpspi6grp {
+ 		fsl,pins = <
+ 			MX93_PAD_GPIO_IO00__GPIO2_IO00				0x3fe
+@@ -569,6 +578,15 @@ &lpuart2 { /* UART A */
+ 	uart-has-rtscts;
+ };
+ 
++&lpuart6 { /* UART B */
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart6>;
++	status = "okay";
++	cts-gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
++	rts-gpios = <&gpio2 7 GPIO_ACTIVE_LOW>;
++	uart-has-rtscts;
++};
++
+ &tpm3 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_tpm3>;
+-- 
+2.30.2
+
