@@ -28,4 +28,5 @@ SRC_URI += " \
     file://0024-arm64-dts-iesy-add-csi-nodes.patch \
     file://0025-arm64-dts-iesy-add-support-for-dsi-functionality.patch \
     file://0026-arm64-dts-iesy-add-support-for-sdio-b.patch \
+    file://0027-arm64-dts-iesy-add-support-for-uart-b.patch \
 "
