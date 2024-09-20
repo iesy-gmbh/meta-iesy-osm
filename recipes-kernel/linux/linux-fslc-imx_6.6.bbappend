@@ -27,4 +27,5 @@ SRC_URI += " \
     file://0023-arm64-boot-dts-iesy-add-support-for-audio-input-and-.patch \
     file://0024-arm64-dts-iesy-add-csi-nodes.patch \
     file://0025-arm64-dts-iesy-add-support-for-dsi-functionality.patch \
+    file://0026-arm64-dts-iesy-add-support-for-sdio-b.patch \
 "
