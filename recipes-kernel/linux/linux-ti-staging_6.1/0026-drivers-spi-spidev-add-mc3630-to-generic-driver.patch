@@ -1,0 +1,34 @@
+From fe380feacab80961f8bab01c4b51cd6285f47d1a Mon Sep 17 00:00:00 2001
+From: Christian Biermann <bie@iesy.com>
+Date: Mon, 23 Sep 2024 16:21:56 +0200
+Subject: [PATCH 1/1] drivers: spi: spidev: add mc3630 to generic driver
+
+---
+ drivers/spi/spidev.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/spi/spidev.c b/drivers/spi/spidev.c
+index 71c3db60e968..a8b1469db3a2 100644
+--- a/drivers/spi/spidev.c
++++ b/drivers/spi/spidev.c
+@@ -700,6 +700,8 @@ static const struct spi_device_id spidev_spi_ids[] = {
+ 	{ .name = "m53cpld" },
+ 	{ .name = "spi-petra" },
+ 	{ .name = "spi-authenta" },
++	{ .name = "m95m04" },
++	{ .name = "mc3630" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(spi, spidev_spi_ids);
+@@ -726,6 +728,8 @@ static const struct of_device_id spidev_dt_ids[] = {
+ 	{ .compatible = "menlo,m53cpld", .data = &spidev_of_check },
+ 	{ .compatible = "cisco,spi-petra", .data = &spidev_of_check },
+ 	{ .compatible = "micron,spi-authenta", .data = &spidev_of_check },
++	{ .compatible = "st,m95m04", .data = &spidev_of_check },
++	{ .compatible = "memsic,mc3630", .data = &spidev_of_check },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, spidev_dt_ids);
+-- 
+2.30.2
+
