@@ -29,6 +29,9 @@ SRC_URI += " \
     file://0022-arm64-dts-ti-iesy-am62x-add-names-to-all-used-gpios.patch \
     file://0023-arm64-dts-ti-iesy_-am62x-add-gpio-pins-to-pin-muxer-.patch \
     file://0024-arm64-dts-ti-iesy-am62x-add-LM75-on-I2C-A.patch \
+    file://0025-driver-spi-slow-down-spi-speed-of-bitbanging-driver.patch \
+    file://0026-drivers-spi-spidev-add-mc3630-to-generic-driver.patch \
+    file://0027-arm64-dts-ti-iesy-add-ac-sensors-and-switch-to-bitbanging-driver.patch \
 "
 KERNEL_CONFIG_FRAGMENTS:append = "\
     ${APPEND_DIR}/fragment.config \
