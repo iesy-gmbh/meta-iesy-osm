@@ -1,0 +1,50 @@
+From 0510fbe0030fb39c1ae952b7bb8018ce9b56603c Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 1 Oct 2024 10:15:09 +0200
+Subject: [PATCH 3/3] board: ti: am62x: set rootfs device from boot device
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ board/ti/am62x/evm.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/board/ti/am62x/evm.c b/board/ti/am62x/evm.c
+index 9146361b3aa..9e5585a7596 100644
+--- a/board/ti/am62x/evm.c
++++ b/board/ti/am62x/evm.c
+@@ -398,6 +398,32 @@ int board_late_init(void)
+ #endif
+ 	}
+ 
++	u32 devstat = readl(CTRLMMR_MAIN_DEVSTAT);
++
++	u32 bootmode = (devstat & MAIN_DEVSTAT_PRIMARY_BOOTMODE_MASK) >>
++				MAIN_DEVSTAT_PRIMARY_BOOTMODE_SHIFT;
++
++	u32 bootmode_cfg = (devstat & MAIN_DEVSTAT_PRIMARY_BOOTMODE_CFG_MASK) >>
++				MAIN_DEVSTAT_PRIMARY_BOOTMODE_CFG_SHIFT;
++
++	switch (bootmode) {
++	case BOOT_DEVICE_EMMC:
++		// env_set("mmc_boot_dev", "emmc");
++		env_set_ulong("mmcdev", 0);
++		break;
++	case BOOT_DEVICE_MMC:
++		if ((bootmode_cfg & MAIN_DEVSTAT_PRIMARY_MMC_PORT_MASK) >>
++				MAIN_DEVSTAT_PRIMARY_MMC_PORT_SHIFT)
++			// env_set("mmc_boot_dev", "sd");
++			env_set_ulong("mmcdev", 1);
++		else
++			// env_set("mmc_boot_dev", "emmc");
++			env_set_ulong("mmcdev", 0);
++		break;
++	}
++
++	env_set("root", "/dev/mmcblk${mmcdev}p2");
++
+ 	return 0;
+ }
+ #endif
+-- 
+2.30.2
+
