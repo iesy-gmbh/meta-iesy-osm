@@ -22,11 +22,11 @@ index 7f24426c49f3..bce9ed40e83f 100644
 +
 +		bank0: bank0 {
 +			gpio-controller;
-+			#gpio-cells = <2>;
++			#gpio-cells = <1>;
 +			ngpios = <1>;
 +
 +			interrupt-controller;
-+			#interrupt-cells = <2>;
++			#interrupt-cells = <1>;
 +		};
 +	};
 +
