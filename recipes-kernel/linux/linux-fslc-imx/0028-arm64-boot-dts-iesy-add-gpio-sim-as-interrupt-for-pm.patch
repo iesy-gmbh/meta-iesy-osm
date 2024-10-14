@@ -1,0 +1,49 @@
+From 4276298fd730243831da6de59703dca2e7e5bbab Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Mon, 14 Oct 2024 14:03:50 +0200
+Subject: [PATCH 28/28] arm64: boot: dts: iesy: add gpio-sim as interrupt for
+ pmic
+
+adds gpio-simulator node to simulate a gpio controller and use it as interrupt source for PCA9451A PMIC
+---
+ arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+index 7f24426c49f3..bce9ed40e83f 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
++++ b/arch/arm64/boot/dts/iesy/iesy-imx93-osm-mf.dtsi
+@@ -15,6 +15,19 @@ chosen {
+ 		stdout-path = &lpuart1;
+ 	};
+ 
++	gpio_sim {
++		compatible = "gpio-simulator";
++
++		bank0: bank0 {
++			gpio-controller;
++			#gpio-cells = <2>;
++			ngpios = <1>;
++
++			interrupt-controller;
++			#interrupt-cells = <2>;
++		};
++	};
++
+ 	reg_vref_1v8: regulator-adc-vref {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vref_1v8";
+@@ -456,8 +469,8 @@ &lpi2c1 {
+     pmic@25 {
+ 		compatible = "nxp,pca9451a";
+ 		reg = <0x25>;
+-		interrupt-parent = <&pcal6524>;
+-		interrupts = <11 IRQ_TYPE_EDGE_FALLING>;
++		interrupt-parent = <&bank0>;
++		interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
+ 
+ 		regulators {
+ 			buck1: BUCK1 {
+-- 
+2.30.2
+
