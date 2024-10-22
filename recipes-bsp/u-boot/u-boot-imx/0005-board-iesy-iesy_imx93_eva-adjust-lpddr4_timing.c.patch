@@ -1,0 +1,148 @@
+From 930a67fd56598215f1e854044e2065ad0845f7fa Mon Sep 17 00:00:00 2001
+From: EliaFunk <eli@iesy.com>
+Date: Tue, 22 Oct 2024 10:57:31 +0200
+Subject: [PATCH 5/5] board: iesy: iesy_imx93_eva: adjust lpddr4_timing.c
+
+adjust lpddr4_timing.c file
+---
+ board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c | 44 +++++++++-----------
+ 1 file changed, 20 insertions(+), 24 deletions(-)
+
+diff --git a/board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c b/board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c
+index 0de03497368..8d924b6db0f 100644
+--- a/board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c
++++ b/board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c
+@@ -3,7 +3,7 @@
+  *
+  * SPDX-License-Identifier: BSD-3-Clause
+  *
+- * Code generated with DDR Tool v3.3.0_7.8-d1cdb7d3.
++ * Code generated with DDR Tool v3.3.0_8.3-d1cdb7d3.
+  * DDR PHY FW2022.01
+  */
+ 
+@@ -18,7 +18,7 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
+     {0x4e300080, 0x80000412},
+     {0x4e300084, 0x0},
+     {0x4e300114, 0x1002},
+-    {0x4e300260, 0x80},
++    {0x4e300260, 0x4080},
+     {0x4e300f04, 0x80},
+     {0x4e300800, 0x43b30002},
+     {0x4e300804, 0x1f1f1f1f},
+@@ -37,26 +37,26 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
+ static struct dram_fsp_cfg ddr_dram_fsp_cfg[] = {
+     {
+         {
+-            {0x4e300100, 0x24A0321B},
++            {0x4e300100, 0x25A0421B},
+             {0x4e300104, 0xF8EE001B},
+-            {0x4e300108, 0x2F2E3233},
+-            {0x4e30010C, 0x0005C18B},
+-            {0x4e300124, 0x1C790000},
++            {0x4e300108, 0x62663273},
++            {0x4e30010C, 0x0005E18B},
++            {0x4e300124, 0x1C760000},
+             {0x4e300160, 0x00009102},
+             {0x4e30016C, 0x35F00000},
+             {0x4e300170, 0x8B0B0608},
+-            {0x4e300250, 0x00000028},
++            {0x4e300250, 0x0000002B},
+             {0x4e300254, 0x00FE00FE},
+             {0x4e300258, 0x00000008},
+             {0x4e30025C, 0x00000400},
+-            {0x4e300300, 0x224F2213},
+-            {0x4e300304, 0x00FE2213},
+-            {0x4e300308, 0x0A380E3D},
++            {0x4e300300, 0x26522615},
++            {0x4e300304, 0x00FE2217},
++            {0x4e300308, 0x0A3C0E3D},
+         },
+         {
+             {0x01, 0xE4},
+             {0x02, 0x36},
+-            {0x03, 0x23},
++            {0x03, 0xE3},
+             {0x0b, 0x44},
+             {0x0c, 0x48},
+             {0x0e, 0x48},
+@@ -132,10 +132,8 @@ static struct dram_cfg_param ddr_ddrphy_cfg[] = {
+     {0x200f5, 0x0},
+     {0x200f6, 0x0},
+     {0x200f7, 0xf000},
+-    {0x1004a, 0x500},
+-    {0x1104a, 0x500},
+     {0x20025, 0x0},
+-    {0x2002d, 0x0},
++    {0x2002d, 0x1},
+     {0x2002c, 0x0},
+     {0x20021, 0x0},
+     {0x200c7, 0x21},
+@@ -193,8 +191,6 @@ static struct dram_cfg_param ddr_ddrphy_trained_csr[] = {
+     {0x200f5, 0x0},
+     {0x200f6, 0x0},
+     {0x200f7, 0x0},
+-    {0x1004a, 0x0},
+-    {0x1104a, 0x0},
+     {0x20025, 0x0},
+     {0x2002d, 0x0},
+     {0x2002c, 0x0},
+@@ -905,23 +901,23 @@ static struct dram_cfg_param ddr_fsp0_cfg[] = {
+     {0x5400f, 0x100},
+     {0x54012, 0x110},
+     {0x54019, 0x36e4},
+-    {0x5401a, 0x23},
++    {0x5401a, 0xe3},
+     {0x5401b, 0x4844},
+     {0x5401c, 0x4808},
+     {0x5401e, 0x4},
+     {0x5401f, 0x36e4},
+-    {0x54020, 0x23},
++    {0x54020, 0xe3},
+     {0x54021, 0x4844},
+     {0x54022, 0x4808},
+     {0x54024, 0x4},
+     {0x54032, 0xe400},
+-    {0x54033, 0x2336},
++    {0x54033, 0xe336},
+     {0x54034, 0x4400},
+     {0x54035, 0x848},
+     {0x54036, 0x48},
+     {0x54037, 0x400},
+     {0x54038, 0xe400},
+-    {0x54039, 0x2336},
++    {0x54039, 0xe336},
+     {0x5403a, 0x4400},
+     {0x5403b, 0x848},
+     {0x5403c, 0x48},
+@@ -944,23 +940,23 @@ static struct dram_cfg_param ddr_fsp0_2d_cfg[] = {
+     {0x54010, 0x2080},
+     {0x54012, 0x110},
+     {0x54019, 0x36e4},
+-    {0x5401a, 0x23},
++    {0x5401a, 0xe3},
+     {0x5401b, 0x4844},
+     {0x5401c, 0x4808},
+     {0x5401e, 0x4},
+     {0x5401f, 0x36e4},
+-    {0x54020, 0x23},
++    {0x54020, 0xe3},
+     {0x54021, 0x4844},
+     {0x54022, 0x4808},
+     {0x54024, 0x4},
+     {0x54032, 0xe400},
+-    {0x54033, 0x2336},
++    {0x54033, 0xe336},
+     {0x54034, 0x4400},
+     {0x54035, 0x848},
+     {0x54036, 0x48},
+     {0x54037, 0x400},
+     {0x54038, 0xe400},
+-    {0x54039, 0x2336},
++    {0x54039, 0xe336},
+     {0x5403a, 0x4400},
+     {0x5403b, 0x848},
+     {0x5403c, 0x48},
+-- 
+2.30.2
+
