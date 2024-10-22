@@ -1,0 +1,26 @@
+From 907086f0ca1d2b03cd1f5435279d2b029605304b Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 15 Oct 2024 17:49:35 +0200
+Subject: [PATCH 5/7] environment: ti: use rootfs var for root
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ include/environment/ti/mmc.env | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/environment/ti/mmc.env b/include/environment/ti/mmc.env
+index 1e62bf85daf..0868278c4ec 100644
+--- a/include/environment/ti/mmc.env
++++ b/include/environment/ti/mmc.env
+@@ -3,7 +3,7 @@ mmcrootfstype=ext4 rootwait
+ finduuid=part uuid ${boot} ${bootpart} uuid
+ args_mmc=run finduuid;setenv bootargs console=${console}
+ 	${optargs}
+-	root=PARTUUID=${uuid} rw
++	root=${rootfs}
+ 	rootfstype=${mmcrootfstype}
+ loadbootscript=load mmc ${mmcdev} ${loadaddr} boot.scr
+ bootscript=echo Running bootscript from mmc${mmcdev} ...;
+-- 
+2.30.2
+
