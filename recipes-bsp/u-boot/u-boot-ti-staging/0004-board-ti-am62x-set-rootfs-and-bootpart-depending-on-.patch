@@ -1,0 +1,50 @@
+From 4489a3c2816687483117bf7a3db92ce1037e81cf Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 15 Oct 2024 17:48:59 +0200
+Subject: [PATCH 4/7] board: ti: am62x: set rootfs and bootpart depending on
+ boot device
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ board/ti/am62x/evm.c | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/board/ti/am62x/evm.c b/board/ti/am62x/evm.c
+index 555b24f524f..9770baad5e0 100644
+--- a/board/ti/am62x/evm.c
++++ b/board/ti/am62x/evm.c
+@@ -408,22 +408,24 @@ int board_late_init(void)
+ 
+ 	switch (bootmode) {
+ 	case BOOT_DEVICE_EMMC:
+-		// env_set("mmc_boot_dev", "emmc");
+ 		env_set_ulong("mmcdev", 0);
++		env_set("bootpart", "0:2");
++		env_set("rootfs", "/dev/mmcblk0p2");
+ 		break;
+ 	case BOOT_DEVICE_MMC:
+ 		if ((bootmode_cfg & MAIN_DEVSTAT_PRIMARY_MMC_PORT_MASK) >>
+-				MAIN_DEVSTAT_PRIMARY_MMC_PORT_SHIFT)
+-			// env_set("mmc_boot_dev", "sd");
++				MAIN_DEVSTAT_PRIMARY_MMC_PORT_SHIFT) {
+ 			env_set_ulong("mmcdev", 1);
+-		else
+-			// env_set("mmc_boot_dev", "emmc");
++			env_set("bootpart", "1:2");
++			env_set("rootfs", "/dev/mmcblk1p2");
++		} else {
+ 			env_set_ulong("mmcdev", 0);
++			env_set("bootpart", "0:2");
++			env_set("rootfs", "/dev/mmcblk0p2");
++		}
+ 		break;
+ 	}
+ 
+-	env_set("rootfs", "/dev/mmcblk${mmcdev}p2");
+-
+ 	return 0;
+ }
+ #endif
+-- 
+2.30.2
+

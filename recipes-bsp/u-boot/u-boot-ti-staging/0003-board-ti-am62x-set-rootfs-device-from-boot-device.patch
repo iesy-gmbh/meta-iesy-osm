@@ -40,7 +40,7 @@ index 9146361b3aa..9e5585a7596 100644
 +		break;
 +	}
 +
-+	env_set("root", "/dev/mmcblk${mmcdev}p2");
++	env_set("rootfs", "/dev/mmcblk${mmcdev}p2");
 +
  	return 0;
  }
