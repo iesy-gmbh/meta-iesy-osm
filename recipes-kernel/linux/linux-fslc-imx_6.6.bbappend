@@ -30,4 +30,5 @@ SRC_URI += " \
     file://0026-arm64-dts-iesy-add-support-for-sdio-b.patch \
     file://0027-arm64-dts-iesy-add-support-for-uart-b.patch \
     file://0028-arm64-boot-dts-iesy-add-gpio-sim-as-interrupt-for-pm.patch \
+    file://0029-arm64-dts-iesy-add-imx219-camera-sensor.patch \
 "
