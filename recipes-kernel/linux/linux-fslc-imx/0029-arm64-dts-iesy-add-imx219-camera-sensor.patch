@@ -1,0 +1,124 @@
+From 2f136ed3472715fa14a3d2344fe88baf070462c4 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Mon, 28 Oct 2024 15:18:45 +0100
+Subject: [PATCH 29/29] arm64: dts: iesy: add imx219 camera sensor
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ .../boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts   | 72 ++++++++++++++++++-
+ 1 file changed, 71 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
+index d5abf7e68e73..9c99a737439e 100644
+--- a/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
++++ b/arch/arm64/boot/dts/iesy/iesy-imx8mm-eva-mi-v1.dts
+@@ -13,7 +13,14 @@
+ 
+ / {
+ 	model = "iesy i.MX8MM EVA-MI V1.xx (Eval Kit)";
+-	compatible = "fsl,imx8mm-evk", "fsl,imx8mm";	
++	compatible = "fsl,imx8mm-evk", "fsl,imx8mm";
++
++	cam24m: cam24m {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <24000000>;
++		clock-output-names = "cam24m";
++	};
+ 
+ 	leds {
+ 		compatible = "gpio-leds";
+@@ -35,6 +42,17 @@ led@1 {
+ 		};
+ 	};
+ 
++	reg_cam: regulator-cam {
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_cam>;
++		compatible = "regulator-fixed";
++		regulator-name = "reg_cam";
++		gpio = <&gpio1 11 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
+ 	user-buttons {
+ 		compatible = "gpio-keys";
+ 		// autorepeat;
+@@ -121,6 +139,10 @@ pcie0_refclk: pcie0-refclk {
+ 	};
+ };
+ 
++&csi1_bridge {
++	status = "okay";
++};
++
+ &fec1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_fec1>;
+@@ -248,6 +270,48 @@ lt8912b_out: endpoint {
+ 	};
+ };
+ 
++&i2c3 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	status = "okay";
++
++	imx219: sensor@10 {
++		compatible = "sony,imx219";
++		reg = <0x10>;
++		clocks = <&cam24m>;
++		VDIG-supply = <&reg_cam>;
++
++		port {
++			/* MIPI CSI-2 bus endpoint */
++			imx219_to_mipi_csi2: endpoint {
++				remote-endpoint = <&imx8mm_mipi_csi_in>;
++				clock-lanes = <0>;
++				data-lanes = <1 2>;
++				link-frequencies = /bits/ 64 <456000000>;
++			};
++		};
++	};
++};
++
++&mipi_csi_1 {
++	status = "okay";
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++
++			imx8mm_mipi_csi_in: endpoint {
++				remote-endpoint = <&imx219_to_mipi_csi2>;
++				data-lanes = <1 2>;
++			};
++		};
++	};
++};
++
+ &sai5 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+@@ -323,6 +387,12 @@ MX8MM_IOMUXC_GPIO1_IO09_GPIO1_IO9               0x19    /* Touch int */
+ 		>;
+ 	};
+ 
++	pinctrl_reg_cam: regcamgrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_GPIO1_IO11_GPIO1_IO11	0x41
++		>;
++	};
++
+ 	pinctrl_sai5: sai5grp {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_SAI3_RXD_SAI5_RX_DATA0		0x0
+-- 
+2.30.2
+
