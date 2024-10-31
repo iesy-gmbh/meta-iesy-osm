@@ -33,4 +33,5 @@ SRC_URI += " \
     file://0029-arm64-dts-iesy-add-imx219-camera-sensor.patch \
     file://0030-arm64-dts-iesy-remove-unused-nodes-from-i.MX93-eval-.patch \
     file://0031-arm64-dts-iesy-fix-audio.patch \
+    file://0032-arm64-dts-iesy-add-usb-role-switch-to-usbotg1-fix-us.patch \
 "
