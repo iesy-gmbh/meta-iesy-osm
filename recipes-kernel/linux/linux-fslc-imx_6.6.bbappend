@@ -34,4 +34,5 @@ SRC_URI += " \
     file://0030-arm64-dts-iesy-remove-unused-nodes-from-i.MX93-eval-.patch \
     file://0031-arm64-dts-iesy-fix-audio.patch \
     file://0032-arm64-dts-iesy-add-usb-role-switch-to-usbotg1-fix-us.patch \
+    file://0033-arm64-dts-iesy-add-pullup-resistor-for-sd-card-and-s.patch \
 "
