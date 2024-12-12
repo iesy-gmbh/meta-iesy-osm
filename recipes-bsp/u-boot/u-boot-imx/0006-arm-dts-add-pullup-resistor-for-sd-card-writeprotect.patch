@@ -1,0 +1,41 @@
+From 8ac4b6eb1988b020d6484091c5882b0198c9b481 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Thu, 12 Dec 2024 15:05:16 +0100
+Subject: [PATCH 6/6] arm: dts: add pullup resistor for sd-card writeprotect
+
+Signed-off-by: Dominik Poggel <pog@iesy.com>
+---
+ arch/arm/dts/iesy-imx8mm-osm-sf.dtsi | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm/dts/iesy-imx8mm-osm-sf.dtsi b/arch/arm/dts/iesy-imx8mm-osm-sf.dtsi
+index f01c077fae7..35a76f7380f 100644
+--- a/arch/arm/dts/iesy-imx8mm-osm-sf.dtsi
++++ b/arch/arm/dts/iesy-imx8mm-osm-sf.dtsi
+@@ -617,6 +617,7 @@
+ 			MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d0
+ 			MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d0
+ 			MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d0
++			MX8MM_IOMUXC_SD2_WP_USDHC2_WP		0x150
+ 			MX8MM_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x1d0
+ 		>;
+ 	};
+@@ -629,6 +630,7 @@
+ 			MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d4
+ 			MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d4
+ 			MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d4
++			MX8MM_IOMUXC_SD2_WP_USDHC2_WP		0x154
+ 			MX8MM_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x1d0
+ 		>;
+ 	};
+@@ -641,6 +643,7 @@
+ 			MX8MM_IOMUXC_SD2_DATA1_USDHC2_DATA1	0x1d6
+ 			MX8MM_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d6
+ 			MX8MM_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d6
++			MX8MM_IOMUXC_SD2_WP_USDHC2_WP		0x156
+ 			MX8MM_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0x1d0
+ 		>;
+ 	};
+-- 
+2.30.2
+
