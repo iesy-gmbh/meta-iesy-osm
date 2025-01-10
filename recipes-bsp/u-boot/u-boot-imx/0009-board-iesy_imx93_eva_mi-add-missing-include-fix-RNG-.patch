@@ -1,0 +1,35 @@
+From e41fee69720de4e45eacca915373eebdffaaa0a6 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 10 Jan 2025 10:05:47 +0100
+Subject: [PATCH 09/11] board: iesy_imx93_eva_mi: add missing include, fix RNG
+ call
+
+change from ahab (advanced high assurance boot) to ele (edgelock enclave)
+---
+ board/iesy/iesy_imx93_eva_mi/spl.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/board/iesy/iesy_imx93_eva_mi/spl.c b/board/iesy/iesy_imx93_eva_mi/spl.c
+index 368a9b3ba63..d75868b8742 100644
+--- a/board/iesy/iesy_imx93_eva_mi/spl.c
++++ b/board/iesy/iesy_imx93_eva_mi/spl.c
+@@ -29,6 +29,7 @@
+ #include <asm/arch/clock.h>
+ #include <asm/arch/ccm_regs.h>
+ #include <asm/arch/ddr.h>
++#include <asm/sections.h>
+ #include <power/pmic.h>
+ #include <power/pca9450.h>
+ #include <power/pf0900.h>
+@@ -60,7 +61,7 @@ void spl_board_init(void)
+ 
+ 	puts("Normal Boot\n");
+ 
+-	ret = ahab_start_rng();
++	ret = ele_start_rng();
+ 	if (ret)
+ 		printf("Fail to start RNG: %d\n", ret);
+ }
+-- 
+2.30.2
+
