@@ -1,0 +1,25 @@
+From 9b7a5f38ee461df115966ec9c566466663fba522 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 7 Jan 2025 10:08:32 +0100
+Subject: [PATCH 8/8] configs: iesy_imx8mm_eva_mi_v1_defconfig: disable EFI
+ capsule auth
+
+---
+ configs/iesy_imx8mm_eva_mi_v1_defconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/configs/iesy_imx8mm_eva_mi_v1_defconfig b/configs/iesy_imx8mm_eva_mi_v1_defconfig
+index fa10552a24e..3433323a282 100644
+--- a/configs/iesy_imx8mm_eva_mi_v1_defconfig
++++ b/configs/iesy_imx8mm_eva_mi_v1_defconfig
+@@ -218,7 +218,6 @@ CONFIG_SPL_RSA=y
+ CONFIG_SHA384=y
+ CONFIG_EFI_VAR_BUF_SIZE=139264
+ CONFIG_EFI_IGNORE_OSINDICATIONS=y
+-CONFIG_EFI_CAPSULE_AUTHENTICATE=y
+ CONFIG_OPTEE=y
+ CONFIG_CMD_OPTEE_RPMB=y
+ CONFIG_EFI_MM_COMM_TEE=y
+-- 
+2.30.2
+

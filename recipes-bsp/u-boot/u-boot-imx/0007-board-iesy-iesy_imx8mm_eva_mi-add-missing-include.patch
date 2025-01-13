@@ -1,0 +1,24 @@
+From 152ee21c00d6b2431202c38a68c5db3e00cb09fa Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Tue, 7 Jan 2025 09:48:34 +0100
+Subject: [PATCH 7/8] board: iesy: iesy_imx8mm_eva_mi: add missing include
+
+---
+ board/iesy/iesy_imx8mm_eva_mi/spl.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/board/iesy/iesy_imx8mm_eva_mi/spl.c b/board/iesy/iesy_imx8mm_eva_mi/spl.c
+index 6380b34bd29..269c2da0f2c 100644
+--- a/board/iesy/iesy_imx8mm_eva_mi/spl.c
++++ b/board/iesy/iesy_imx8mm_eva_mi/spl.c
+@@ -19,6 +19,7 @@
+ #include <asm/arch/sys_proto.h>
+ #include <asm/mach-imx/boot_mode.h>
+ #include <asm/arch/ddr.h>
++#include <asm/sections.h>
+ 
+ #include <power/pmic.h>
+ #ifdef CONFIG_POWER_PCA9450
+-- 
+2.30.2
+

@@ -1,0 +1,122 @@
+From 7aade014c208429347893962a74efe7929f5db11 Mon Sep 17 00:00:00 2001
+From: Dominik Poggel <pog@iesy.com>
+Date: Fri, 10 Jan 2025 10:07:37 +0100
+Subject: [PATCH 11/11] arm: dts: remove type c nodes
+
+nodes caused build errors, are not present on eval kit, artefacts from nxp eval kit
+---
+ arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi |  2 -
+ arch/arm/dts/iesy-imx93-eva-mi.dts         | 66 ----------------------
+ 2 files changed, 68 deletions(-)
+
+diff --git a/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi b/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi
+index 3256a77cbd9..cafd5936bf1 100644
+--- a/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi
++++ b/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi
+@@ -159,12 +159,10 @@
+ 
+ &usbotg1 {
+ 	status = "okay";
+-	extcon = <&ptn5110>;
+ };
+ 
+ &usbotg2 {
+ 	status = "okay";
+-	extcon = <&ptn5110_2>;
+ };
+ 
+ &s4muap {
+diff --git a/arch/arm/dts/iesy-imx93-eva-mi.dts b/arch/arm/dts/iesy-imx93-eva-mi.dts
+index ab1e869a510..f85fcaa295c 100644
+--- a/arch/arm/dts/iesy-imx93-eva-mi.dts
++++ b/arch/arm/dts/iesy-imx93-eva-mi.dts
+@@ -316,60 +316,6 @@ dsi_host: dsi-host {
+ 		interrupts = <1 IRQ_TYPE_LEVEL_LOW>;
+ 		status = "okay";
+ 	};
+-
+-	ptn5110: tcpc@50 {
+-		compatible = "nxp,ptn5110";
+-		reg = <0x50>;
+-		interrupt-parent = <&pcal6524>;
+-		interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
+-		status = "okay";
+-
+-		port {
+-			typec1_dr_sw: endpoint {
+-				remote-endpoint = <&usb1_drd_sw>;
+-			};
+-		};
+-
+-		typec1_con: connector {
+-			compatible = "usb-c-connector";
+-			label = "USB-C";
+-			power-role = "dual";
+-			data-role = "dual";
+-			try-power-role = "sink";
+-			source-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)>;
+-			sink-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)
+-				     PDO_VAR(5000, 20000, 3000)>;
+-			op-sink-microwatt = <15000000>;
+-			self-powered;
+-		};
+-	};
+-
+-	ptn5110_2: tcpc@51 {
+-		compatible = "nxp,ptn5110";
+-		reg = <0x51>;
+-		interrupt-parent = <&pcal6524>;
+-		interrupts = <9 IRQ_TYPE_EDGE_FALLING>;
+-		status = "okay";
+-
+-		port {
+-			typec2_dr_sw: endpoint {
+-				remote-endpoint = <&usb2_drd_sw>;
+-			};
+-		};
+-
+-		typec2_con: connector {
+-			compatible = "usb-c-connector";
+-			label = "USB-C";
+-			power-role = "dual";
+-			data-role = "dual";
+-			try-power-role = "sink";
+-			source-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)>;
+-			sink-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)
+-				     PDO_VAR(5000, 20000, 3000)>;
+-			op-sink-microwatt = <15000000>;
+-			self-powered;
+-		};
+-	};
+ };
+ 
+ &lpuart1 { /* console */
+@@ -388,12 +334,6 @@ dsi_host: dsi-host {
+ 	samsung,picophy-pre-emp-curr-control = <3>;
+ 	samsung,picophy-dc-vol-level-adjust = <7>;
+ 	status = "okay";
+-
+-	port {
+-		usb1_drd_sw: endpoint {
+-			remote-endpoint = <&typec1_dr_sw>;
+-		};
+-	};
+ };
+ 
+ &usbotg2 {
+@@ -406,12 +346,6 @@ dsi_host: dsi-host {
+ 	samsung,picophy-pre-emp-curr-control = <3>;
+ 	samsung,picophy-dc-vol-level-adjust = <7>;
+ 	status = "okay";
+-
+-	port {
+-		usb2_drd_sw: endpoint {
+-			remote-endpoint = <&typec2_dr_sw>;
+-		};
+-	};
+ };
+ 
+ &usdhc1 {
+-- 
+2.30.2
+

@@ -1,6 +1,6 @@
-From f1a62df56a4a337cfaaeaf7ba16c8e4333ca73b4 Mon Sep 17 00:00:00 2001
+From 236df71db454556da1f213c74933bb81fdf92dcf Mon Sep 17 00:00:00 2001
 From: Dominik Poggel <pog@iesy.com>
-Date: Fri, 9 Aug 2024 14:53:05 +0200
+Date: Thu, 19 Dec 2024 16:26:50 +0100
 Subject: [PATCH 2/2] arch: arm: Add support for iesy-imx93-eva-mi
 
 Signed-off-by: Dominik Poggel <pog@iesy.com>
@@ -13,11 +13,11 @@ Signed-off-by: Dominik Poggel <pog@iesy.com>
  board/iesy/iesy_imx93_eva_mi/MAINTAINERS      |    7 +
  board/iesy/iesy_imx93_eva_mi/Makefile         |   12 +
  .../iesy_imx93_eva_mi/iesy_imx93_eva_mi.c     |  405 +++++
- board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c  | 1545 +++++++++++++++++
+ board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c  | 1544 +++++++++++++++++
  board/iesy/iesy_imx93_eva_mi/spl.c            |  188 ++
  configs/iesy_imx93_eva_mi_defconfig           |  190 ++
  include/configs/iesy_imx93_eva_mi.h           |  187 ++
- 12 files changed, 3414 insertions(+)
+ 12 files changed, 3413 insertions(+)
  create mode 100644 arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi
  create mode 100644 arch/arm/dts/iesy-imx93-eva-mi.dts
  create mode 100644 board/iesy/iesy_imx93_eva_mi/Kconfig
@@ -30,17 +30,17 @@ Signed-off-by: Dominik Poggel <pog@iesy.com>
  create mode 100644 include/configs/iesy_imx93_eva_mi.h
 
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 8aab6abdbc2..4cec7310e9b 100644
+index bfca4182ad9..3374da85dc4 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -1086,6 +1086,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
+@@ -1185,6 +1185,7 @@ dtb-$(CONFIG_ARCH_IMX8M) += \
  	imx8mq-librem5-r4.dtb
  
  dtb-$(CONFIG_ARCH_IMX9) += \
 +	iesy-imx93-eva-mi.dtb \
+ 	imx95-15x15-evk.dtb \
  	imx95-19x19-evk.dtb \
- 	imx95-19x19-titan.dtb \
- 	imx93-11x11-evk.dtb \
+ 	imx95-19x19-verdin.dtb \
 diff --git a/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi b/arch/arm/dts/iesy-imx93-eva-mi-u-boot.dtsi
 new file mode 100644
 index 00000000000..d85e6d69b41
@@ -914,10 +914,10 @@ index 00000000000..fb1b32c474a
 +	status = "okay";
 +};
 diff --git a/arch/arm/mach-imx/imx9/Kconfig b/arch/arm/mach-imx/imx9/Kconfig
-index 2e306fa5add..b6bc14caa2a 100644
+index 1f78b1b6a31..bf331a0721d 100644
 --- a/arch/arm/mach-imx/imx9/Kconfig
 +++ b/arch/arm/mach-imx/imx9/Kconfig
-@@ -56,6 +56,12 @@ config TARGET_IMX95_19X19_EVK
+@@ -72,6 +72,12 @@ config TARGET_IMX95_19X19_EVK
  	bool "imx95_19x19_evk"
  	select IMX95
  
@@ -927,15 +927,15 @@ index 2e306fa5add..b6bc14caa2a 100644
 +	select IMX93
 +	select IMX9_LPDDR4X
 +
- config TARGET_TITAN_IMX95_19X19
- 	bool "imx95_titan_evk"
+ config TARGET_VERDIN_IMX95_19X19
+ 	bool "imx95_verdin_evk"
  	select IMX95
-@@ -65,6 +71,7 @@ endchoice
- source "board/freescale/imx93_evk/Kconfig"
+@@ -89,6 +95,7 @@ source "board/phytec/phycore_imx93/Kconfig"
+ source "board/variscite/imx93_var_som/Kconfig"
  source "board/freescale/imx93_qsb/Kconfig"
  source "board/freescale/imx95_evk/Kconfig"
 +source "board/iesy/iesy_imx93_eva_mi/Kconfig"
- source "board/toradex/titan-imx95/Kconfig"
+ source "board/toradex/verdin-imx95/Kconfig"
  
  endif
 diff --git a/board/iesy/iesy_imx93_eva_mi/Kconfig b/board/iesy/iesy_imx93_eva_mi/Kconfig
@@ -1400,10 +1400,10 @@ index 00000000000..2a448c5e194
 +}
 diff --git a/board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c b/board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c
 new file mode 100644
-index 00000000000..0de03497368
+index 00000000000..b24728712f0
 --- /dev/null
 +++ b/board/iesy/iesy_imx93_eva_mi/lpddr4_timing.c
-@@ -0,0 +1,1545 @@
+@@ -0,0 +1,1544 @@
 +/*
 + * Copyright 2024 NXP
 + *
@@ -2948,7 +2948,6 @@ index 00000000000..0de03497368
 +    .fsp_cfg = ddr_dram_fsp_cfg,
 +    .fsp_cfg_num = ARRAY_SIZE(ddr_dram_fsp_cfg),
 +};
-+
 diff --git a/board/iesy/iesy_imx93_eva_mi/spl.c b/board/iesy/iesy_imx93_eva_mi/spl.c
 new file mode 100644
 index 00000000000..368a9b3ba63
