@@ -32,6 +32,7 @@ SRC_URI += " \
     file://0025-driver-spi-slow-down-spi-speed-of-bitbanging-driver.patch \
     file://0026-drivers-spi-spidev-add-mc3630-to-generic-driver.patch \
     file://0027-arm64-dts-ti-iesy-add-ac-sensors-and-switch-to-bitbanging-driver.patch \
+    file://0028-arm64-dts-ti-iesy-am62x-add-Uart-B.patch \
 "
 KERNEL_CONFIG_FRAGMENTS:append = "\
     ${APPEND_DIR}/fragment.config \
